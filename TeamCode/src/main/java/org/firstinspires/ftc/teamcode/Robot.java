@@ -14,8 +14,6 @@ public class Robot {
 
 
         // This is a test from Elliot
-        //Yegor was the best
-
         // Moss King 
         //Hello there Moss King
         
