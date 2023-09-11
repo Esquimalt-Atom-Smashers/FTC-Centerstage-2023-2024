@@ -14,13 +14,10 @@ public class Robot {
 
 
         // This is a test from Elliot
-<<<<<<< HEAD
         //Yegor was the best
 
-=======
         // Moss King 
         //Hello there Moss King
         
->>>>>>> 41235730f6d35c7c323a722193e1a6bcf7b18e00
     }
 }
