@@ -11,17 +11,5 @@ public class Robot {
 
     public void run() {
         //Map your key-bind/key presses here.
-
-
-        // This is a test from Elliot
-        // Moss King 
-        //Hello there Moss King
-        //Eli
-        // hi! this is Lottie
-        
-        //Yegor was here
-        // Peter 
-        // Test 2
-        
     }
 }
