@@ -15,4 +15,11 @@ public class Constants {
         public static String REAR_RIGHT_MOTOR_NAME = " ";
 
     }
+
+    public static class ArmConstants 
+    {
+        public static String CLAW1_SERVO_MOTOR_NAME = " ";
+        public static String CLAW2_SERVO_MOTOR_NAME = " ";
+    }
+
 }
