@@ -14,6 +14,12 @@ public class Constants {
         public static String FRONT_RIGHT_MOTOR_NAME = " ";
         public static String REAR_RIGHT_MOTOR_NAME = " ";
 
+        public static boolean FIELD_CENTRIC = false;
+        public static boolean SCALED = false;
+
+        public static float AUTO_DRIVE_SPEED;
+        public static float AUTO_STRAFE_SPEED;
+        public static float TURN_SPEED;
     }
 
     public static class ArmConstants 
