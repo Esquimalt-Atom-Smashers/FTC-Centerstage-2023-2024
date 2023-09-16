@@ -8,43 +8,34 @@ import static org.firstinspires.ftc.teamcode.Constants.ArmConstants.*;
 
 public class ClawSubsystem {
 
-    private final Servo claw1;
-    private final Servo claw2;
+    private final Servo clawServo;
 
-    public ClawSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
-    {
-        claw1 = hardwareMap.servo.get(CLAW1_SERVO_MOTOR_NAME);
-        claw2 = hardwareMap.servo.get(CLAW2_SERVO_MOTOR_NAME);
+    public ClawSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        clawServo = hardwareMap.servo.get(CLAW1_SERVO_MOTOR_NAME);
     }
 
-    public void openClaw1()
-    {
-        claw1.setPosition(OPEN_POSITION);
+    public void openClaw() {
+        clawServo.setPosition(OPEN_POSITION);
     }
 
-    public void openClaw2()
-    {
-        claw2.setPosition(OPEN_POSITION);
+    public void closeClaw() {
+        clawServo.setPosition(CLOSE_POSITION);
     }
 
-    public void closeClaw1()
-    {
-        claw1.setPosition(CLOSE_POSITION);
-    }  
-
-    public void closeClaw2()
-    {
-        claw2.setPosition(CLOSE_POSITION);
-    }  
-
-    public Servo getClaw1()
-    {
-        return claw1;
+    public boolean clawOpen() {
+        return clawServo.getPosition() == OPEN_POSITION;
     }
 
-    public Servo getClaw2()
-    {
-        return claw2;
+    public void toggleClaw() {
+        if (clawOpen()) {
+            closeClaw();
+        } else {
+            openClaw();
+        }
     }
 
+    public Servo getClawServo()
+    {
+        return clawServo;
+    }
 }

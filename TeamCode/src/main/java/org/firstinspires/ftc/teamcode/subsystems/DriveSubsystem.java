@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -15,27 +15,27 @@ import java.util.Arrays;
 
 public class DriveSubsystem {
     //Declare hardware here.
-    private final DcMotor frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
-    private final DcMotor[] motors;
+    private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
+    private final DcMotorEx[] motors;
 
-    // TODO: Check what kind of imu we have (think it's the BNO055IMU)
     private final BNO055IMU imu;
 
-    //Initialize hardware here
     public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         // Initialize the motors
-        frontLeftMotor = hardwareMap.dcMotor.get(FRONT_LEFT_MOTOR_NAME);
-        frontRightMotor = hardwareMap.dcMotor.get(FRONT_RIGHT_MOTOR_NAME);
-        rearLeftMotor = hardwareMap.dcMotor.get(REAR_LEFT_MOTOR_NAME);
-        rearRightMotor = hardwareMap.dcMotor.get(REAR_RIGHT_MOTOR_NAME);
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, FRONT_LEFT_MOTOR_NAME);
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, FRONT_RIGHT_MOTOR_NAME);
+        rearLeftMotor = hardwareMap.get(DcMotorEx.class, REAR_LEFT_MOTOR_NAME);
+        rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
 
-        motors = new DcMotor[]{frontRightMotor, frontLeftMotor, rearLeftMotor, rearRightMotor};
+        motors = new DcMotorEx[]{frontRightMotor, frontLeftMotor, rearLeftMotor, rearRightMotor};
 
+        // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);
         frontRightMotor.setDirection(FRONT_RIGHT_MOTOR_DIRECTION);
         rearLeftMotor.setDirection(REAR_LEFT_MOTOR_DIRECTION);
         rearRightMotor.setDirection(REAR_RIGHT_MOTOR_DIRECTION);
 
+        // Set the motor modes and zero power behavior
         Arrays.stream(motors).forEach(motor -> motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE));
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -47,16 +47,23 @@ public class DriveSubsystem {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         imu.initialize(parameters);
-
-
     }
 
     //Define methods that control the bot down here.
 
+    // Main drive method that controls the robot
     public void drive(float forward, float strafe, float turn) {
         if (FIELD_CENTRIC) {
             // Field centric drive
             // TODO: Field centric drive
+            double gyroRadians = Math.toRadians(-getHeading());
+            double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
+            double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.sin(gyroRadians);
+
+            frontLeftMotor.setPower(scaleInput(rotateY + rotateX + turn));
+            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn));
+            rearLeftMotor.setPower(scaleInput(rotateY - rotateX + turn));
+            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn));
         }
         else {
             // Robot centric drive
@@ -83,6 +90,7 @@ public class DriveSubsystem {
 
     }
 
+    // Stop all of the motors
     public void stop() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
     }
@@ -93,15 +101,20 @@ public class DriveSubsystem {
         Arrays.stream(motors).forEach(motor -> motor.setMode(runMode));
     }
 
-    // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
-    private float scaleInput(float input) {
+    // Take the input and scale it if needed, while also clipping it to between -1 and 1
+    private double scaleInput(double input) {
         if (SCALED) {
-            // TODO: Create a scaling formula
-            return  Range.clip(input * INPUT_MULTIPLIER, -1, 1);
+            // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
+            // Current formula just cubes the input and multiplies it by the multiplier
+            return  Range.clip(Math.pow(input, 3) * INPUT_MULTIPLIER, -1, 1);
         }
         else {
             return Range.clip(input * INPUT_MULTIPLIER, -1, 1);
         }
+    }
+
+    private double getHeading() {
+        return imu.getAngularOrientation().firstAngle;
     }
 
     //Define getter/setter's here.
