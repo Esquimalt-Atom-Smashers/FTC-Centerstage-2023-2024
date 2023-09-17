@@ -20,6 +20,14 @@ public class Constants {
 
         public static final boolean FIELD_CENTRIC = true;
         public static final double POWER_MULTIPLIER = 0.80;
+
+        public static final int AUTO_SNAP_TOLERANCE_DEG = 2;
+        public static final double AUTO_SNAP_POWER = 0.5;
+
+        public static final int STEPPING_TOLERANCE = 15;
+        public static final double STEPPING_POWER = 0.25;
+
+        public static final double TAG_ALIGNMENT_TOLERANCE = 2.0;
     }
 
     public static class IntakeConstants {
