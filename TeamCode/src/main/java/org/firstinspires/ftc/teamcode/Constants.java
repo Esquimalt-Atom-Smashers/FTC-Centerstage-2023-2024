@@ -87,8 +87,14 @@ public class Constants {
         public static String WRIST_SERVO_MOTOR_NAME = " ";
         public static double WRIST_UP_POSITION;
         public static double WRIST_DOWN_POSITION;
+    }
 
-
-
+    public static class ElbowConstants {
+        public static String ELBOW_DC_MOTOR_NAME = " ";
+        public static double MOTOR_LIMITATION_OF_ANGLE;
+        public static double MOTOR_ANGLE;
+        public static double MOTOR_POSITION;
+        public static double ARM_POSITION;
+        public static double ARM_ANGLE;
     }
 }
