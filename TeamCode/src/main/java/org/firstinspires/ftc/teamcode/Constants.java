@@ -82,4 +82,13 @@ public class Constants {
 
 
     }
+
+    public static class WristConstants {
+        public static String WRIST_SERVO_MOTOR_NAME = " ";
+        public static double WRIST_UP_POSITION;
+        public static double WRIST_DOWN_POSITION;
+
+
+
+    }
 }
