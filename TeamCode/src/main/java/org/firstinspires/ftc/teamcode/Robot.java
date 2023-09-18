@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
@@ -23,6 +24,16 @@ public class Robot {
 
     private final InstructionExecutor instructionExecutor;
 
+    enum DriveState {
+        DRIVER_CONTROLLED,
+        SNAPPING,
+        DETECTING_TAG,
+        CENTERING_TAG,
+        STEPPING_LEFT,
+        STEPPING_RIGHT
+    }
+
+    private DriveState driveState = DriveState.DRIVER_CONTROLLED;
 
     //Define gamepads here.
 
@@ -47,7 +58,7 @@ public class Robot {
         // Left joystick up and down moves the robot forward and back
         // Left joystick left and right moves the robot left and right
         // Right joystick left and right turns the robot left and right
-        driveSubsystem.drive(driverGamepad.left_stick_y, driverGamepad.left_stick_x, driverGamepad.right_stick_x);
+        driveLoop();
 
         // Instruction controls (driver):
         // Left trigger adds a left align
@@ -96,8 +107,28 @@ public class Robot {
 
     }
 
-    public DriveSubsystem getDriveSubsystem() {
-        return driveSubsystem;
+    private void driveLoop() {
+        switch (driveState) {
+            case DRIVER_CONTROLLED:
+                driveSubsystem.drive(driverGamepad.left_stick_y, driverGamepad.left_stick_x, driverGamepad.right_stick_x);
+                if (driverGamepad.a) {
+                    driveSubsystem.autoSnap();
+                    driveState = DriveState.SNAPPING;
+                }
+                break;
+            case SNAPPING:
+                break;
+            case DETECTING_TAG:
+                break;
+            case CENTERING_TAG:
+                break;
+            case STEPPING_LEFT:
+                break;
+            case STEPPING_RIGHT:
+                break;
+            default:
+                driveState = DriveState.DRIVER_CONTROLLED;
+        }
     }
 
     private void alignLeft() {
@@ -122,5 +153,14 @@ public class Robot {
 
     private boolean isPressed(float controllerInput) {
         return Math.abs(controllerInput) >= Constants.DriveConstants.DEADZONE;
+    }
+
+    private void wait(int ms) {
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.milliseconds() <= ms) {}
+    }
+
+    public DriveSubsystem getDriveSubsystem() {
+        return driveSubsystem;
     }
 }

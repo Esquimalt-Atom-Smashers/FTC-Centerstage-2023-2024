@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -18,9 +17,9 @@ public class Constants {
             - limits(MAX_SPEED_M_S)
         */
 
-        public static float DEADZONE = 0;
+        public static double DEADZONE = 0;
 
-        public static float INPUT_MULTIPLIER = 0.8f;
+        public static double INPUT_MULTIPLIER = 0.8f;
 
         public static String FRONT_LEFT_MOTOR_NAME = " ";
         public static String FRONT_RIGHT_MOTOR_NAME = " ";
@@ -37,9 +36,14 @@ public class Constants {
         public static boolean FIELD_CENTRIC = false;
         public static boolean SCALED = false;
 
-        public static float AUTO_DRIVE_SPEED;
-        public static float AUTO_STRAFE_SPEED;
-        public static float TURN_SPEED;
+        public static double SNAP_TARGET;
+
+        public static double AUTO_DRIVE_SPEED;
+        public static double AUTO_STRAFE_SPEED;
+        public static double TURN_SPEED;
+
+        public static double AUTO_SNAP_POWER;
+        public static double AUTO_SNAP_TOLERANCE;
     }
 
     public static class ArmConstants {

@@ -3,13 +3,14 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
+import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.PULSES_PER_INCH;
 
 import java.util.Arrays;
 
@@ -19,6 +20,8 @@ public class DriveSubsystem {
     private final DcMotorEx[] motors;
 
     private final BNO055IMU imu;
+
+    private double snapTarget;
 
     public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         // Initialize the motors
@@ -52,7 +55,7 @@ public class DriveSubsystem {
     //Define methods that control the bot down here.
 
     // Main drive method that controls the robot
-    public void drive(float forward, float strafe, float turn) {
+    public void drive(double forward, double strafe, double turn) {
         if (FIELD_CENTRIC) {
             // Field centric drive
             // TODO: Field centric drive
@@ -85,6 +88,43 @@ public class DriveSubsystem {
 
     }
 
+    public void autoSnap() {
+        // Our snap target is a predetermined angle
+        snapTarget = SNAP_TARGET;
+        if (getNormalizedAngle() >= -90) drive(0, 0, AUTO_SNAP_POWER);
+        if (getNormalizedAngle() <= -90) drive(0, 0, -AUTO_SNAP_POWER);
+    }
+
+    public boolean isFinishedSnapping() {
+        // Checks if we are within the tolerance to auto snap
+        return getNormalizedAngle() + AUTO_SNAP_TOLERANCE <= snapTarget &&
+                getNormalizedAngle() - AUTO_SNAP_TOLERANCE >= snapTarget;
+    }
+
+    public void centerWithTag() {
+
+    }
+
+    public boolean isCentered() {
+        return false;
+    }
+
+    public void halfStepLeft() {
+
+    }
+
+    public void halfStepRight() {
+
+    }
+
+    public boolean isFinishedSteppingLeft() {
+        return false;
+    }
+
+    public boolean isFinishedSteppingRight() {
+        return false;
+    }
+
     // Used for autonomous driving
     public void driveToPosition() {
 
@@ -93,6 +133,16 @@ public class DriveSubsystem {
     // Stop all of the motors
     public void stop() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
+    }
+
+    public void setMotorPositions(int position) {
+        Arrays.stream(motors).forEach(motor -> motor.setTargetPosition(position));
+    }
+
+    public int getNormalizedAngle() {
+        // TODO:                                 |
+        // TODO: Should this be negative?       \/
+        return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
     //Define lower-level methods here. (Methods that are private or work behind the scenes)
@@ -109,6 +159,7 @@ public class DriveSubsystem {
             return  Range.clip(Math.pow(input, 3) * INPUT_MULTIPLIER, -1, 1);
         }
         else {
+            // Otherwise, we just multiply the input by the multiplier
             return Range.clip(input * INPUT_MULTIPLIER, -1, 1);
         }
     }
@@ -121,5 +172,18 @@ public class DriveSubsystem {
 
     public BNO055IMU getGyro() {
         return imu;
+    }
+
+    enum TargetPosition {
+        HALF_STEP(-1);
+
+        private int inches;
+        TargetPosition(int inches) {
+            this.inches = inches;
+        }
+
+        int getTarget() {
+            return (int) (inches * PULSES_PER_INCH);
+        }
     }
 }
