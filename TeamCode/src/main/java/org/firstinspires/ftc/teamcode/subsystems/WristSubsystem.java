@@ -8,9 +8,11 @@ import static org.firstinspires.ftc.teamcode.Constants.WristConstants.*;
 
 public class WristSubsystem
 {
+
     // One servo
     // Method to rotate to 0 degrees
     // Method to rotate to 60 degrees
+
     private Servo wristServo;
 
     public WristSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
@@ -28,7 +30,6 @@ public class WristSubsystem
     public Servo getWristServo()
     {
         return wristServo;
-
     }
 
 }
