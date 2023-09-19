@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
@@ -19,7 +20,8 @@ public class Robot {
     //Define subsystems here.
     private final DriveSubsystem driveSubsystem;
     private final IntakeSubsystem intakeSubsystem;
-    private final ClawSubsystem clawSubsystem;
+    private final ElbowSubsystem elbowSubsystem;
+//    private final ClawSubsystem clawSubsystem;
     private final LinearSlideSubsystem linearSlideSubsystem;
 
     private final InstructionExecutor instructionExecutor;
@@ -45,7 +47,8 @@ public class Robot {
         // Initialize subsystems
         driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
-        clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
+        elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
+//        clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
 
         instructionExecutor = new InstructionExecutor();
@@ -68,42 +71,51 @@ public class Robot {
         // Right bumper adds a step right
         // A enters the instructions
         // B cancels the instructions
-        if (isPressed(driverGamepad.left_trigger) && isPressed(driverGamepad.right_trigger))
-            instructionExecutor.addInstruction(this::alignCenter);
-        else if (isPressed(driverGamepad.left_trigger))
-            instructionExecutor.addInstruction(this::alignLeft);
-        else if (isPressed(driverGamepad.right_trigger))
-            instructionExecutor.addInstruction(this::alignRight);
-        if (driverGamepad.left_bumper) instructionExecutor.addInstruction(this::stepLeft);
-        if (driverGamepad.right_bumper) instructionExecutor.addInstruction(this::stepRight);
-        if (driverGamepad.a) instructionExecutor.executeInstructions();
-        if (driverGamepad.b) instructionExecutor.clearInstructions();
+//        if (isPressed(driverGamepad.left_trigger) && isPressed(driverGamepad.right_trigger))
+//            instructionExecutor.addInstruction(this::alignCenter);
+//        else if (isPressed(driverGamepad.left_trigger))
+//            instructionExecutor.addInstruction(this::alignLeft);
+//        else if (isPressed(driverGamepad.right_trigger))
+//            instructionExecutor.addInstruction(this::alignRight);
+//        if (driverGamepad.left_bumper) instructionExecutor.addInstruction(this::stepLeft);
+//        if (driverGamepad.right_bumper) instructionExecutor.addInstruction(this::stepRight);
+//        if (driverGamepad.a) instructionExecutor.executeInstructions();
+//        if (driverGamepad.b) instructionExecutor.clearInstructions();
 
         // Intake subsystem controls (operator):
         // A intakes the robot
         // B outtakes the robot
         // X lifts the intake
         // Y lowers the intake
+//        if (operatorGamepad.a) {
+//            intakeSubsystem.intake();
+//        } else if (operatorGamepad.b) {
+//            intakeSubsystem.outtake();
+//        } else intakeSubsystem.stop();
+//        if (operatorGamepad.x) intakeSubsystem.raiseIntake();
+//        if (operatorGamepad.y) intakeSubsystem.lowerIntake();
+//        if (operatorGamepad.x) intakeSubsystem.printPosition();
+
         if (operatorGamepad.a) {
-            intakeSubsystem.intake();
+            linearSlideSubsystem.extend();
         } else if (operatorGamepad.b) {
-            intakeSubsystem.outtake();
-        } else intakeSubsystem.stop();
-        if (operatorGamepad.x) intakeSubsystem.raiseIntake();
-        if (operatorGamepad.y) intakeSubsystem.lowerIntake();
+            linearSlideSubsystem.retract();
+        } else linearSlideSubsystem.stop();
 
         // Claw subsystem controls (operator):
         // A opens the claw
         // B closes the claw
-        if (operatorGamepad.a) clawSubsystem.openClaw();
-        if (operatorGamepad.b) clawSubsystem.closeClaw();
+//        if (operatorGamepad.a) clawSubsystem.openClaw();
+//        if (operatorGamepad.b) clawSubsystem.closeClaw();
 
         // Elbow subsystem controls (operator):
         // D-pad down sets it to default
         // D-pad left sets it to low
         // D-pad up sets it to medium
         // D-pad right sets it to high
-
+        if (operatorGamepad.x) elbowSubsystem.spin();
+        else if (operatorGamepad.y) elbowSubsystem.counterSpin();
+        else elbowSubsystem.stop();
 
     }
 
@@ -112,8 +124,8 @@ public class Robot {
             case DRIVER_CONTROLLED:
                 driveSubsystem.drive(driverGamepad.left_stick_y, driverGamepad.left_stick_x, driverGamepad.right_stick_x);
                 if (driverGamepad.a) {
-                    driveSubsystem.autoSnap();
-                    driveState = DriveState.SNAPPING;
+//                    driveSubsystem.autoSnap();
+//                    driveState = DriveState.SNAPPING;
                 }
                 break;
             case SNAPPING:
@@ -160,7 +172,7 @@ public class Robot {
         while (timer.milliseconds() <= ms) {}
     }
 
-    public DriveSubsystem getDriveSubsystem() {
-        return driveSubsystem;
-    }
+//    public DriveSubsystem getDriveSubsystem() {
+//        return driveSubsystem;
+//    }
 }

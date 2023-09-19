@@ -21,19 +21,19 @@ public class Constants {
 
         public static double INPUT_MULTIPLIER = 0.8f;
 
-        public static String FRONT_LEFT_MOTOR_NAME = " ";
-        public static String FRONT_RIGHT_MOTOR_NAME = " ";
-        public static String REAR_LEFT_MOTOR_NAME = " ";
-        public static String REAR_RIGHT_MOTOR_NAME = " ";
+        public static String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
+        public static String FRONT_RIGHT_MOTOR_NAME = "frontRightMotor";
+        public static String REAR_LEFT_MOTOR_NAME = "rearLeftMotor";
+        public static String REAR_RIGHT_MOTOR_NAME = "rearRightMotor";
 
         public static DcMotorSimple.Direction FRONT_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
-        public static DcMotorSimple.Direction FRONT_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static DcMotorSimple.Direction FRONT_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
         public static DcMotorSimple.Direction REAR_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
-        public static DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
         public static String IMU_NAME = "imu";
 
-        public static boolean FIELD_CENTRIC = false;
+        public static boolean FIELD_CENTRIC = true;
         public static boolean SCALED = false;
 
         public static double SNAP_TARGET;
@@ -55,22 +55,22 @@ public class Constants {
     }
 
     public static class IntakeConstants {
-        public static String INTAKE_SERVO_NAME = " ";
-        public static String INTAKE_MOTOR_NAME = " ";
+        public static String INTAKE_SERVO_NAME = "intakeServo";
+        public static String INTAKE_MOTOR_NAME = "intakeMotor";
         public static DcMotorSimple.Direction INTAKE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
         public static double INTAKE_DOWN_POSITION;
         public static double INTAKE_UP_POSITION;
-        public static double INTAKE_SPEED = 0;
-        public static double OUTTAKE_SPEED = 0;
+        public static double INTAKE_SPEED = 1;
+        public static double OUTTAKE_SPEED = -1;
     }
 
     public static class LinearSlideConstants {
-        public static String SLIDE_MOTOR_NAME = " ";
+        public static String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
-        public static double EXTEND_POWER;
-        public static double RETRACT_POWER;
+        public static double EXTEND_POWER = .25;
+        public static double RETRACT_POWER = -.25;
 
         public static final double PULSES_PER_MOTOR_REV = -1;
         public static final double WHEEL_DIAMETER = -1;

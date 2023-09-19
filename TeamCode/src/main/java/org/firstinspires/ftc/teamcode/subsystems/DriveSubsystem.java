@@ -19,6 +19,7 @@ public class DriveSubsystem {
     private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
     private final DcMotorEx[] motors;
 
+    // TODO: There is a problem with the initialization of the imu
     private final BNO055IMU imu;
 
     private double snapTarget;
@@ -58,7 +59,6 @@ public class DriveSubsystem {
     public void drive(double forward, double strafe, double turn) {
         if (FIELD_CENTRIC) {
             // Field centric drive
-            // TODO: Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
             double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.sin(gyroRadians);
