@@ -44,11 +44,13 @@ public class Constants {
 
         public static double AUTO_SNAP_POWER;
         public static double AUTO_SNAP_TOLERANCE;
+
+        public static double AUTO_STEP_POWER;
+        public static double AUTO_STEP_TOLERANCE;
     }
 
-    public static class ArmConstants {
-        public static String CLAW1_SERVO_MOTOR_NAME = " ";
-        public static String CLAW2_SERVO_MOTOR_NAME = " ";
+    public static class ClawConstants {
+        public static String CLAW_SERVO_MOTOR_NAME = " ";
 
         public static double OPEN_POSITION = -1;
         public static double CLOSE_POSITION = -1;

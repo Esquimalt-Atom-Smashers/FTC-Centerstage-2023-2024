@@ -129,14 +129,26 @@ public class Robot {
                 }
                 break;
             case SNAPPING:
+                if (driveSubsystem.isFinishedSnapping()) {
+                    driveState = DriveState.DETECTING_TAG;
+                }
                 break;
             case DETECTING_TAG:
                 break;
             case CENTERING_TAG:
+                if (driveSubsystem.isCentered()) {
+                    instructionExecutor.getNextInstruction();
+                }
                 break;
             case STEPPING_LEFT:
+                if (driveSubsystem.isFinishedSteppingLeft()) {
+                    driveState = DriveState.DRIVER_CONTROLLED;
+                }
                 break;
             case STEPPING_RIGHT:
+                if (driveSubsystem.isFinishedSteppingRight()) {
+                    driveState = DriveState.DRIVER_CONTROLLED;
+                }
                 break;
             default:
                 driveState = DriveState.DRIVER_CONTROLLED;
@@ -156,11 +168,13 @@ public class Robot {
     }
 
     private void stepLeft() {
-
+        driveSubsystem.halfStepLeft();
+        driveState = DriveState.STEPPING_LEFT;
     }
 
     private void stepRight() {
-
+        driveSubsystem.halfStepRight();
+        driveState = DriveState.STEPPING_RIGHT;
     }
 
     private boolean isPressed(float controllerInput) {

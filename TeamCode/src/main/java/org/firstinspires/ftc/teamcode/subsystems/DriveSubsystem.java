@@ -97,8 +97,7 @@ public class DriveSubsystem {
 
     public boolean isFinishedSnapping() {
         // Checks if we are within the tolerance to auto snap
-        return getNormalizedAngle() + AUTO_SNAP_TOLERANCE <= snapTarget &&
-                getNormalizedAngle() - AUTO_SNAP_TOLERANCE >= snapTarget;
+        return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
     }
 
     public void centerWithTag() {
@@ -110,19 +109,35 @@ public class DriveSubsystem {
     }
 
     public void halfStepLeft() {
-
+        // Add or subtract the half step value to strafe to the left
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
+        drive(0, -AUTO_STEP_POWER, 0);
     }
 
     public void halfStepRight() {
-
+        // Add or subtract the half step value to strafe to the right
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
+        drive(0, AUTO_STEP_POWER, 0);
     }
 
     public boolean isFinishedSteppingLeft() {
-        return false;
+        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
     }
 
     public boolean isFinishedSteppingRight() {
-        return false;
+        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
     }
 
     // Used for autonomous driving
@@ -162,6 +177,10 @@ public class DriveSubsystem {
             // Otherwise, we just multiply the input by the multiplier
             return Range.clip(input * INPUT_MULTIPLIER, -1, 1);
         }
+    }
+
+    private boolean isWithinTolerance(double input, double target, double tolerance) {
+        return Math.abs(input - target) <= tolerance;
     }
 
     private double getHeading() {

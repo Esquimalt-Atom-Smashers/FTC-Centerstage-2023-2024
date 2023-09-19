@@ -20,4 +20,10 @@ public class InstructionExecutor {
 
         clearInstructions();
     }
+
+    public Instruction getNextInstruction() {
+        Instruction nextInstruction = instructions.get(0);
+        instructions.remove(0);
+        return nextInstruction;
+    }
 }
