@@ -95,6 +95,7 @@ public class Constants {
         public static double MOTOR_ANGLE;
         public static double MOTOR_POSITION;
         public static double ARM_POSITION;
+        public static double ARM_LIMITATION_OF_ANGLE;
         public static double ARM_ANGLE;
     }
 }
