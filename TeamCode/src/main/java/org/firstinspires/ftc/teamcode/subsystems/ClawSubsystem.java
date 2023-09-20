@@ -4,14 +4,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import static org.firstinspires.ftc.teamcode.Constants.ArmConstants.*;
+import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.*;
 
 public class ClawSubsystem {
 
     private final Servo clawServo;
 
     public ClawSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
-        clawServo = hardwareMap.servo.get(CLAW1_SERVO_MOTOR_NAME);
+        clawServo = hardwareMap.servo.get(CLAW_SERVO_MOTOR_NAME);
     }
 
     public void openClaw() {

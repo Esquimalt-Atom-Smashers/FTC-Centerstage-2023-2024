@@ -81,6 +81,7 @@ public class LinearSlideSubsystem {
 
     public enum TargetPosition {
         // The number of inches
+        // TODO: Figure out the numbers for these
         DEFAULT(0),
         LOW(-1),
         MEDIUM(-1),
