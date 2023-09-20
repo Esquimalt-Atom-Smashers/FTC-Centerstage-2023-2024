@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
+import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
 public class ElbowSubsystem {
     // One DcMotorEx
     // Method to spin the motor clockwise
@@ -19,7 +19,7 @@ public class ElbowSubsystem {
     private final DcMotorEx elbowMotor;
 
     public  ElbowSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
-        elbowMotor = hardwareMap.get(DcMotorEx.class, "elbowMotor");
+        elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
         elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 

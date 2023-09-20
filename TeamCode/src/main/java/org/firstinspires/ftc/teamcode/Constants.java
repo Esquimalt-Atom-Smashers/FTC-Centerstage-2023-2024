@@ -17,62 +17,62 @@ public class Constants {
             - limits(MAX_SPEED_M_S)
         */
 
-        public static double DEADZONE = 0;
+        public static final double DEADZONE = 0.1;
 
-        public static double INPUT_MULTIPLIER = 0.8f;
+        public static final double INPUT_MULTIPLIER = 0.8f;
 
-        public static String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
-        public static String FRONT_RIGHT_MOTOR_NAME = "frontRightMotor";
-        public static String REAR_LEFT_MOTOR_NAME = "rearLeftMotor";
-        public static String REAR_RIGHT_MOTOR_NAME = "rearRightMotor";
+        public static final String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
+        public static final String FRONT_RIGHT_MOTOR_NAME = "frontRightMotor";
+        public static final String REAR_LEFT_MOTOR_NAME = "rearLeftMotor";
+        public static final String REAR_RIGHT_MOTOR_NAME = "rearRightMotor";
 
-        public static DcMotorSimple.Direction FRONT_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
-        public static DcMotorSimple.Direction FRONT_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
-        public static DcMotorSimple.Direction REAR_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
-        public static DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
+        public static final DcMotorSimple.Direction FRONT_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final DcMotorSimple.Direction FRONT_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
+        public static final DcMotorSimple.Direction REAR_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        public static String IMU_NAME = "imu";
+        public static final String IMU_NAME = "imu";
 
-        public static boolean FIELD_CENTRIC = true;
-        public static boolean SCALED = false;
+        public static final boolean FIELD_CENTRIC = true;
+        public static final boolean SCALED = false;
 
-        public static double SNAP_TARGET;
+        public static final double SNAP_TARGET = -1;
 
-        public static double AUTO_DRIVE_SPEED;
-        public static double AUTO_STRAFE_SPEED;
-        public static double TURN_SPEED;
+        public static final double AUTO_DRIVE_SPEED = -1;
+        public static final double AUTO_STRAFE_SPEED = -1;
+        public static final double TURN_SPEED = -1;
 
-        public static double AUTO_SNAP_POWER;
-        public static double AUTO_SNAP_TOLERANCE;
+        public static final double AUTO_SNAP_POWER = -1;
+        public static final double AUTO_SNAP_TOLERANCE = -1;
 
-        public static double AUTO_STEP_POWER;
-        public static double AUTO_STEP_TOLERANCE;
+        public static final double AUTO_STEP_POWER = -1;
+        public static final double AUTO_STEP_TOLERANCE = -1;
     }
 
     public static class ClawConstants {
-        public static String CLAW_SERVO_MOTOR_NAME = " ";
+        public static final String CLAW_SERVO_MOTOR_NAME = " ";
 
-        public static double OPEN_POSITION = -1;
-        public static double CLOSE_POSITION = -1;
+        public static final double OPEN_POSITION = -1;
+        public static final double CLOSE_POSITION = -1;
     }
 
     public static class IntakeConstants {
-        public static String INTAKE_SERVO_NAME = "intakeServo";
-        public static String INTAKE_MOTOR_NAME = "intakeMotor";
-        public static DcMotorSimple.Direction INTAKE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final String INTAKE_SERVO_NAME = "intakeServo";
+        public static final String INTAKE_MOTOR_NAME = "intakeMotor";
+        public static final DcMotorSimple.Direction INTAKE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
-        public static double INTAKE_DOWN_POSITION;
-        public static double INTAKE_UP_POSITION;
-        public static double INTAKE_SPEED = 1;
-        public static double OUTTAKE_SPEED = -1;
+        public static final double INTAKE_DOWN_POSITION = -1;
+        public static final double INTAKE_UP_POSITION = -1;
+        public static final double INTAKE_SPEED = 1;
+        public static final double OUTTAKE_SPEED = -1;
     }
 
     public static class LinearSlideConstants {
-        public static String SLIDE_MOTOR_NAME = "linearSlideMotor";
-        public static DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
+        public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
-        public static double EXTEND_POWER = .25;
-        public static double RETRACT_POWER = -.25;
+        public static final double EXTEND_POWER = .25;
+        public static final double RETRACT_POWER = -.25;
 
         public static final double PULSES_PER_MOTOR_REV = -1;
         public static final double WHEEL_DIAMETER = -1;
@@ -86,18 +86,18 @@ public class Constants {
     }
 
     public static class WristConstants {
-        public static String WRIST_SERVO_MOTOR_NAME = " ";
-        public static double WRIST_UP_POSITION;
-        public static double WRIST_DOWN_POSITION;
+        public static final String WRIST_SERVO_MOTOR_NAME = " ";
+        public static final double WRIST_UP_POSITION = -1;
+        public static final double WRIST_DOWN_POSITION = -1;
     }
 
     public static class ElbowConstants {
-        public static String ELBOW_DC_MOTOR_NAME = " ";
-        public static double MOTOR_LIMITATION_OF_ANGLE;
-        public static double MOTOR_ANGLE;
-        public static double MOTOR_POSITION;
-        public static double ARM_POSITION;
-        public static double ARM_LIMITATION_OF_ANGLE;
-        public static double ARM_ANGLE;
+        public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
+        public static final double MOTOR_LIMITATION_OF_ANGLE = -1;
+        public static final double MOTOR_ANGLE = -1;
+        public static final double MOTOR_POSITION = -1;
+        public static final double ARM_POSITION = -1;
+        public static final double ARM_LIMITATION_OF_ANGLE = -1;
+        public static final double ARM_ANGLE = -1;
     }
 }
