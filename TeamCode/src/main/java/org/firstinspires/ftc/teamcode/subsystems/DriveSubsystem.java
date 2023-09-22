@@ -22,6 +22,8 @@ public class DriveSubsystem {
     // TODO: There is a problem with the initialization of the imu
     private final BNO055IMU imu;
 
+    Telemetry telemetry;
+
     private double snapTarget;
 
     public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -32,6 +34,8 @@ public class DriveSubsystem {
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
 
         motors = new DcMotorEx[]{frontRightMotor, frontLeftMotor, rearLeftMotor, rearRightMotor};
+
+        this.telemetry = telemetry;
 
         // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);
@@ -58,10 +62,12 @@ public class DriveSubsystem {
     // Main drive method that controls the robot
     public void drive(double forward, double strafe, double turn) {
         if (FIELD_CENTRIC) {
+//            telemetry.addData("Heading", getHeading());
+//            telemetry.update();
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
-            double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.sin(gyroRadians);
+            double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
 
             frontLeftMotor.setPower(scaleInput(rotateY + rotateX + turn));
             frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn));

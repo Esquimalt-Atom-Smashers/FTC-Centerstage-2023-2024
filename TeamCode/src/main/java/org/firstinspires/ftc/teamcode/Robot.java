@@ -21,7 +21,7 @@ public class Robot {
     private final DriveSubsystem driveSubsystem;
     private final IntakeSubsystem intakeSubsystem;
     private final ElbowSubsystem elbowSubsystem;
-//    private final ClawSubsystem clawSubsystem;
+    private final ClawSubsystem clawSubsystem;
     private final LinearSlideSubsystem linearSlideSubsystem;
 
     private final InstructionExecutor instructionExecutor;
@@ -48,7 +48,7 @@ public class Robot {
         driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
-//        clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
+        clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
 
         instructionExecutor = new InstructionExecutor();
@@ -96,33 +96,34 @@ public class Robot {
 //        if (operatorGamepad.y) intakeSubsystem.lowerIntake();
 //        if (operatorGamepad.x) intakeSubsystem.printPosition();
 
-        if (operatorGamepad.a) {
-            linearSlideSubsystem.extend();
-        } else if (operatorGamepad.b) {
-            linearSlideSubsystem.retract();
-        } else linearSlideSubsystem.stop();
+//        if (operatorGamepad.a) {
+//            linearSlideSubsystem.extend();
+//        } else if (operatorGamepad.b) {
+//            linearSlideSubsystem.retract();
+//        } else linearSlideSubsystem.stop();
 
         // Claw subsystem controls (operator):
         // A opens the claw
         // B closes the claw
-//        if (operatorGamepad.a) clawSubsystem.openClaw();
-//        if (operatorGamepad.b) clawSubsystem.closeClaw();
+        clawSubsystem.printPosition();
+        if (operatorGamepad.a) clawSubsystem.openClaw();
+        if (operatorGamepad.b) clawSubsystem.closeClaw();
 
         // Elbow subsystem controls (operator):
         // D-pad down sets it to default
         // D-pad left sets it to low
         // D-pad up sets it to medium
         // D-pad right sets it to high
-        if (operatorGamepad.x) elbowSubsystem.spin();
-        else if (operatorGamepad.y) elbowSubsystem.counterSpin();
-        else elbowSubsystem.stop();
+//        if (operatorGamepad.x) elbowSubsystem.spin();
+//        else if (operatorGamepad.y) elbowSubsystem.counterSpin();
+//        else elbowSubsystem.stop();
 
     }
 
     private void driveLoop() {
         switch (driveState) {
             case DRIVER_CONTROLLED:
-                driveSubsystem.drive(driverGamepad.left_stick_y, driverGamepad.left_stick_x, driverGamepad.right_stick_x);
+                driveSubsystem.drive(driverGamepad.left_stick_y, -driverGamepad.left_stick_x, -driverGamepad.right_stick_x);
                 if (driverGamepad.a) {
 //                    driveSubsystem.autoSnap();
 //                    driveState = DriveState.SNAPPING;

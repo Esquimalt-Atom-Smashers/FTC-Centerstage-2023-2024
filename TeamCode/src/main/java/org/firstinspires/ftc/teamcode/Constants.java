@@ -50,10 +50,13 @@ public class Constants {
     }
 
     public static class ClawConstants {
-        public static final String CLAW_SERVO_MOTOR_NAME = " ";
+        public static final String CLAW_SERVO_NAME = "clawServo";
 
-        public static final double OPEN_POSITION = -1;
-        public static final double CLOSE_POSITION = -1;
+        public static final double MIN_POSITION = 0;
+        public static final double MAX_POSITION = 270;
+        public static final double OPEN_POSITION = 0;
+        // TODO: Fine tune this value (it is already around the right value)
+        public static final double CLOSE_POSITION = 40;
     }
 
     public static class IntakeConstants {
