@@ -40,7 +40,7 @@ public class ClawSubsystem {
         telemetry.addData("Claw servo angle", clawServo.getAngle());
         telemetry.addData("Claw position", clawServo.getPosition());
         telemetry.addData("Angle in degrees", clawServo.getAngle(AngleUnit.DEGREES));
-        telemetry.update();
+//        telemetry.update();
     }
 
     public boolean clawOpen() {

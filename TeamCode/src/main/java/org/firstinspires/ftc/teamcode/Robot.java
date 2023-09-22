@@ -54,6 +54,10 @@ public class Robot {
         instructionExecutor = new InstructionExecutor();
     }
 
+    public void start() {
+        linearSlideSubsystem.retract();
+    }
+
     public void run() {
         // Control all of the subsystems
 
@@ -96,16 +100,10 @@ public class Robot {
 //        if (operatorGamepad.y) intakeSubsystem.lowerIntake();
 //        if (operatorGamepad.x) intakeSubsystem.printPosition();
 
-//        if (operatorGamepad.a) {
-//            linearSlideSubsystem.extend();
-//        } else if (operatorGamepad.b) {
-//            linearSlideSubsystem.retract();
-//        } else linearSlideSubsystem.stop();
 
         // Claw subsystem controls (operator):
         // A opens the claw
         // B closes the claw
-        clawSubsystem.printPosition();
         if (operatorGamepad.a) clawSubsystem.openClaw();
         if (operatorGamepad.b) clawSubsystem.closeClaw();
 
@@ -114,9 +112,28 @@ public class Robot {
         // D-pad left sets it to low
         // D-pad up sets it to medium
         // D-pad right sets it to high
-//        if (operatorGamepad.x) elbowSubsystem.spin();
-//        else if (operatorGamepad.y) elbowSubsystem.counterSpin();
-//        else elbowSubsystem.stop();
+
+        if (operatorGamepad.dpad_up) intakeSubsystem.raiseIntake();
+        if (operatorGamepad.dpad_down) intakeSubsystem.lowerIntake();
+        if (operatorGamepad.dpad_left) intakeSubsystem.intake();
+        else if (operatorGamepad.dpad_right) intakeSubsystem.outtake();
+        else intakeSubsystem.stop();
+
+//        driveSubsystem.printPower();
+//        opMode.telemetry.update();
+
+        if (operatorGamepad.right_bumper) {
+            linearSlideSubsystem.extend();
+        } else if (operatorGamepad.left_bumper) {
+            linearSlideSubsystem.retract();
+        } else linearSlideSubsystem.stop();
+
+        linearSlideSubsystem.run();
+
+        if (operatorGamepad.x) elbowSubsystem.spin();
+        else if (operatorGamepad.y) elbowSubsystem.counterSpin();
+        else elbowSubsystem.stop();
+        elbowSubsystem.run();
 
     }
 

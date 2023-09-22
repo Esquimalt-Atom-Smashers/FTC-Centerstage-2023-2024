@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -34,7 +35,7 @@ public class Constants {
         public static final String IMU_NAME = "imu";
 
         public static final boolean FIELD_CENTRIC = true;
-        public static final boolean SCALED = false;
+        public static final boolean SCALED = true;
 
         public static final double SNAP_TARGET = -1;
 
@@ -64,28 +65,31 @@ public class Constants {
         public static final String INTAKE_MOTOR_NAME = "intakeMotor";
         public static final DcMotorSimple.Direction INTAKE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
-        public static final double INTAKE_DOWN_POSITION = -1;
-        public static final double INTAKE_UP_POSITION = -1;
+        public static final double MIN_ANGLE = 0;
+        public static final double MAX_ANGLE = 270;
+        public static final double INTAKE_DOWN_POSITION =270 - 175;
+        public static final double INTAKE_UP_POSITION = 270 - 45;
         public static final double INTAKE_SPEED = 1;
         public static final double OUTTAKE_SPEED = -1;
     }
 
     public static class LinearSlideConstants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
-        public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
         public static final double EXTEND_POWER = .25;
         public static final double RETRACT_POWER = -.25;
 
-        public static final double PULSES_PER_MOTOR_REV = -1;
-        public static final double WHEEL_DIAMETER = -1;
-        public static final double GEAR_RATIO = -1;
-        public static final double PULSES_PER_INCH = (PULSES_PER_MOTOR_REV * GEAR_RATIO) / (WHEEL_DIAMETER * Math.PI);
+        public static double P = 0.013, I = 0, D = 0.0003;
 
-        public static final PIDController SLIDE_PID_CONTROLLER = new PIDController(-1, 0, 0);
+        // DONT CHANGE THESE VALUES
+        public static final int MAX_POSITION = 3000;
+        public static final int MIN_POSITION = 100;
+
+        public static final int OUT_POSITION = 2000;
+        public static final int IN_POSITION = MIN_POSITION;
+
         public static final double TARGET_TOLERANCE = 1.0;
-
-
     }
 
     public static class WristConstants {
@@ -94,8 +98,14 @@ public class Constants {
         public static final double WRIST_DOWN_POSITION = -1;
     }
 
+    @Config
     public static class ElbowConstants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
+
+        public static int P = 0, I = 0, D = 0;
+
+
+
         public static final double MOTOR_LIMITATION_OF_ANGLE = -1;
         public static final double MOTOR_ANGLE = -1;
         public static final double MOTOR_POSITION = -1;
