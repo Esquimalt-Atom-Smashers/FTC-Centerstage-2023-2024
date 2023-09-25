@@ -36,10 +36,10 @@ public class ClawSubsystem {
     private int count;
     public void printPosition() {
         count++;
-        telemetry.addData("Count", count);
-        telemetry.addData("Claw servo angle", clawServo.getAngle());
-        telemetry.addData("Claw position", clawServo.getPosition());
-        telemetry.addData("Angle in degrees", clawServo.getAngle(AngleUnit.DEGREES));
+        telemetry.addData("Count ", count);
+        telemetry.addData("Claw servo angle ", clawServo.getAngle());
+        telemetry.addData("Claw position ", clawServo.getPosition());
+        telemetry.addData("Angle in degrees ", clawServo.getAngle(AngleUnit.DEGREES));
         telemetry.update();
     }
 
