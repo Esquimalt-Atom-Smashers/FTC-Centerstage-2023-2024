@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
 
-@Config
 public class ElbowSubsystem {
     private final DcMotorEx elbowMotor;
 
@@ -28,25 +27,45 @@ public class ElbowSubsystem {
         this.telemetry = telemetry;
     }
 
-    public void spin() {
-        elbowMotor.setPower(0.8);
+    public void intakePosition() {
+        target = INTAKE_POSITION;
     }
 
-    public void counterSpin() {
-        elbowMotor.setPower(-0.8);
+    public void drivingPosition() {
+        target = DRIVING_POSITION;
+    }
+
+    public void levelPosition() {
+        target = LEVEL_POSITION;
+    }
+
+    public void testPosition() {
+        target = TEST_POSITION;
     }
 
     public void stop() {
         elbowMotor.setPower(0);
     }
 
-    public void run() {
+    public void spinManual() {
+        elbowMotor.setPower(MANUAL_MOTOR_SPEED);
+    }
+
+    public void counterSpinManual() {
+        elbowMotor.setPower(-MANUAL_MOTOR_SPEED);
+    }
+
+    public void runPID() {
         controller.setPID(P, I, D);
         int elbowPosition = elbowMotor.getCurrentPosition();
         double power = controller.calculate(elbowPosition, target);
         elbowMotor.setPower(power);
         telemetry.addData("pos ", elbowPosition);
         telemetry.addData("Target ", target);
-        telemetry.update();
+//        telemetry.update();
+    }
+
+    public boolean isAtPosition() {
+        return Math.abs(target - elbowMotor.getCurrentPosition()) <= TOLERANCE;
     }
 }

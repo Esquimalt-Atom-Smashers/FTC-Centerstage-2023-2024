@@ -17,7 +17,7 @@ public class WristSubsystem
 
     public WristSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
     {
-        wristServo = hardwareMap.servo.get(WRIST_SERVO_MOTOR_NAME);
+        wristServo = hardwareMap.servo.get(WRIST_SERVO_NAME);
     }
     public void upWrist()
     {

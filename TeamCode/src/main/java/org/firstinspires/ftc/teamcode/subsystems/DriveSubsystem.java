@@ -14,11 +14,11 @@ import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 import java.util.Arrays;
 
 public class DriveSubsystem {
-    //Declare hardware here.
+    // Motors
     private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
     private final DcMotorEx[] motors;
 
-    // TODO: There is a problem with the initialization of the imu
+    // Gyro
     private final BNO055IMU imu;
 
     Telemetry telemetry;
@@ -56,13 +56,9 @@ public class DriveSubsystem {
         imu.initialize(parameters);
     }
 
-    //Define methods that control the bot down here.
-
     // Main drive method that controls the robot
     public void drive(double forward, double strafe, double turn) {
         if (FIELD_CENTRIC) {
-//            telemetry.addData("Heading", getHeading());
-//            telemetry.update();
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);

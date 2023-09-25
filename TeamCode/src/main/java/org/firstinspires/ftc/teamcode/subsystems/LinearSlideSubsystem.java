@@ -11,12 +11,10 @@ import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 
 import java.util.Arrays;
 
-@Config
 public class LinearSlideSubsystem {
     private final DcMotorEx slideMotor;
 
-    private TargetPosition position = TargetPosition.DEFAULT;
-    private TargetPosition[] positions = TargetPosition.class.getEnumConstants();
+    private double[] positions = new double[]{IN_POSITION, TEST_POSITION, OUT_POSITION};
 
     private PIDController controller;
 
@@ -37,88 +35,58 @@ public class LinearSlideSubsystem {
         this.telemetry = telemetry;
     }
 
-    public void nextPosition() {
-        if (position == TargetPosition.HIGH) return;
-        // Set our position to the next position
-        setPosition(positions[Arrays.asList(positions).indexOf(position) + 1]);
-    }
-
-    public void prevPosition() {
-        if (position == TargetPosition.DEFAULT) return;
-        // Set our position to the previous position
-        setPosition(positions[Arrays.asList(positions).indexOf(position) - 1]);
-    }
-
-    public void setPosition(TargetPosition targetPosition) {
-        // Loop until we get within the tolerance to the target
-//        while (slideMotor.getCurrentPosition() < targetPosition.getTarget() - TARGET_TOLERANCE ||
-//                slideMotor.getCurrentPosition() > targetPosition.getTarget() + TARGET_TOLERANCE) {
-//            slideMotor.setPower(SLIDE_PID_CONTROLLER.calculate(targetPosition.getTarget(), slideMotor.getCurrentPosition()));
-//        }
-//        position = targetPosition;
-    }
-
-    public void SetPosition(int target) {
-//        while (slideMotor.getCurrentPosition() < target - TARGET_TOLERANCE ||
-//                slideMotor.getCurrentPosition() > target + TARGET_TOLERANCE) {
-//            slideMotor.setPower(SLIDE_PID_CONTROLLER.calculate(target, slideMotor.getCurrentPosition()));
-//        }
-    }
-
     public void extend() {
-//        if (isMaxExtension()) {
-//            stop();
-//            return;
-//        }
-//        slideMotor.setPower(EXTEND_POWER);
         target = OUT_POSITION;
     }
 
     public void retract() {
-//        if (isMaxRetraction()) {
-//            stop();
-//            return;
-//        }
-//        slideMotor.setPower(RETRACT_POWER);
         target = IN_POSITION;
     }
 
+    public void testPosition() {
+        target = TEST_POSITION;
+    }
+
+    public void extendManually() {
+        slideMotor.setPower(EXTEND_POWER);
+    }
+
+    public void retractManually() {
+        slideMotor.setPower(RETRACT_POWER);
+    }
+
     public void stop() {
-//        slideMotor.setPower(0);
+        slideMotor.setPower(0);
     }
 
     public boolean isMaxExtension() {
-//        return slideMotor.getCurrentPosition() >= TargetPosition.HIGH.getTarget();
-        return false;
+        return slideMotor.getCurrentPosition() >= MAX_POSITION;
     }
 
     public boolean isMaxRetraction() {
-//        return slideMotor.getCurrentPosition() <= TargetPosition.DEFAULT.getTarget();
-        return false;
+        return slideMotor.getCurrentPosition() <= MIN_POSITION;
     }
 
-    public void run() {
+    public void runPID() {
         controller.setPID(P, I, D);
         int slidePosition = slideMotor.getCurrentPosition();
         double power = controller.calculate(slidePosition, target);
         slideMotor.setPower(power);
-//        telemetry.addData("pos ", slidePosition);
-//        telemetry.addData("target ", target);
-//        telemetry.update();
     }
 
-    public enum TargetPosition {
-        // The number of inches
-        // TODO: Figure out the numbers for these
-        DEFAULT(MIN_POSITION),
-        LOW(-1),
-        MEDIUM(-1),
-        HIGH(2500);
+    public void nextPosition() {
+//        if (position == TargetPosition.HIGH) return;
+//        // Set our position to the next position
+//        setPosition(positions[Arrays.asList(positions).indexOf(position) + 1]);
+        if (target == positions[positions.length - 1]) return;
+        target = positions[Arrays.asList(positions).indexOf(target) + 1];
+    }
 
-        private int targetPosition;
-
-        TargetPosition(int targetPosition) {
-            this.targetPosition = targetPosition;
-        }
+    public void prevPosition() {
+//        if (position == TargetPosition.DEFAULT) return;
+//        // Set our position to the previous position
+//        setPosition(positions[Arrays.asList(positions).indexOf(position) - 1]);
+        if (target == positions[0]) return;
+        target = positions[Arrays.asList(positions).indexOf(target) - 1];
     }
 }

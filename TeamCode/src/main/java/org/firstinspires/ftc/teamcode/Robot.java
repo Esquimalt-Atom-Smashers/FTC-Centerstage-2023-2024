@@ -26,6 +26,8 @@ public class Robot {
 
     private final InstructionExecutor instructionExecutor;
 
+    private boolean usingPIDControllers;
+
     enum DriveState {
         DRIVER_CONTROLLED,
         SNAPPING,
@@ -35,16 +37,34 @@ public class Robot {
         STEPPING_RIGHT
     }
 
+    enum ScoringState {
+        STARTING,
+        INTAKE,
+        LOWERING_CLAW,
+        WAITING,
+        RAISING_CLAW,
+        LOADED_DRIVING,
+        SCORING,
+        DRIVING,
+        MANUAL
+    }
+
+    ElapsedTime timer;
+
     private DriveState driveState = DriveState.DRIVER_CONTROLLED;
+    private ScoringState scoringState = ScoringState.SCORING;
 
-    //Define gamepads here.
-
-    public Robot(OpMode opMode) {
+    public Robot(OpMode opMode, boolean usingPID) {
         this.opMode = opMode;
+
+        this.usingPIDControllers = usingPID;
+        if (!usingPID) scoringState = ScoringState.MANUAL;
+
+        // Initialize the gamepads
         driverGamepad = opMode.gamepad1;
         operatorGamepad = opMode.gamepad2;
 
-        // Initialize subsystems
+        // Initialize the subsystems
         driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
@@ -54,10 +74,16 @@ public class Robot {
         instructionExecutor = new InstructionExecutor();
     }
 
+    public Robot(OpMode opMode) {
+        this(opMode, true);
+    }
+
+    // Perform actions that happen when the robot starts
     public void start() {
         linearSlideSubsystem.retract();
     }
 
+    // Main robot control
     public void run() {
         // Control all of the subsystems
 
@@ -66,6 +92,15 @@ public class Robot {
         // Left joystick left and right moves the robot left and right
         // Right joystick left and right turns the robot left and right
         driveLoop();
+
+
+//        if (operatorGamepad.a) scoringState = ScoringState.STARTING;
+        if (operatorGamepad.x) scoringState = ScoringState.INTAKE;
+        if (operatorGamepad.y) scoringState = ScoringState.LOADED_DRIVING;
+        if (operatorGamepad.b) scoringState = ScoringState.DRIVING;
+        scoringLoop();
+
+        opMode.telemetry.addData("Scoring State: ", scoringState);
 
         // Instruction controls (driver):
         // Left trigger adds a left align
@@ -104,8 +139,8 @@ public class Robot {
         // Claw subsystem controls (operator):
         // A opens the claw
         // B closes the claw
-        if (operatorGamepad.a) clawSubsystem.openClaw();
-        if (operatorGamepad.b) clawSubsystem.closeClaw();
+//        if (operatorGamepad.a) clawSubsystem.openClaw();
+//        if (operatorGamepad.b) clawSubsystem.closeClaw();
 
         // Elbow subsystem controls (operator):
         // D-pad down sets it to default
@@ -113,28 +148,30 @@ public class Robot {
         // D-pad up sets it to medium
         // D-pad right sets it to high
 
-        if (operatorGamepad.dpad_up) intakeSubsystem.raiseIntake();
-        if (operatorGamepad.dpad_down) intakeSubsystem.lowerIntake();
-        if (operatorGamepad.dpad_left) intakeSubsystem.intake();
-        else if (operatorGamepad.dpad_right) intakeSubsystem.outtake();
-        else intakeSubsystem.stop();
+//        if (operatorGamepad.dpad_up) intakeSubsystem.upPosition();
+//        if (operatorGamepad.dpad_down) intakeSubsystem.downPosition();
+//        if (operatorGamepad.dpad_left) intakeSubsystem.intake();
+//        else if (operatorGamepad.dpad_right) intakeSubsystem.outtake();
+//        else intakeSubsystem.stop();
 
 //        driveSubsystem.printPower();
 //        opMode.telemetry.update();
 
-        if (operatorGamepad.right_bumper) {
-            linearSlideSubsystem.extend();
-        } else if (operatorGamepad.left_bumper) {
-            linearSlideSubsystem.retract();
-        } else linearSlideSubsystem.stop();
+//        if (operatorGamepad.right_bumper) {
+//            linearSlideSubsystem.testPosition();
+//        } else if (operatorGamepad.left_bumper) {
+//            linearSlideSubsystem.retract();
+//        } else linearSlideSubsystem.stop();
 
-        linearSlideSubsystem.run();
+//        if (operatorGamepad.y) elbowSubsystem.testPosition();
+//        if (operatorGamepad.x) {
+//            intakePosition();
+//        }
 
-        if (operatorGamepad.x) elbowSubsystem.spin();
-        else if (operatorGamepad.y) elbowSubsystem.counterSpin();
-        else elbowSubsystem.stop();
-        elbowSubsystem.run();
+        // If we are using the PID controllers, run them all
+//        if (usingPIDControllers) runPIDControllers();
 
+        opMode.telemetry.update();
     }
 
     private void driveLoop() {
@@ -173,6 +210,106 @@ public class Robot {
         }
     }
 
+    public void scoringLoop() {
+        switch (scoringState) {
+            case STARTING:
+                intakeSubsystem.upPosition();
+                clawSubsystem.openClaw();
+                linearSlideSubsystem.retract();
+                intakeSubsystem.stop();
+                runPIDControllers();
+                break;
+            case INTAKE:
+                intakeSubsystem.downPosition();
+                intakeSubsystem.intake();
+                clawSubsystem.openClaw();
+                linearSlideSubsystem.retract();
+                elbowSubsystem.drivingPosition();
+                runPIDControllers();
+                if (operatorGamepad.a) scoringState = ScoringState.LOWERING_CLAW;
+                break;
+            case LOWERING_CLAW:
+                elbowSubsystem.intakePosition();
+                runPIDControllers();
+                if (elbowSubsystem.isAtPosition()) {
+                    scoringState = ScoringState.RAISING_CLAW;
+                    elbowSubsystem.stop();
+                    clawSubsystem.closeClaw();
+                    timer = new ElapsedTime();
+                    scoringState = ScoringState.WAITING;
+                }
+                break;
+            case WAITING:
+                if (timer.milliseconds() >= 500) scoringState = ScoringState.RAISING_CLAW;
+                break;
+            case RAISING_CLAW:
+                clawSubsystem.closeClaw();
+                intakeSubsystem.stop();
+                intakeSubsystem.mediumPosition();
+                elbowSubsystem.levelPosition();
+                runPIDControllers();
+                break;
+            case LOADED_DRIVING:
+                clawSubsystem.closeClaw();
+                intakeSubsystem.mediumPosition();
+                elbowSubsystem.levelPosition();
+                intakeSubsystem.stop();
+                runPIDControllers();
+                break;
+            case SCORING:
+                break;
+            case DRIVING:
+                intakeSubsystem.stop();
+                intakeSubsystem.mediumPosition();
+                linearSlideSubsystem.retract();
+                elbowSubsystem.drivingPosition();
+                runPIDControllers();
+                break;
+            case MANUAL:
+                runManually();
+                break;
+        }
+    }
+
+    public void runManually() {
+
+        driveLoop();
+
+        // Elbow Subsystem
+        if (operatorGamepad.x) elbowSubsystem.spinManual();
+        else if (operatorGamepad.y) elbowSubsystem.counterSpinManual();
+        else elbowSubsystem.stop();
+
+        // Intake Subsystem
+        if (operatorGamepad.dpad_up) intakeSubsystem.mediumPosition();
+        if (operatorGamepad.dpad_down) intakeSubsystem.downPosition();
+        if (operatorGamepad.dpad_left) intakeSubsystem.intake();
+        else if (operatorGamepad.dpad_right) intakeSubsystem.outtake();
+        else intakeSubsystem.stop();
+
+        // Linear Slide Subsystem
+        if (operatorGamepad.right_bumper) linearSlideSubsystem.extendManually();
+        else if (operatorGamepad.left_bumper) linearSlideSubsystem.retractManually();
+        else linearSlideSubsystem.stop();
+
+        // Claw Subsystem
+        if (operatorGamepad.a) clawSubsystem.openClaw();
+        if (operatorGamepad.b) clawSubsystem.closeClaw();
+
+    }
+
+    public void runPIDControllers() {
+        if (!usingPIDControllers) return;
+        elbowSubsystem.runPID();
+        linearSlideSubsystem.runPID();
+    }
+
+    public void intakePosition() {
+        elbowSubsystem.intakePosition();
+        linearSlideSubsystem.retract();
+        clawSubsystem.openClaw();
+    }
+
     private void alignLeft() {
 
     }
@@ -203,8 +340,4 @@ public class Robot {
         ElapsedTime timer = new ElapsedTime();
         while (timer.milliseconds() <= ms) {}
     }
-
-//    public DriveSubsystem getDriveSubsystem() {
-//        return driveSubsystem;
-//    }
 }

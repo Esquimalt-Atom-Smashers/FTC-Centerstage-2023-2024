@@ -13,36 +13,26 @@ import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.*;
 public class ClawSubsystem {
 
     private final ServoEx clawServo;
-//    private final Servo clawServo;
     Telemetry telemetry;
 
     public ClawSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        // Initialize the servo
         clawServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_POSITION, MAX_POSITION);
-//        clawServo = hardwareMap.servo.get(CLAW_SERVO_NAME);
         this.telemetry = telemetry;
 
     }
 
+    // Set the claw to the open position
     public void openClaw() {
         clawServo.turnToAngle(OPEN_POSITION);
-//        clawServo.setPosition(OPEN_POSITION);
     }
 
+    // Set the claw to the closed position
     public void closeClaw() {
         clawServo.turnToAngle(CLOSE_POSITION);
-//        clawServo.setPosition(CLOSE_POSITION);
     }
 
-    private int count;
-    public void printPosition() {
-        count++;
-        telemetry.addData("Count", count);
-        telemetry.addData("Claw servo angle", clawServo.getAngle());
-        telemetry.addData("Claw position", clawServo.getPosition());
-        telemetry.addData("Angle in degrees", clawServo.getAngle(AngleUnit.DEGREES));
-//        telemetry.update();
-    }
-
+    // Check if the claw is open
     public boolean clawOpen() {
         return clawServo.getPosition() == OPEN_POSITION;
     }
@@ -53,6 +43,12 @@ public class ClawSubsystem {
         } else {
             openClaw();
         }
+    }
+
+    public void printPosition() {
+        telemetry.addData("Claw servo angle", clawServo.getAngle());
+        telemetry.addData("Claw position", clawServo.getPosition());
+        telemetry.addData("Angle in degrees", clawServo.getAngle(AngleUnit.DEGREES));
     }
 
     public ServoEx getClawServo()
