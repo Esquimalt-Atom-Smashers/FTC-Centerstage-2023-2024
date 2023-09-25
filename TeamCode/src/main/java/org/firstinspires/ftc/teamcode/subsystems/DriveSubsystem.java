@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
-import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.PULSES_PER_INCH;
 
 import java.util.Arrays;
 
@@ -33,7 +32,7 @@ public class DriveSubsystem {
         rearLeftMotor = hardwareMap.get(DcMotorEx.class, REAR_LEFT_MOTOR_NAME);
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
 
-        motors = new DcMotorEx[]{frontRightMotor, frontLeftMotor, rearLeftMotor, rearRightMotor};
+        motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
 
         this.telemetry = telemetry;
 
@@ -166,6 +165,13 @@ public class DriveSubsystem {
         return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
+    public void printPower() {
+        telemetry.addData("FLM", frontLeftMotor.getVelocity());
+        telemetry.addData("FRM", frontRightMotor.getVelocity());
+        telemetry.addData("RLM", rearLeftMotor.getVelocity());
+        telemetry.addData("RRM", rearRightMotor.getVelocity());
+    }
+
     //Define lower-level methods here. (Methods that are private or work behind the scenes)
 
     private void setMotorMode(DcMotor.RunMode runMode) {
@@ -208,7 +214,7 @@ public class DriveSubsystem {
         }
 
         int getTarget() {
-            return (int) (inches * PULSES_PER_INCH);
+            return (int) (inches);
         }
     }
 }

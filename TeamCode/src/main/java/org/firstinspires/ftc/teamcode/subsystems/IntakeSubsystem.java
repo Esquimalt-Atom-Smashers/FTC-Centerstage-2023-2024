@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -11,10 +13,10 @@ import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 public class IntakeSubsystem {
     Telemetry telemetry;
     private final DcMotorEx intakeMotor;
-    private final Servo intakeServo;
+    private final ServoEx intakeServo;
 
     public IntakeSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
-        intakeServo = hardwareMap.servo.get(INTAKE_SERVO_NAME);
+        intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
         intakeMotor = hardwareMap.get(DcMotorEx.class, INTAKE_MOTOR_NAME);
 
         intakeMotor.setDirection(INTAKE_MOTOR_DIRECTION);
@@ -23,11 +25,11 @@ public class IntakeSubsystem {
     }
 
     public void lowerIntake() {
-        intakeServo.setPosition(INTAKE_DOWN_POSITION);
+        intakeServo.turnToAngle(INTAKE_DOWN_POSITION);
     }
 
     public void raiseIntake() {
-        intakeServo.setPosition(INTAKE_UP_POSITION);
+        intakeServo.turnToAngle(INTAKE_UP_POSITION);
     }
 
     public void intake() {
