@@ -126,47 +126,16 @@ public class Robot {
         // B outtakes the robot
         // X lifts the intake
         // Y lowers the intake
-//        if (operatorGamepad.a) {
-//            intakeSubsystem.intake();
-//        } else if (operatorGamepad.b) {
-//            intakeSubsystem.outtake();
-//        } else intakeSubsystem.stop();
-//        if (operatorGamepad.x) intakeSubsystem.raiseIntake();
-//        if (operatorGamepad.y) intakeSubsystem.lowerIntake();
-//        if (operatorGamepad.x) intakeSubsystem.printPosition();
-
 
         // Claw subsystem controls (operator):
         // A opens the claw
         // B closes the claw
-//        if (operatorGamepad.a) clawSubsystem.openClaw();
-//        if (operatorGamepad.b) clawSubsystem.closeClaw();
 
         // Elbow subsystem controls (operator):
         // D-pad down sets it to default
         // D-pad left sets it to low
         // D-pad up sets it to medium
         // D-pad right sets it to high
-
-//        if (operatorGamepad.dpad_up) intakeSubsystem.upPosition();
-//        if (operatorGamepad.dpad_down) intakeSubsystem.downPosition();
-//        if (operatorGamepad.dpad_left) intakeSubsystem.intake();
-//        else if (operatorGamepad.dpad_right) intakeSubsystem.outtake();
-//        else intakeSubsystem.stop();
-
-//        driveSubsystem.printPower();
-//        opMode.telemetry.update();
-
-//        if (operatorGamepad.right_bumper) {
-//            linearSlideSubsystem.testPosition();
-//        } else if (operatorGamepad.left_bumper) {
-//            linearSlideSubsystem.retract();
-//        } else linearSlideSubsystem.stop();
-
-//        if (operatorGamepad.y) elbowSubsystem.testPosition();
-//        if (operatorGamepad.x) {
-//            intakePosition();
-//        }
 
         opMode.telemetry.update();
     }
