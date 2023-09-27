@@ -108,6 +108,17 @@ public class Constants {
         public static final double TEST_POSITION = 15000;
 
         public static final double TOLERANCE = 15;
+    }
+
+    public static class DroneConstants
+    {
+        public static final String DRONE_SERVO_NAME = "droneServo";
+
+        public static final double MIN_POSITION = 0;
+        public static final double MAX_POSITION = 270;
+        public static final double FORWARD_DEGREE = 1;
+        public static final double BACKWARD_DEGREE = 0;
+        public static final double STOP_DEGREE = 0.5;
 
     }
 }
