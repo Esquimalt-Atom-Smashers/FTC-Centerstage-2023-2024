@@ -60,8 +60,8 @@ public class ElbowSubsystem {
         int elbowPosition = elbowMotor.getCurrentPosition();
         double power = controller.calculate(elbowPosition, target);
         elbowMotor.setPower(power);
-        telemetry.addData("pos ", elbowPosition);
-        telemetry.addData("Target ", target);
+//        telemetry.addData("pos ", elbowPosition);
+//        telemetry.addData("Target ", target);
 //        telemetry.update();
     }
 

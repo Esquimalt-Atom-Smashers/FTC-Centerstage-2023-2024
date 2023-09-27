@@ -13,12 +13,10 @@ import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.*;
 public class ClawSubsystem {
 
     private final ServoEx clawServo;
-    Telemetry telemetry;
 
     public ClawSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         // Initialize the servo
         clawServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_POSITION, MAX_POSITION);
-        this.telemetry = telemetry;
 
     }
 
@@ -45,7 +43,7 @@ public class ClawSubsystem {
         }
     }
 
-    public void printPosition() {
+    public void printPosition(Telemetry telemetry) {
         telemetry.addData("Claw servo angle", clawServo.getAngle());
         telemetry.addData("Claw position", clawServo.getPosition());
         telemetry.addData("Angle in degrees", clawServo.getAngle(AngleUnit.DEGREES));

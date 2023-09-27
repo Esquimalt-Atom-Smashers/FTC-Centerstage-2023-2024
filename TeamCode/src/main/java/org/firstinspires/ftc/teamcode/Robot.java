@@ -168,9 +168,6 @@ public class Robot {
 //            intakePosition();
 //        }
 
-        // If we are using the PID controllers, run them all
-//        if (usingPIDControllers) runPIDControllers();
-
         opMode.telemetry.update();
     }
 

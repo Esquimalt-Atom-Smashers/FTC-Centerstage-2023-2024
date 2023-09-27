@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.WristConstants.*;
 
-public class WristSubsystem
-{
+public class WristSubsystem {
 
     // One servo
     // Method to rotate to 0 degrees
@@ -15,20 +14,19 @@ public class WristSubsystem
 
     private Servo wristServo;
 
-    public WristSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
-    {
+    public WristSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         wristServo = hardwareMap.servo.get(WRIST_SERVO_NAME);
     }
-    public void upWrist()
-    {
+
+    public void upWrist() {
         wristServo.setPosition(WRIST_UP_POSITION);
     }
-    public void downWrist()
-    {
+
+    public void downWrist() {
         wristServo.setPosition(WRIST_DOWN_POSITION);
     }
-    public Servo getWristServo()
-    {
+
+    public Servo getWristServo() {
         return wristServo;
     }
 
