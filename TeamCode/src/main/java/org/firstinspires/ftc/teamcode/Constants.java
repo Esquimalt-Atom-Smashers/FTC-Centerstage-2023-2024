@@ -121,4 +121,18 @@ public class Constants {
         public static final double STOP_DEGREE = 0.5;
 
     }
+
+    public static class PixelConstants
+    {
+        public static final double START_POSITION = 0;
+        public static final double ROTATE_BY_POSITION = 90;
+    }
+
+    public static class WinchConstants
+    {
+        public static final String WINCH_DC_MOTOR_NAME = "winchMotor";
+
+        public static final double INTAKE_SPEED = -1;
+        public static final double OUTTAKE_SPEED = 1;
+    }
 }
