@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
 public class Robot {
     private final OpMode opMode;
-
     private final Gamepad driverGamepad;
     private final Gamepad operatorGamepad;
 
