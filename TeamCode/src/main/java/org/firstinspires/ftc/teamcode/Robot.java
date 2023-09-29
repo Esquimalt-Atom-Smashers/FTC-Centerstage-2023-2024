@@ -12,7 +12,10 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
 public class Robot {
+    // OpMode
     private final OpMode opMode;
+
+    // Gamepads
     private final Gamepad driverGamepad;
     private final Gamepad operatorGamepad;
 
