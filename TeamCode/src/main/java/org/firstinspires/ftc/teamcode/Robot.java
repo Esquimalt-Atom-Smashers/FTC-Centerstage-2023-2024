@@ -51,7 +51,7 @@ public class Robot {
     ElapsedTime timer;
 
     private DriveState driveState = DriveState.DRIVER_CONTROLLED;
-    private ScoringState scoringState = ScoringState.SCORING;
+    private ScoringState scoringState = ScoringState.STARTING;
 
     public Robot(OpMode opMode, boolean usingPID) {
         this.opMode = opMode;
@@ -94,10 +94,29 @@ public class Robot {
 
 
 //        if (operatorGamepad.a) scoringState = ScoringState.STARTING;
-        if (operatorGamepad.x) scoringState = ScoringState.INTAKE;
-        if (operatorGamepad.y) scoringState = ScoringState.LOADED_DRIVING;
-        if (operatorGamepad.b) scoringState = ScoringState.DRIVING;
+
+        // FOR DRIVERS:
+        // Press A to enter intake mode
+        // While in intake mode press X to pick up
+        // Press B to enter driving mode
+
+
+        if (operatorGamepad.a) scoringState = ScoringState.INTAKE;
+        if (operatorGamepad.b) scoringState = ScoringState.LOADED_DRIVING;
+//        if (operatorGamepad.b) scoringState = ScoringState.DRIVING;
+
+        if (operatorGamepad.dpad_up) elbowSubsystem.raiseManually();
+        else if (operatorGamepad.dpad_down) elbowSubsystem.lowerManually();
+        else elbowSubsystem.stop();
+
+        if (operatorGamepad.dpad_right) linearSlideSubsystem.extendManually();
+        else if (operatorGamepad.dpad_left) linearSlideSubsystem.retractManually();
+        else linearSlideSubsystem.stop();
+
+        if (operatorGamepad.y) clawSubsystem.openClaw();
+
         scoringLoop();
+//        runPIDControllers();
 
         opMode.telemetry.addData("Scoring State: ", scoringState);
 
@@ -178,9 +197,9 @@ public class Robot {
     public void scoringLoop() {
         switch (scoringState) {
             case STARTING:
-                intakeSubsystem.upPosition();
+                intakeSubsystem.mediumPosition();
                 clawSubsystem.openClaw();
-                linearSlideSubsystem.retract();
+//                linearSlideSubsystem.retract();
                 intakeSubsystem.stop();
                 runPIDControllers();
                 break;
@@ -191,13 +210,12 @@ public class Robot {
                 linearSlideSubsystem.retract();
                 elbowSubsystem.drivingPosition();
                 runPIDControllers();
-                if (operatorGamepad.a) scoringState = ScoringState.LOWERING_CLAW;
+                if (operatorGamepad.x) scoringState = ScoringState.LOWERING_CLAW;
                 break;
             case LOWERING_CLAW:
                 elbowSubsystem.intakePosition();
                 runPIDControllers();
-                if (elbowSubsystem.isAtPosition()) {
-                    scoringState = ScoringState.RAISING_CLAW;
+                if (elbowSubsystem.isAtTarget()) {
                     elbowSubsystem.stop();
                     clawSubsystem.closeClaw();
                     timer = new ElapsedTime();
@@ -205,7 +223,8 @@ public class Robot {
                 }
                 break;
             case WAITING:
-                if (timer.milliseconds() >= 500) scoringState = ScoringState.RAISING_CLAW;
+//                if (timer.milliseconds() >= 500) scoringState = ScoringState.RAISING_CLAW;
+                if (timer.milliseconds() >= 500) scoringState = ScoringState.LOADED_DRIVING;
                 break;
             case RAISING_CLAW:
                 clawSubsystem.closeClaw();
@@ -215,11 +234,11 @@ public class Robot {
                 runPIDControllers();
                 break;
             case LOADED_DRIVING:
-                clawSubsystem.closeClaw();
+//                clawSubsystem.closeClaw();
                 intakeSubsystem.mediumPosition();
-                elbowSubsystem.levelPosition();
+//                elbowSubsystem.levelPosition();
                 intakeSubsystem.stop();
-                runPIDControllers();
+//                runPIDControllers();
                 break;
             case SCORING:
                 break;
@@ -241,8 +260,8 @@ public class Robot {
         driveLoop();
 
         // Elbow Subsystem
-        if (operatorGamepad.x) elbowSubsystem.spinManual();
-        else if (operatorGamepad.y) elbowSubsystem.counterSpinManual();
+        if (operatorGamepad.x) elbowSubsystem.raiseManually();
+        else if (operatorGamepad.y) elbowSubsystem.lowerManually();
         else elbowSubsystem.stop();
 
         // Intake Subsystem

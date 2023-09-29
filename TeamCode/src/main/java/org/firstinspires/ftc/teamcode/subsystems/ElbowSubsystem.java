@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -15,6 +14,7 @@ public class ElbowSubsystem {
     private PIDController controller;
 
     public static double target;
+    private boolean atTarget = false;
 
     private final Telemetry telemetry;
 
@@ -47,11 +47,11 @@ public class ElbowSubsystem {
         elbowMotor.setPower(0);
     }
 
-    public void spinManual() {
+    public void raiseManually() {
         elbowMotor.setPower(MANUAL_MOTOR_SPEED);
     }
 
-    public void counterSpinManual() {
+    public void lowerManually() {
         elbowMotor.setPower(-MANUAL_MOTOR_SPEED);
     }
 
@@ -60,12 +60,11 @@ public class ElbowSubsystem {
         int elbowPosition = elbowMotor.getCurrentPosition();
         double power = controller.calculate(elbowPosition, target);
         elbowMotor.setPower(power);
-//        telemetry.addData("pos ", elbowPosition);
-//        telemetry.addData("Target ", target);
-//        telemetry.update();
+        // If the power we are setting is basically none, we are close enough to the target
+        atTarget = power <= POWER_TOLERANCE;
     }
 
-    public boolean isAtPosition() {
-        return Math.abs(target - elbowMotor.getCurrentPosition()) <= TOLERANCE;
+    public boolean isAtTarget() {
+        return atTarget;
     }
 }

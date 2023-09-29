@@ -48,7 +48,7 @@ public class Constants {
         public static final double MIN_POSITION = 0;
         public static final double MAX_POSITION = 270;
         public static final double OPEN_POSITION = 0;
-        public static final double CLOSE_POSITION = 45; // TODO: Fine tune this value (it is already around the right value)
+        public static final double CLOSE_POSITION = 50; // TODO: Fine tune this value (it is already around the right value)
     }
 
     public static class IntakeConstants {
@@ -69,8 +69,8 @@ public class Constants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        public static final double EXTEND_POWER = .25;
-        public static final double RETRACT_POWER = -.25;
+        public static  double EXTEND_POWER = .5;
+        public static  double RETRACT_POWER = -.5;
 
         // PID values for the PID controller
         public static double P = 0.013, I = 0, D = 0.0003;
@@ -84,6 +84,8 @@ public class Constants {
         public static final double IN_POSITION = MIN_POSITION;
 
         public static final double TARGET_TOLERANCE = 1.0;
+
+        public static final double POWER_TOLERANCE = -1;
     }
 
     public static class WristConstants {
@@ -108,6 +110,7 @@ public class Constants {
         public static final double TEST_POSITION = 15000;
 
         public static final double TOLERANCE = 15;
+        public static final double POWER_TOLERANCE = -1;
     }
 
     public static class DroneConstants

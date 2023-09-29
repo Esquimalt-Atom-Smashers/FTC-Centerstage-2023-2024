@@ -19,6 +19,7 @@ public class LinearSlideSubsystem {
     private PIDController controller;
 
     public static double target;
+    private boolean atTarget;
 
     private final Telemetry telemetry;
 
@@ -72,6 +73,7 @@ public class LinearSlideSubsystem {
         int slidePosition = slideMotor.getCurrentPosition();
         double power = controller.calculate(slidePosition, target);
         slideMotor.setPower(power);
+        atTarget = power <= POWER_TOLERANCE;
     }
 
     public void nextPosition() {
@@ -88,5 +90,10 @@ public class LinearSlideSubsystem {
 //        setPosition(positions[Arrays.asList(positions).indexOf(position) - 1]);
         if (target == positions[0]) return;
         target = positions[Arrays.asList(positions).indexOf(target) - 1];
+    }
+
+    // TODO: Make a isAtTarget method
+    public boolean isAtTarget() {
+        return atTarget;
     }
 }
