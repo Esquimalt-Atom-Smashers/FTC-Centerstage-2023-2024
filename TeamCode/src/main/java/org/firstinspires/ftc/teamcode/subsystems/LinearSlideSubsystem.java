@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -21,10 +20,7 @@ public class LinearSlideSubsystem {
     public static double target;
     private boolean atTarget;
 
-    private final Telemetry telemetry;
-
-
-    public LinearSlideSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public LinearSlideSubsystem(HardwareMap hardwareMap) {
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
 
         slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
@@ -33,19 +29,18 @@ public class LinearSlideSubsystem {
 
 
         controller = new PIDController(P, I, D);
-        this.telemetry = telemetry;
     }
 
     public void extend() {
-        target = OUT_POSITION;
+        setTarget(OUT_POSITION);
     }
 
     public void retract() {
-        target = IN_POSITION;
+        setTarget(IN_POSITION);
     }
 
     public void testPosition() {
-        target = TEST_POSITION;
+        setTarget(TEST_POSITION);
     }
 
     public void extendManually() {
@@ -68,12 +63,23 @@ public class LinearSlideSubsystem {
         return slideMotor.getCurrentPosition() <= MIN_POSITION;
     }
 
+    private void setTarget(double targetPosition) {
+        target = targetPosition;
+        atTarget = false;
+    }
+
     public void runPID() {
-        controller.setPID(P, I, D);
-        int slidePosition = slideMotor.getCurrentPosition();
-        double power = controller.calculate(slidePosition, target);
-        slideMotor.setPower(power);
-        atTarget = power <= POWER_TOLERANCE;
+        // If we aren't at the target,
+        if (!atTarget)
+        {
+            // Calculate how much we need to move the motor by
+            controller.setPID(P, I, D);
+            int slidePosition = slideMotor.getCurrentPosition();
+            double power = controller.calculate(slidePosition, target);
+            slideMotor.setPower(power);
+            // If the power isn't much, we are about as close to the target as we are going to get, don't update anymore
+            atTarget = Math.abs(power) <= POWER_TOLERANCE;
+        }
     }
 
     public void nextPosition() {
@@ -92,7 +98,6 @@ public class LinearSlideSubsystem {
         target = positions[Arrays.asList(positions).indexOf(target) - 1];
     }
 
-    // TODO: Make a isAtTarget method
     public boolean isAtTarget() {
         return atTarget;
     }

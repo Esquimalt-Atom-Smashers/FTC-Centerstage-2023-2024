@@ -21,11 +21,9 @@ public class DriveSubsystem {
     // Gyro
     private final BNO055IMU imu;
 
-    Telemetry telemetry;
-
     private double snapTarget;
 
-    public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public DriveSubsystem(HardwareMap hardwareMap) {
         // Initialize the motors
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, FRONT_LEFT_MOTOR_NAME);
         frontRightMotor = hardwareMap.get(DcMotorEx.class, FRONT_RIGHT_MOTOR_NAME);
@@ -33,8 +31,6 @@ public class DriveSubsystem {
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
 
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
-
-        this.telemetry = telemetry;
 
         // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);
@@ -161,7 +157,7 @@ public class DriveSubsystem {
         return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
-    public void printPower() {
+    public void printPower(Telemetry telemetry) {
         telemetry.addData("FLM", frontLeftMotor.getVelocity());
         telemetry.addData("FRM", frontRightMotor.getVelocity());
         telemetry.addData("RLM", rearLeftMotor.getVelocity());

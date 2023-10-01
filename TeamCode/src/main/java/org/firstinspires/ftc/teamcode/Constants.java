@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 //This class holds all constants, the reason we do this is so we can import all the constants 'statically.'
@@ -8,6 +7,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 // import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 public class Constants {
+    public static class ClawConstants {
+        public static final String CLAW_SERVO_NAME = "clawServo";
+
+        public static final double MIN_ANGLE = 0;
+        public static final double MAX_ANGLE = 270;
+        public static final double OPEN_POSITION = 0;
+        public static final double CLOSE_POSITION = 50; // TODO: Fine tune this value (it is already around the right value)
+    }
+
     public static class DriveConstants {
 
         public static final double DEADZONE = 0.1;
@@ -42,13 +50,34 @@ public class Constants {
         public static final double AUTO_STEP_TOLERANCE = -1;
     }
 
-    public static class ClawConstants {
-        public static final String CLAW_SERVO_NAME = "clawServo";
+    public static class DroneConstants {
+        public static final String DRONE_SERVO_NAME = "droneServo";
 
-        public static final double MIN_POSITION = 0;
-        public static final double MAX_POSITION = 270;
-        public static final double OPEN_POSITION = 0;
-        public static final double CLOSE_POSITION = 50; // TODO: Fine tune this value (it is already around the right value)
+        public static final double MIN_ANGLE = 0;
+        public static final double MAX_ANGLE = 270;
+
+        public static final double FORWARD = 1;
+        public static final double BACKWARD = 0;
+        public static final double STOP = 0.5;
+    }
+
+    public static class ElbowConstants {
+        public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
+
+        public static final double MANUAL_MOTOR_SPEED = 0.8;
+
+        // PID values for the PID controller
+        public static final double P = 0.0019, I = 0, D = 0;
+
+        // 0 intake
+        // 1000 driving
+        // 4750 level
+        // 23000 straight up / climbing
+        public static final double INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
+        public static final double TEST_POSITION = 15000;
+
+        public static final double TOLERANCE = 15;
+        public static final double POWER_TOLERANCE = -1;
     }
 
     public static class IntakeConstants {
@@ -88,54 +117,26 @@ public class Constants {
         public static final double POWER_TOLERANCE = -1;
     }
 
+    public static class PixelConstants {
+        public static final String PIXEL_SERVO_NAME = "pixelServo";
+
+        public static final double MIN_ANGLE = 0;
+        public static final double MAX_ANGLE = 270;
+
+        public static final double START_POSITION = 0;
+        public static final double PLACE_POSITION = 90;
+    }
+
     public static class WristConstants {
         public static final String WRIST_SERVO_NAME = " ";
         public static final double WRIST_UP_POSITION = -1;
         public static final double WRIST_DOWN_POSITION = -1;
     }
 
-    public static class ElbowConstants {
-        public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
+    public static class WinchConstants {
+        public static final String WINCH_MOTOR_NAME = "winchMotor";
 
-        public static final double MANUAL_MOTOR_SPEED = 0.8;
-
-        // PID values for the PID controller
-        public static final double P = 0.0019, I = 0, D = 0;
-
-        // 0 intake
-        // 1000 driving
-        // 4750 level
-        // 23000 straight up / climbing
-        public static final double INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
-        public static final double TEST_POSITION = 15000;
-
-        public static final double TOLERANCE = 15;
-        public static final double POWER_TOLERANCE = -1;
-    }
-
-    public static class DroneConstants
-    {
-        public static final String DRONE_SERVO_NAME = "droneServo";
-
-        public static final double MIN_POSITION = 0;
-        public static final double MAX_POSITION = 270;
-        public static final double FORWARD_DEGREE = 1;
-        public static final double BACKWARD_DEGREE = 0;
-        public static final double STOP_DEGREE = 0.5;
-
-    }
-
-    public static class PixelConstants
-    {
-        public static final double START_POSITION = 0;
-        public static final double ROTATE_BY_POSITION = 90;
-    }
-
-    public static class WinchConstants
-    {
-        public static final String WINCH_DC_MOTOR_NAME = "winchMotor";
-
-        public static final double INTAKE_SPEED = -1;
-        public static final double OUTTAKE_SPEED = 1;
+        public static final double WINCH_SPEED = -1;
+        public static final double UNWINCH_SPEED = -1;
     }
 }

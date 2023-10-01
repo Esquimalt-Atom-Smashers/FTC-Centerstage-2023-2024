@@ -14,7 +14,7 @@ public class IntakeSubsystem {
     private final DcMotorEx intakeMotor;
     private final ServoEx intakeServo;
 
-    public IntakeSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public IntakeSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
         intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
         intakeMotor = hardwareMap.get(DcMotorEx.class, INTAKE_MOTOR_NAME);

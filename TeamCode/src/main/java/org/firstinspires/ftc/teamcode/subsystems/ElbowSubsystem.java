@@ -16,31 +16,27 @@ public class ElbowSubsystem {
     public static double target;
     private boolean atTarget = false;
 
-    private final Telemetry telemetry;
-
-    public  ElbowSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public  ElbowSubsystem(HardwareMap hardwareMap) {
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
         elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         controller = new PIDController(P, I, D);
-
-        this.telemetry = telemetry;
     }
 
     public void intakePosition() {
-        target = INTAKE_POSITION;
+        setTarget(INTAKE_POSITION);
     }
 
     public void drivingPosition() {
-        target = DRIVING_POSITION;
+        setTarget(DRIVING_POSITION);
     }
 
     public void levelPosition() {
-        target = LEVEL_POSITION;
+        setTarget(LEVEL_POSITION);
     }
 
     public void testPosition() {
-        target = TEST_POSITION;
+        setTarget(TEST_POSITION);
     }
 
     public void stop() {
@@ -55,13 +51,23 @@ public class ElbowSubsystem {
         elbowMotor.setPower(-MANUAL_MOTOR_SPEED);
     }
 
+    private void setTarget(double targetPosition) {
+        target = targetPosition;
+        atTarget = false;
+    }
+
     public void runPID() {
-        controller.setPID(P, I, D);
-        int elbowPosition = elbowMotor.getCurrentPosition();
-        double power = controller.calculate(elbowPosition, target);
-        elbowMotor.setPower(power);
-        // If the power we are setting is basically none, we are close enough to the target
-        atTarget = power <= POWER_TOLERANCE;
+        // If we aren't at the target
+        if (!atTarget)
+        {
+            // Calculate how much we need to move the motor by
+            controller.setPID(P, I, D);
+            int elbowPosition = elbowMotor.getCurrentPosition();
+            double power = controller.calculate(elbowPosition, target);
+            elbowMotor.setPower(power);
+            // If the power we are setting is basically none, we are close enough to the target
+            atTarget = Math.abs(power) <= POWER_TOLERANCE;
+        }
     }
 
     public boolean isAtTarget() {

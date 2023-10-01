@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -67,11 +69,11 @@ public class Robot {
         operatorGamepad = opMode.gamepad2;
 
         // Initialize the subsystems
-        driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
-        intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
-        elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
-        clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
-        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
+        driveSubsystem = new DriveSubsystem(opMode.hardwareMap);
+        intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap);
+        elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap);
+        clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
+        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap);
 
         instructionExecutor = new InstructionExecutor();
     }
@@ -94,9 +96,6 @@ public class Robot {
         // Left joystick left and right moves the robot left and right
         // Right joystick left and right turns the robot left and right
         driveLoop();
-
-
-//        if (operatorGamepad.a) scoringState = ScoringState.STARTING;
 
         // FOR DRIVERS:
         // Press A to enter intake mode
@@ -141,22 +140,6 @@ public class Robot {
 //        if (driverGamepad.right_bumper) instructionExecutor.addInstruction(this::stepRight);
 //        if (driverGamepad.a) instructionExecutor.executeInstructions();
 //        if (driverGamepad.b) instructionExecutor.clearInstructions();
-
-        // Intake subsystem controls (operator):
-        // A intakes the robot
-        // B outtakes the robot
-        // X lifts the intake
-        // Y lowers the intake
-
-        // Claw subsystem controls (operator):
-        // A opens the claw
-        // B closes the claw
-
-        // Elbow subsystem controls (operator):
-        // D-pad down sets it to default
-        // D-pad left sets it to low
-        // D-pad up sets it to medium
-        // D-pad right sets it to high
 
         opMode.telemetry.update();
     }

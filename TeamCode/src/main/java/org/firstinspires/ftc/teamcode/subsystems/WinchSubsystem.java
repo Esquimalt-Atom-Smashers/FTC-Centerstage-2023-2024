@@ -2,12 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.WinchConstants.*;
 
-import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class WinchSubsystem {
     // One DcMotorEx
@@ -18,18 +14,18 @@ public class WinchSubsystem {
 
     private final DcMotorEx winchMotor;
 
-    public WinchSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public WinchSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
-        winchMotor = hardwareMap.get(DcMotorEx.class, WINCH_DC_MOTOR_NAME);
+        winchMotor = hardwareMap.get(DcMotorEx.class, WINCH_MOTOR_NAME);
     }
 
     public void intake() {
-        winchMotor.setPower(INTAKE_SPEED);
+        winchMotor.setPower(WINCH_SPEED);
     }
 
     // Set the motor to outtake
     public void outtake() {
-        winchMotor.setPower(OUTTAKE_SPEED);
+        winchMotor.setPower(UNWINCH_SPEED);
     }
 
     // Stop the motor

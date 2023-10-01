@@ -3,10 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.DroneConstants.*;
 
@@ -23,22 +19,20 @@ public class DroneSubsystem {
 
     private final ServoEx droneServo;
 
-    public DroneSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public DroneSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
-        droneServo = new SimpleServo(hardwareMap, DRONE_SERVO_NAME, MIN_POSITION, MAX_POSITION);
+        droneServo = new SimpleServo(hardwareMap, DRONE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
-    public void rotateServoForward()
-    {
-        droneServo.turnToAngle(FORWARD_DEGREE);
+    public void forward() {
+        droneServo.turnToAngle(FORWARD);
     }
 
-    public void stopServo()
-    {
-        droneServo.turnToAngle(STOP_DEGREE);
+    public void backward() {
+        droneServo.turnToAngle(BACKWARD);
     }
-    public void rotateServoBackward()
-    {
-        droneServo.turnToAngle(BACKWARD_DEGREE);
+
+    public void stop() {
+        droneServo.turnToAngle(STOP);
     }
 }

@@ -1,18 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.CLAW_SERVO_NAME;
-import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.MAX_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.MIN_POSITION;
-
 import static org.firstinspires.ftc.teamcode.Constants.PixelConstants.*;
 
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class PixelSubsystem {
     // One ServoEx
@@ -22,18 +14,16 @@ public class PixelSubsystem {
 
     private final ServoEx pixelServo;
 
-    public PixelSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public PixelSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
-        pixelServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_POSITION, MAX_POSITION);
+        pixelServo = new SimpleServo(hardwareMap, PIXEL_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
-    public void rotateToPosition()
-    {
-        pixelServo.rotateBy(ROTATE_BY_POSITION);
+    public void placePixel() {
+        pixelServo.rotateBy(PLACE_POSITION);
     }
 
-    public void rotateToStartPosition()
-    {
+    public void startPosition() {
         pixelServo.setPosition(START_POSITION);
     }
 }
