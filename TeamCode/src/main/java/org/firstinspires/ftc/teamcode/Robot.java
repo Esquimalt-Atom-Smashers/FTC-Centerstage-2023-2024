@@ -210,14 +210,19 @@ public class Robot {
                 break;
             case WAITING:
 //                if (timer.milliseconds() >= 500) scoringState = ScoringState.RAISING_CLAW;
-                if (timer.milliseconds() >= 500) scoringState = ScoringState.LOADED_DRIVING;
+                if (timer.milliseconds() >= 500) {
+                    clawSubsystem.closeClaw();
+                    intakeSubsystem.stop();
+                    intakeSubsystem.mediumPosition();
+                    elbowSubsystem.levelPosition();
+                    scoringState = ScoringState.RAISING_CLAW;
+                }
                 break;
             case RAISING_CLAW:
-                clawSubsystem.closeClaw();
-                intakeSubsystem.stop();
-                intakeSubsystem.mediumPosition();
-                elbowSubsystem.levelPosition();
                 runPIDControllers();
+                if (elbowSubsystem.isAtTarget()) {
+                    scoringState = ScoringState.LOADED_DRIVING;
+                }
                 break;
             case LOADED_DRIVING:
 //                clawSubsystem.closeClaw();
