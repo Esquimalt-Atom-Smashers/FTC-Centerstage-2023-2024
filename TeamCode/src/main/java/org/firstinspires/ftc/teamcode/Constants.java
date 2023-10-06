@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 //This class holds all constants, the reason we do this is so we can import all the constants 'statically.'
@@ -7,12 +8,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 // import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 public class Constants {
+    @Config
     public static class ClawConstants {
         public static final String CLAW_SERVO_NAME = "clawServo";
 
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
         public static final double OPEN_POSITION = 0;
+        public static double DROP_POSITION = 40;
         public static final double CLOSE_POSITION = 50; // TODO: Fine tune this value (it is already around the right value)
     }
 
@@ -61,6 +64,7 @@ public class Constants {
         public static final double STOP = 0.5;
     }
 
+    @Config
     public static class ElbowConstants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
 
@@ -74,10 +78,11 @@ public class Constants {
         // 4750 level
         // 23000 straight up / climbing
         public static final double INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
+        public static double TILT_POSITION = 3350;
         public static final double TEST_POSITION = 15000;
 
         public static final double TOLERANCE = 15;
-        public static final double POWER_TOLERANCE = -1;
+        public static final double POWER_TOLERANCE = 0.09;
     }
 
     public static class IntakeConstants {
@@ -87,13 +92,14 @@ public class Constants {
 
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
-        public static final double INTAKE_DOWN_POSITION = 100; // This is around 270 - 175 because the up position is actually around 270
+        public static final double INTAKE_DOWN_POSITION = 270 - 175; // This is around 270 - 175 because the up position is actually around 270
         public static final double INTAKE_DRIVING_POSITION = 270 - 120;
         public static final double INTAKE_UP_POSITION = 270 - 45; // This is 270 - 45 because the up position is actually around 270
         public static final double INTAKE_SPEED = -1;
         public static final double OUTTAKE_SPEED = 1;
     }
 
+    @Config
     public static class LinearSlideConstants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
@@ -106,15 +112,16 @@ public class Constants {
 
         // DONT CHANGE THESE VALUES
         public static final double MAX_POSITION = 3000;
-        public static final double MIN_POSITION = 60;
+        public static final double MIN_POSITION = 80;
 
         public static final double TEST_POSITION = 3000;
         public static final double OUT_POSITION = 2000;
         public static final double IN_POSITION = MIN_POSITION;
+        public static double TILT_POSITION = 275;
 
         public static final double TARGET_TOLERANCE = 1.0;
 
-        public static final double POWER_TOLERANCE = -1;
+        public static final double POWER_TOLERANCE = 0.1;
     }
 
     public static class PixelConstants {

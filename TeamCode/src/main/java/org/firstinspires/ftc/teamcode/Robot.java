@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -47,6 +45,11 @@ public class Robot {
         LOWERING_CLAW,
         WAITING,
         RAISING_CLAW,
+        START_ALIGN,
+        LOWER_INTAKE,
+        EXTEND,
+        END_ALIGN,
+        LEVEL,
         LOADED_DRIVING,
         SCORING,
         DRIVING,
@@ -104,23 +107,35 @@ public class Robot {
 
 
         if (operatorGamepad.a) scoringState = ScoringState.INTAKE;
-        if (operatorGamepad.b) scoringState = ScoringState.LOADED_DRIVING;
+        if (operatorGamepad.b) {
+            scoringState = ScoringState.LOADED_DRIVING;
+            intakeSubsystem.stop();
+            intakeSubsystem.mediumPosition();
+            elbowSubsystem.drivingPosition();
+        }
 //        if (operatorGamepad.b) scoringState = ScoringState.DRIVING;
 
-        if (operatorGamepad.dpad_up) elbowSubsystem.raiseManually();
-        else if (operatorGamepad.dpad_down) elbowSubsystem.lowerManually();
+        if (operatorGamepad.left_stick_y <= -0.1) elbowSubsystem.lowerManually();
+        else if (operatorGamepad.left_stick_y >= 0.1) elbowSubsystem.raiseManually();
         else elbowSubsystem.stop();
 
-        if (operatorGamepad.dpad_right) linearSlideSubsystem.extendManually();
-        else if (operatorGamepad.dpad_left) linearSlideSubsystem.retractManually();
+        if (operatorGamepad.right_stick_y >= 0.1) linearSlideSubsystem.retractManually();
+        else if (operatorGamepad.right_stick_y <= -0.1) linearSlideSubsystem.extendManually();
         else linearSlideSubsystem.stop();
 
         if (operatorGamepad.y) clawSubsystem.openClaw();
 
-        scoringLoop();
-//        runPIDControllers();
+        if (operatorGamepad.dpad_up) {
+            elbowSubsystem.testPosition();
+            linearSlideSubsystem.testPosition();
+        }
 
-        opMode.telemetry.addData("Scoring State: ", scoringState);
+        scoringLoop();
+
+        opMode.telemetry.addData("Driving State", driveState);
+        opMode.telemetry.addData("Scoring State", scoringState);
+        elbowSubsystem.printPosition(opMode.telemetry);
+        opMode.telemetry.update();
 
         // Instruction controls (driver):
         // Left trigger adds a left align
@@ -140,8 +155,6 @@ public class Robot {
 //        if (driverGamepad.right_bumper) instructionExecutor.addInstruction(this::stepRight);
 //        if (driverGamepad.a) instructionExecutor.executeInstructions();
 //        if (driverGamepad.b) instructionExecutor.clearInstructions();
-
-        opMode.telemetry.update();
     }
 
     private void driveLoop() {
@@ -196,40 +209,79 @@ public class Robot {
                 linearSlideSubsystem.retract();
                 elbowSubsystem.drivingPosition();
                 runPIDControllers();
-                if (operatorGamepad.x) scoringState = ScoringState.LOWERING_CLAW;
+                if (operatorGamepad.x) {
+                    scoringState = ScoringState.LOWERING_CLAW;
+                    elbowSubsystem.intakePosition();
+                }
                 break;
             case LOWERING_CLAW:
-                elbowSubsystem.intakePosition();
                 runPIDControllers();
                 if (elbowSubsystem.isAtTarget()) {
+                    scoringState = ScoringState.WAITING;
                     elbowSubsystem.stop();
                     clawSubsystem.closeClaw();
                     timer = new ElapsedTime();
-                    scoringState = ScoringState.WAITING;
                 }
                 break;
             case WAITING:
-//                if (timer.milliseconds() >= 500) scoringState = ScoringState.RAISING_CLAW;
                 if (timer.milliseconds() >= 500) {
+                    scoringState = ScoringState.RAISING_CLAW;
                     clawSubsystem.closeClaw();
                     intakeSubsystem.stop();
                     intakeSubsystem.mediumPosition();
                     elbowSubsystem.levelPosition();
-                    scoringState = ScoringState.RAISING_CLAW;
                 }
                 break;
             case RAISING_CLAW:
                 runPIDControllers();
                 if (elbowSubsystem.isAtTarget()) {
+                    scoringState = ScoringState.START_ALIGN;
+                    intakeSubsystem.mediumPosition();
+                    intakeSubsystem.stop();
+                    elbowSubsystem.levelPosition();
+//                    linearSlideSubsystem.tiltPosition();
+                }
+                break;
+            case START_ALIGN:
+                runPIDControllers();
+                if (elbowSubsystem.isAtTarget()) {
+                    scoringState = ScoringState.LOWER_INTAKE;
+                    intakeSubsystem.downPosition();
+                    timer = new ElapsedTime();
+//                    elbowSubsystem.levelPosition();
+                }
+                break;
+            case LOWER_INTAKE:
+                runPIDControllers();
+                if (timer.milliseconds() >= 250) {
+                    scoringState = ScoringState.EXTEND;
+                    linearSlideSubsystem.tiltPosition();
+                }
+                break;
+            case EXTEND:
+                runPIDControllers();
+                if (linearSlideSubsystem.isAtTarget()) {
+                    scoringState = ScoringState.END_ALIGN;
+                    linearSlideSubsystem.tiltPosition();
+                }
+                break;
+            case END_ALIGN:
+                runPIDControllers();
+                if (linearSlideSubsystem.isAtTarget()) {
+                    scoringState = ScoringState.LEVEL;
+                    elbowSubsystem.tiltPosition();
+//                    linearSlideSubsystem.retract();
+                }
+                break;
+            case LEVEL:
+                runPIDControllers();
+                if (elbowSubsystem.isAtTarget()) {
                     scoringState = ScoringState.LOADED_DRIVING;
+                    elbowSubsystem.levelPosition();
                 }
                 break;
             case LOADED_DRIVING:
-//                clawSubsystem.closeClaw();
-                intakeSubsystem.mediumPosition();
-//                elbowSubsystem.levelPosition();
-                intakeSubsystem.stop();
-//                runPIDControllers();
+                runPIDControllers();
                 break;
             case SCORING:
                 break;
@@ -243,6 +295,7 @@ public class Robot {
             case MANUAL:
                 runManually();
                 break;
+
         }
     }
 

@@ -43,6 +43,10 @@ public class LinearSlideSubsystem {
         setTarget(TEST_POSITION);
     }
 
+    public void tiltPosition() {
+        setTarget(TILT_POSITION);
+    }
+
     public void extendManually() {
         slideMotor.setPower(EXTEND_POWER);
     }

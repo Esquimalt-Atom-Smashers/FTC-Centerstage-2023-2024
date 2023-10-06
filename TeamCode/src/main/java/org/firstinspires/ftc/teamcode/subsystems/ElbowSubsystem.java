@@ -15,6 +15,7 @@ public class ElbowSubsystem {
 
     public static double target;
     private boolean atTarget = false;
+    private double lastPower;
 
     public  ElbowSubsystem(HardwareMap hardwareMap) {
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
@@ -39,6 +40,10 @@ public class ElbowSubsystem {
         setTarget(TEST_POSITION);
     }
 
+    public void tiltPosition() {
+        setTarget(TILT_POSITION);
+    }
+
     public void stop() {
         elbowMotor.setPower(0);
     }
@@ -56,6 +61,13 @@ public class ElbowSubsystem {
         atTarget = false;
     }
 
+    public void printPosition(Telemetry telemetry) {
+        telemetry.addData("At target? ", atTarget);
+        telemetry.addData("Target: ", target);
+        telemetry.addData("Position: ", elbowMotor.getCurrentPosition());
+        telemetry.addData("Power", lastPower);
+    }
+
     public void runPID() {
         // If we aren't at the target
         if (!atTarget)
@@ -64,6 +76,7 @@ public class ElbowSubsystem {
             controller.setPID(P, I, D);
             int elbowPosition = elbowMotor.getCurrentPosition();
             double power = controller.calculate(elbowPosition, target);
+            lastPower = power;
             elbowMotor.setPower(power);
             // If the power we are setting is basically none, we are close enough to the target
             atTarget = Math.abs(power) <= POWER_TOLERANCE;
