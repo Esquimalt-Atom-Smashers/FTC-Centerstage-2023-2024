@@ -8,7 +8,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 // import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 public class Constants {
-    @Config
+
+    public static class CameraConstants {
+        public static final String CAMERA_NAME = "camera";
+    }
+
     public static class ClawConstants {
         public static final String CLAW_SERVO_NAME = "clawServo";
 

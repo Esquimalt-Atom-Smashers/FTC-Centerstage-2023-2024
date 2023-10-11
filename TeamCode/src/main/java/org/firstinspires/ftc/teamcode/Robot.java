@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
+import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
@@ -25,6 +26,7 @@ public class Robot {
     private final ElbowSubsystem elbowSubsystem;
     private final ClawSubsystem clawSubsystem;
     private final LinearSlideSubsystem linearSlideSubsystem;
+    private final CameraSubsystem cameraSubsystem;
 
     private final InstructionExecutor instructionExecutor;
 
@@ -39,6 +41,7 @@ public class Robot {
         STEPPING_RIGHT
     }
 
+    // TODO: Simplify this (maybe use ftclib commands?)
     enum ScoringState {
         STARTING,
         INTAKE,
@@ -77,6 +80,7 @@ public class Robot {
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap);
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap);
+        cameraSubsystem = new CameraSubsystem(opMode.hardwareMap, opMode.telemetry);
 
         instructionExecutor = new InstructionExecutor();
     }
@@ -105,6 +109,8 @@ public class Robot {
         // While in intake mode press X to pick up
         // Press B to enter driving mode
 
+
+        cameraSubsystem.detect();
 
         if (operatorGamepad.a) scoringState = ScoringState.INTAKE;
         if (operatorGamepad.b) {
