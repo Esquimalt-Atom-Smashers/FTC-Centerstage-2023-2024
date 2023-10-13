@@ -81,7 +81,7 @@ public class Robot {
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap);
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap);
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
-        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap);
+        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, this);
         cameraSubsystem = new CameraSubsystem(opMode.hardwareMap, opMode.telemetry);
         droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
 
@@ -142,7 +142,7 @@ public class Robot {
         opMode.telemetry.addData("Driving State", driveState);
         opMode.telemetry.addData("Scoring State", scoringState);
         elbowSubsystem.printPosition(opMode.telemetry);
-        linearSlideSubsystem.printPosition(opMode.telemetry);
+        linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
 
         // Instruction controls (driver):
@@ -399,5 +399,9 @@ public class Robot {
     private void wait(int ms) {
         ElapsedTime timer = new ElapsedTime();
         while (timer.milliseconds() <= ms) {}
+    }
+
+    public ElbowSubsystem getElbowSubsystem() {
+        return elbowSubsystem;
     }
 }

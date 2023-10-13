@@ -6,11 +6,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Robot;
+
 import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 
 import java.util.Arrays;
 
-public class LinearSlideSubsystem {
+public class LinearSlideSubsystem extends CustomSubsystemBase {
     // TODO: Create limits depending on where the elbow is
     private final DcMotorEx slideMotor;
 
@@ -21,7 +23,8 @@ public class LinearSlideSubsystem {
     public static double target;
     private boolean atTarget;
 
-    public LinearSlideSubsystem(HardwareMap hardwareMap) {
+    public LinearSlideSubsystem(HardwareMap hardwareMap, Robot robot) {
+        super(hardwareMap, robot);
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
 
         slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
@@ -31,6 +34,7 @@ public class LinearSlideSubsystem {
 
         controller = new PIDController(P, I, D);
     }
+
 
     public void extend() {
         setTarget(OUT_POSITION);
@@ -49,11 +53,17 @@ public class LinearSlideSubsystem {
     }
 
     public void extendManually() {
-        slideMotor.setPower(EXTEND_POWER);
+        if (isSafeToMove())
+            slideMotor.setPower(EXTEND_POWER);
+        else
+            stop();
     }
 
     public void retractManually() {
-        slideMotor.setPower(RETRACT_POWER);
+        if (isSafeToMove())
+            slideMotor.setPower(RETRACT_POWER);
+        else
+            stop();
     }
 
     public void lowScoringPosition() {
@@ -87,38 +97,48 @@ public class LinearSlideSubsystem {
     }
 
     public void runPID() {
-        // If we aren't at the target,
-        if (!atTarget)
-        {
-            // Calculate how much we need to move the motor by
-            controller.setPID(P, I, D);
-            int slidePosition = slideMotor.getCurrentPosition();
-            double power = controller.calculate(slidePosition, target);
-            slideMotor.setPower(power);
-            // If the power isn't much, we are about as close to the target as we are going to get, don't update anymore
-            atTarget = Math.abs(power) <= POWER_TOLERANCE;
+        // If we are at the target, don't do anything
+        if (atTarget) return;
+        // If it is unsafe to move, don't (this might not need to be used for PIDs)
+        if (!isSafeToMove()) {
+            stop();
+            return;
         }
+
+        // Calculate how much we need to move the motor by
+        controller.setPID(P, I, D);
+        int slidePosition = slideMotor.getCurrentPosition();
+        double power = controller.calculate(slidePosition, target);
+        slideMotor.setPower(power);
+        // If the power isn't much, we are about as close to the target as we are going to get, don't update anymore
+        atTarget = Math.abs(power) <= POWER_TOLERANCE;
+
     }
 
-    public void nextPosition() {
-//        if (position == TargetPosition.HIGH) return;
-//        // Set our position to the next position
-//        setPosition(positions[Arrays.asList(positions).indexOf(position) + 1]);
-        if (target == positions[positions.length - 1]) return;
-        target = positions[Arrays.asList(positions).indexOf(target) + 1];
-    }
+//    public void nextPosition() {
+////        if (position == TargetPosition.HIGH) return;
+////        // Set our position to the next position
+////        setPosition(positions[Arrays.asList(positions).indexOf(position) + 1]);
+//        if (target == positions[positions.length - 1]) return;
+//        target = positions[Arrays.asList(positions).indexOf(target) + 1];
+//    }
+//
+//    public void prevPosition() {
+////        if (position == TargetPosition.DEFAULT) return;
+////        // Set our position to the previous position
+////        setPosition(positions[Arrays.asList(positions).indexOf(position) - 1]);
+//        if (target == positions[0]) return;
+//        target = positions[Arrays.asList(positions).indexOf(target) - 1];
+//    }
 
-    public void prevPosition() {
-//        if (position == TargetPosition.DEFAULT) return;
-//        // Set our position to the previous position
-//        setPosition(positions[Arrays.asList(positions).indexOf(position) - 1]);
-        if (target == positions[0]) return;
-        target = positions[Arrays.asList(positions).indexOf(target) - 1];
-    }
-
-    public void printPosition(Telemetry telemetry) {
+    @Override
+    public void printData(Telemetry telemetry) {
         telemetry.addData("LinearSlidePosition", slideMotor.getCurrentPosition());
         telemetry.addData("Target", target);
+    }
+
+    public boolean isSafeToMove() {
+        return robot.getElbowSubsystem().isBelowLevel();
     }
 
     public boolean isAtTarget() {

@@ -93,6 +93,10 @@ public class ElbowSubsystem {
         }
     }
 
+    public boolean isBelowLevel() {
+        return elbowMotor.getCurrentPosition() <= LEVEL_POSITION;
+    }
+
     public boolean isAtTarget() {
         return atTarget;
     }
