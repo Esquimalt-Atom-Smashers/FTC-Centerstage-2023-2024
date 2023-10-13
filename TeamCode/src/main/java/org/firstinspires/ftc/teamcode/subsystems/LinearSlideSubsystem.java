@@ -11,6 +11,7 @@ import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 import java.util.Arrays;
 
 public class LinearSlideSubsystem {
+    // TODO: Create limits depending on where the elbow is
     private final DcMotorEx slideMotor;
 
     private double[] positions = new double[]{IN_POSITION, TEST_POSITION, OUT_POSITION};
@@ -55,6 +56,18 @@ public class LinearSlideSubsystem {
         slideMotor.setPower(RETRACT_POWER);
     }
 
+    public void lowScoringPosition() {
+        setTarget(LOW_SCORING_POSITION);
+    }
+
+    public void mediumScoringPosition() {
+        setTarget(MEDIUM_SCORING_POSITION);
+    }
+
+    public void highScoringPosition() {
+        setTarget(HIGH_SCORING_POSITION);
+    }
+
     public void stop() {
         slideMotor.setPower(0);
     }
@@ -68,6 +81,7 @@ public class LinearSlideSubsystem {
     }
 
     private void setTarget(double targetPosition) {
+        if (targetPosition < MIN_POSITION || targetPosition > MAX_POSITION) return;
         target = targetPosition;
         atTarget = false;
     }
@@ -100,6 +114,11 @@ public class LinearSlideSubsystem {
 //        setPosition(positions[Arrays.asList(positions).indexOf(position) - 1]);
         if (target == positions[0]) return;
         target = positions[Arrays.asList(positions).indexOf(target) - 1];
+    }
+
+    public void printPosition(Telemetry telemetry) {
+        telemetry.addData("LinearSlidePosition", slideMotor.getCurrentPosition());
+        telemetry.addData("Target", target);
     }
 
     public boolean isAtTarget() {

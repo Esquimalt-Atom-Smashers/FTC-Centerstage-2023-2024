@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.DroneSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
@@ -27,6 +28,7 @@ public class Robot {
     private final ClawSubsystem clawSubsystem;
     private final LinearSlideSubsystem linearSlideSubsystem;
     private final CameraSubsystem cameraSubsystem;
+    private final DroneSubsystem droneSubsystem;
 
     private final InstructionExecutor instructionExecutor;
 
@@ -54,7 +56,7 @@ public class Robot {
         END_ALIGN,
         LEVEL,
         LOADED_DRIVING,
-        SCORING,
+        SCORING_POSITION,
         DRIVING,
         MANUAL
     }
@@ -81,6 +83,7 @@ public class Robot {
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap);
         cameraSubsystem = new CameraSubsystem(opMode.hardwareMap, opMode.telemetry);
+        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
 
         instructionExecutor = new InstructionExecutor();
     }
@@ -92,6 +95,7 @@ public class Robot {
     // Perform actions that happen when the robot starts
     public void start() {
         linearSlideSubsystem.retract();
+        droneSubsystem.startPosition();
     }
 
     // Main robot control
@@ -104,21 +108,22 @@ public class Robot {
         // Right joystick left and right turns the robot left and right
         driveLoop();
 
+        if (driverGamepad.right_bumper) droneSubsystem.release();
+
         // FOR DRIVERS:
         // Press A to enter intake mode
         // While in intake mode press X to pick up
         // Press B to enter driving mode
 
-
-        cameraSubsystem.detect();
-
         if (operatorGamepad.a) scoringState = ScoringState.INTAKE;
         if (operatorGamepad.b) {
             scoringState = ScoringState.LOADED_DRIVING;
             intakeSubsystem.stop();
+            intakeSubsystem.downPosition();
             intakeSubsystem.mediumPosition();
-            elbowSubsystem.drivingPosition();
+            elbowSubsystem.levelPosition();
         }
+
 //        if (operatorGamepad.b) scoringState = ScoringState.DRIVING;
 
         if (operatorGamepad.left_stick_y <= -0.1) elbowSubsystem.lowerManually();
@@ -131,16 +136,13 @@ public class Robot {
 
         if (operatorGamepad.y) clawSubsystem.openClaw();
 
-        if (operatorGamepad.dpad_up) {
-            elbowSubsystem.testPosition();
-            linearSlideSubsystem.testPosition();
-        }
-
         scoringLoop();
 
+        cameraSubsystem.detect();
         opMode.telemetry.addData("Driving State", driveState);
         opMode.telemetry.addData("Scoring State", scoringState);
         elbowSubsystem.printPosition(opMode.telemetry);
+        linearSlideSubsystem.printPosition(opMode.telemetry);
         opMode.telemetry.update();
 
         // Instruction controls (driver):
@@ -286,10 +288,28 @@ public class Robot {
                     elbowSubsystem.levelPosition();
                 }
                 break;
+            // TODO: Change this to move the elbow first, then the slide going up, and vice versa going down
             case LOADED_DRIVING:
                 runPIDControllers();
+                if (operatorGamepad.dpad_left) {
+                    scoringState = ScoringState.SCORING_POSITION;
+                    elbowSubsystem.lowScoringPosition();
+                    linearSlideSubsystem.lowScoringPosition();
+                }
+                else if (operatorGamepad.dpad_up) {
+                    scoringState = ScoringState.SCORING_POSITION;
+                    elbowSubsystem.mediumScoringPosition();
+                    linearSlideSubsystem.mediumScoringPosition();
+                }
+                else if (operatorGamepad.dpad_right) {
+                    scoringState = ScoringState.SCORING_POSITION;
+                    elbowSubsystem.highScoringPosition();
+                    linearSlideSubsystem.highScoringPosition();
+                }
                 break;
-            case SCORING:
+            case SCORING_POSITION:
+                runPIDControllers();
+                if (elbowSubsystem.isAtTarget()) scoringState = ScoringState.LOADED_DRIVING;
                 break;
             case DRIVING:
                 intakeSubsystem.stop();
@@ -313,6 +333,8 @@ public class Robot {
         if (operatorGamepad.x) elbowSubsystem.raiseManually();
         else if (operatorGamepad.y) elbowSubsystem.lowerManually();
         else elbowSubsystem.stop();
+        elbowSubsystem.printPosition(opMode.telemetry);
+        opMode.telemetry.update();
 
         // Intake Subsystem
         if (operatorGamepad.dpad_up) intakeSubsystem.mediumPosition();
@@ -329,6 +351,10 @@ public class Robot {
         // Claw Subsystem
         if (operatorGamepad.a) clawSubsystem.openClaw();
         if (operatorGamepad.b) clawSubsystem.closeClaw();
+
+        // Drone subsystem
+        if (driverGamepad.right_bumper) droneSubsystem.release();
+        if (driverGamepad.left_bumper) droneSubsystem.startPosition();
 
     }
 

@@ -49,7 +49,7 @@ public class CameraSubsystem {
         int aprilTagIdCode;
 
         aprilTagDetections = aprilTagProcessor.getDetections();
-
+        telemetry.addData("Detections", aprilTagDetections.size());
         for (AprilTagDetection aprilTagDetection : aprilTagDetections) {
 
             if (aprilTagDetection.metadata != null) {

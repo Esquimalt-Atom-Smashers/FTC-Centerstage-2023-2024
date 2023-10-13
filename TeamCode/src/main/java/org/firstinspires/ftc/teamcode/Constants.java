@@ -27,7 +27,7 @@ public class Constants {
 
         public static final double DEADZONE = 0.1;
 
-        public static final double INPUT_MULTIPLIER = 0.8f;
+        public static final double INPUT_MULTIPLIER = 1f;
 
         public static final String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
         public static final String FRONT_RIGHT_MOTOR_NAME = "frontRightMotor";
@@ -63,9 +63,7 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        public static final double FORWARD = 1;
-        public static final double BACKWARD = 0;
-        public static final double STOP = 0.5;
+        public static final double START_POSITION = 0, RELEASE_ANGLE = 180;
     }
 
     @Config
@@ -81,9 +79,14 @@ public class Constants {
         // 1000 driving
         // 4750 level
         // 23000 straight up / climbing
+        // TODO: Change these to ints (and others of the same type)
         public static final double INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
         public static double TILT_POSITION = 3350;
         public static final double TEST_POSITION = 15000;
+
+        // Drone position is ~14000, but the biggest issue is the elastic band
+
+        public static double LOW_SCORING_POSITION = 8400, MEDIUM_SCORING_POSITION = 10400, HIGH_SCORING_POSITION = 12400;
 
         public static final double TOLERANCE = 15;
         public static final double POWER_TOLERANCE = 0.09;
@@ -99,8 +102,8 @@ public class Constants {
         public static final double INTAKE_DOWN_POSITION = 270 - 175; // This is around 270 - 175 because the up position is actually around 270
         public static final double INTAKE_DRIVING_POSITION = 270 - 120;
         public static final double INTAKE_UP_POSITION = 270 - 45; // This is 270 - 45 because the up position is actually around 270
-        public static final double INTAKE_SPEED = -1;
-        public static final double OUTTAKE_SPEED = 1;
+        public static final double INTAKE_SPEED = -0.5;
+        public static final double OUTTAKE_SPEED = 0.5;
     }
 
     @Config
@@ -108,11 +111,11 @@ public class Constants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        public static  double EXTEND_POWER = .5;
-        public static  double RETRACT_POWER = -.5;
+        public static double EXTEND_POWER = .5;
+        public static double RETRACT_POWER = -.5;
 
         // PID values for the PID controller
-        public static double P = 0.013, I = 0, D = 0.0003;
+        public static final double P = 0.013, I = 0, D = 0.0003;
 
         // DONT CHANGE THESE VALUES
         public static final double MAX_POSITION = 3000;
@@ -122,6 +125,7 @@ public class Constants {
         public static final double OUT_POSITION = 2000;
         public static final double IN_POSITION = MIN_POSITION;
         public static double TILT_POSITION = 275;
+        public static double LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
 
         public static final double TARGET_TOLERANCE = 1.0;
 

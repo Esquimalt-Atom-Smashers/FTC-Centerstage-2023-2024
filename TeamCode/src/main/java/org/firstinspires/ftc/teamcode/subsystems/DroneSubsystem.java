@@ -24,15 +24,11 @@ public class DroneSubsystem {
         droneServo = new SimpleServo(hardwareMap, DRONE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
-    public void forward() {
-        droneServo.turnToAngle(FORWARD);
+    public void release() {
+        droneServo.turnToAngle(RELEASE_ANGLE);
     }
 
-    public void backward() {
-        droneServo.turnToAngle(BACKWARD);
-    }
-
-    public void stop() {
-        droneServo.turnToAngle(STOP);
+    public void startPosition() {
+        droneServo.turnToAngle(START_POSITION);
     }
 }

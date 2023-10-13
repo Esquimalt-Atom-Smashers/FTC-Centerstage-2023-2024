@@ -44,6 +44,18 @@ public class ElbowSubsystem {
         setTarget(TILT_POSITION);
     }
 
+    public void lowScoringPosition() {
+        setTarget(LOW_SCORING_POSITION);
+    }
+
+    public void mediumScoringPosition() {
+        setTarget(MEDIUM_SCORING_POSITION);
+    }
+
+    public void highScoringPosition() {
+        setTarget(HIGH_SCORING_POSITION);
+    }
+
     public void stop() {
         elbowMotor.setPower(0);
     }
@@ -62,10 +74,8 @@ public class ElbowSubsystem {
     }
 
     public void printPosition(Telemetry telemetry) {
-        telemetry.addData("At target? ", atTarget);
-        telemetry.addData("Target: ", target);
-        telemetry.addData("Position: ", elbowMotor.getCurrentPosition());
-        telemetry.addData("Power", lastPower);
+        telemetry.addData("Position", elbowMotor.getCurrentPosition());
+        telemetry.addData("Target", target);
     }
 
     public void runPID() {
