@@ -16,5 +16,5 @@ public abstract class CustomSubsystemBase {
         this.robot = robot;
     }
 
-    abstract void printData(Telemetry telemetry);
+    public void printData(Telemetry telemetry) {}
 }

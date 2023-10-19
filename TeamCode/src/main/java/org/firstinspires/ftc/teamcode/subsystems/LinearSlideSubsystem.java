@@ -135,10 +135,11 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     public void printData(Telemetry telemetry) {
         telemetry.addData("LinearSlidePosition", slideMotor.getCurrentPosition());
         telemetry.addData("Target", target);
+        telemetry.addData("Is safe to move slide?", isSafeToMove());
     }
 
     public boolean isSafeToMove() {
-        return robot.getElbowSubsystem().isBelowLevel();
+        return !robot.getElbowSubsystem().isBelowLevel();
     }
 
     public boolean isAtTarget() {
