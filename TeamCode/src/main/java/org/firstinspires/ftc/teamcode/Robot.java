@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.subsystems.DroneSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
 public class Robot {
     // OpMode
@@ -28,7 +29,9 @@ public class Robot {
     private final ClawSubsystem clawSubsystem;
     private final LinearSlideSubsystem linearSlideSubsystem;
     private final CameraSubsystem cameraSubsystem;
-    private final DroneSubsystem droneSubsystem;
+    // TODO: Make this final again, was only removed because the drone was taken off of the robot
+    private DroneSubsystem droneSubsystem;
+    private final WinchSubsystem winchSubsystem;
 
     private final InstructionExecutor instructionExecutor;
 
@@ -83,7 +86,10 @@ public class Robot {
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, this);
         cameraSubsystem = new CameraSubsystem(opMode.hardwareMap, opMode.telemetry);
-        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
+        // TODO: Uncomment when the drone subsystem is back on the robot
+//        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
+        winchSubsystem = new WinchSubsystem(opMode.hardwareMap);
+
 
         instructionExecutor = new InstructionExecutor();
     }
@@ -353,9 +359,14 @@ public class Robot {
         if (operatorGamepad.b) clawSubsystem.closeClaw();
 
         // Drone subsystem
-        if (driverGamepad.right_bumper) droneSubsystem.release();
-        if (driverGamepad.left_bumper) droneSubsystem.startPosition();
+        // TODO: Uncomment when the drone subsystem is back on the robot
+//        if (driverGamepad.right_bumper) droneSubsystem.release();
+//        if (driverGamepad.left_bumper) droneSubsystem.startPosition();
 
+        // Winch subsystem
+        if (driverGamepad.a) winchSubsystem.winch();
+        else if (driverGamepad.b) winchSubsystem.unwinch();
+        else winchSubsystem.stop();
     }
 
     public void runPIDControllers() {
