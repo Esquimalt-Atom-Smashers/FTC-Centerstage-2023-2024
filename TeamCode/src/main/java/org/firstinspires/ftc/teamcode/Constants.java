@@ -24,6 +24,7 @@ public class Constants {
         public static final double CLOSE_POSITION = 50; // TODO: Fine tune this value (it is already around the right value)
     }
 
+    @Config
     public static class DriveConstants {
 
         public static final String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
@@ -54,6 +55,13 @@ public class Constants {
 
         public static final double AUTO_STEP_POWER = -1;
         public static final double AUTO_STEP_TOLERANCE = -1;
+
+        // PID
+        // fP was 0.001
+        public static double fP = 0, fI = 0, fD = 0;
+        public static double sP = 0, sI = 0, sD = 0;
+        public static double tP = 0, tI = 0, tD = 0;
+
     }
 
     public static class DroneConstants {

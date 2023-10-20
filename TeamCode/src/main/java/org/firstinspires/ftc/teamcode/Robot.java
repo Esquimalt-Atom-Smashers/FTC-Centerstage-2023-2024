@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
+import org.firstinspires.ftc.teamcode.commands.AutoDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
@@ -100,7 +101,11 @@ public class Robot {
         driveSubsystem.setDefaultCommand(new RunCommand(() -> {
             driveSubsystem.drive(-driverGamepad.getLeftY(), -driverGamepad.getLeftX(), -driverGamepad.getRightX());
         }, driveSubsystem));
-        Trigger autoSnapTrigger = new Trigger(() -> {return isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));});
+
+//        Trigger autoDriveTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+//        autoDriveTrigger.toggleWhenActive(new AutoDriveCommand(driveSubsystem, 1000), new AutoDriveCommand(driveSubsystem, -1000));
+
+        Trigger autoSnapTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
         autoSnapTrigger.whenActive(new FunctionalCommand(
                 // init actions
                 () -> {},
@@ -112,6 +117,8 @@ public class Robot {
                 driveSubsystem::isFinishedSnapping,
                 driveSubsystem
         ));
+
+
 
         // DroneSubsystem
 //        droneSubsystem.setDefaultCommand(new RunCommand(() -> {
@@ -232,7 +239,7 @@ public class Robot {
         // Run the command scheduler, which polls the gamepad inputs, and performs commands created in initCommands
         CommandScheduler.getInstance().run();
 
-        opMode.telemetry.addData("ScoringState", scoringState);
+        driveSubsystem.printPosition(opMode.telemetry);
         opMode.telemetry.update();
 
         // Instruction controls (driver):
