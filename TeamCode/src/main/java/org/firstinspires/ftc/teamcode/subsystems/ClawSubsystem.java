@@ -31,12 +31,12 @@ public class ClawSubsystem extends SubsystemBase {
     }
 
     // Check if the claw is open
-    public boolean clawOpen() {
+    public boolean isClawOpen() {
         return clawServo.getPosition() == OPEN_POSITION;
     }
 
     public void toggleClaw() {
-        if (clawOpen()) {
+        if (isClawOpen()) {
             closeClaw();
         } else {
             openClaw();

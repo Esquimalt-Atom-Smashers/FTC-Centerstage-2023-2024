@@ -55,6 +55,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Main drive method that controls the robot
     public void drive(double forward, double strafe, double turn) {
+        forward = Math.abs(forward) >= DEADZONE ? forward : 0;
+        strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
+        turn = Math.abs(turn) >= DEADZONE ? turn : 0;
         if (FIELD_CENTRIC) {
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
@@ -91,6 +94,19 @@ public class DriveSubsystem extends SubsystemBase {
         snapTarget = SNAP_TARGET;
         if (getNormalizedAngle() >= -90) drive(0, 0, AUTO_SNAP_POWER);
         if (getNormalizedAngle() <= -90) drive(0, 0, -AUTO_SNAP_POWER);
+    }
+
+    public void autoSnap(Telemetry t) {
+        snapTarget = SNAP_TARGET;
+        if (getNormalizedAngle() >= -90) {
+            t.addData("Would be turning", AUTO_SNAP_POWER);
+            drive(0, 0, AUTO_SNAP_POWER);
+        };
+        if (getNormalizedAngle() <= -90) {
+            t.addData("Would be turning", -AUTO_SNAP_POWER);
+            drive(0, 0, -AUTO_SNAP_POWER);
+
+        };
     }
 
     public boolean isFinishedSnapping() {

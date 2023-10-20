@@ -43,14 +43,14 @@ public class Constants {
 
         public static final String IMU_NAME = "imu";
 
-        public static final double SNAP_TARGET = -1;
 
         public static final double AUTO_DRIVE_SPEED = -1;
         public static final double AUTO_STRAFE_SPEED = -1;
         public static final double TURN_SPEED = -1;
 
-        public static final double AUTO_SNAP_POWER = -1;
-        public static final double AUTO_SNAP_TOLERANCE = -1;
+        public static final double SNAP_TARGET = 180;
+        public static final double AUTO_SNAP_POWER = 0.8;
+        public static final double AUTO_SNAP_TOLERANCE = 1;
 
         public static final double AUTO_STEP_POWER = -1;
         public static final double AUTO_STEP_TOLERANCE = -1;

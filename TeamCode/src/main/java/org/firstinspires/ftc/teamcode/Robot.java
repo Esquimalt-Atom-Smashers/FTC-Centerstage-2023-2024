@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.FunctionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.button.Button;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
@@ -41,8 +43,6 @@ public class Robot {
     private DroneSubsystem droneSubsystem;
     private final WinchSubsystem winchSubsystem;
 
-    private final InstructionExecutor instructionExecutor;
-
     private boolean usingPIDControllers;
 
     enum DriveState {
@@ -54,32 +54,19 @@ public class Robot {
         STEPPING_RIGHT
     }
 
-    // TODO: Simplify this (maybe use ftclib commands?)
     enum ScoringState {
         STARTING,
         INTAKE,
-        LOWERING_CLAW,
-        WAITING,
-        RAISING_CLAW,
-        START_ALIGN,
-        LOWER_INTAKE,
-        EXTEND,
-        END_ALIGN,
-        LEVEL,
-        LOADED_DRIVING,
-        SCORING_POSITION,
+        LOADING_PIXELS,
         DRIVING,
         MANUAL
     }
-
-    ElapsedTime timer;
 
     private DriveState driveState = DriveState.DRIVER_CONTROLLED;
     private ScoringState scoringState = ScoringState.STARTING;
 
     public Robot(OpMode opMode, boolean usingPID) {
         this.opMode = opMode;
-
         this.usingPIDControllers = usingPID;
         if (!usingPID) scoringState = ScoringState.MANUAL;
 
@@ -98,67 +85,136 @@ public class Robot {
 //        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap);
 
-
-        instructionExecutor = new InstructionExecutor();
-
-
-        // TODO: How do you do instant commands?
-        // Controls for individual subsystems:
+        initCommands();
+    }
+    private void initCommands() {
+        // Default commands for individual subsystems:
         // CameraSubsystem
 
         // ClawSubsystem
+        clawSubsystem.setDefaultCommand(new RunCommand(() -> {
+            if (operatorGamepad.getButton(GamepadKeys.Button.Y)) clawSubsystem.openClaw();
+        }, clawSubsystem));
 
         // DriveSubsystem
-//        driveSubsystem.setDefaultCommand(new InstantCommand(() -> {
-//            driveSubsystem.drive(-driverGamepad.getLeftY(), -driverGamepad.getLeftX(), -driverGamepad.getRightX());
-//        }, driveSubsystem));
+        driveSubsystem.setDefaultCommand(new RunCommand(() -> {
+            driveSubsystem.drive(-driverGamepad.getLeftY(), -driverGamepad.getLeftX(), -driverGamepad.getRightX());
+        }, driveSubsystem));
+        Trigger autoSnapTrigger = new Trigger(() -> {return isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));});
+        autoSnapTrigger.whenActive(new FunctionalCommand(
+                // init actions
+                () -> {},
+                // execute actions
+                () -> driveSubsystem.autoSnap(opMode.telemetry),
+                // end actions
+                (b) -> {},
+                // is finished?
+                driveSubsystem::isFinishedSnapping,
+                driveSubsystem
+        ));
 
         // DroneSubsystem
+//        droneSubsystem.setDefaultCommand(new RunCommand(() -> {
+//            if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
+//            if (driverGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) droneSubsystem.startPosition();
+//        }));
 
         // ElbowSubsystem
-//        elbowSubsystem.setDefaultCommand(new InstantCommand(() -> {
-//            if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.lowerManually();
-//            else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.raiseManually();
-//            else elbowSubsystem.stop();
-//        }, elbowSubsystem));
+        elbowSubsystem.setDefaultCommand(new RunCommand(() -> {
+            if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.raiseManually();
+            else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.lowerManually();
+            else elbowSubsystem.stop();
+        }, elbowSubsystem));
 
         // IntakeSubsystem
 
         // LinearSlideSubsystem
-//        linearSlideSubsystem.setDefaultCommand(new InstantCommand(() -> {
-//            if (operatorGamepad.getRightY() >= 0.1) linearSlideSubsystem.retractManually();
-//            else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually();
-//            else linearSlideSubsystem.stop();
-//        }, linearSlideSubsystem));
+        linearSlideSubsystem.setDefaultCommand(new RunCommand(() -> {
+            if (operatorGamepad.getRightY() >= 0.1) linearSlideSubsystem.retractManually();
+            else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually();
+            else linearSlideSubsystem.stop();
+        }, linearSlideSubsystem));
 
         // PixelSubsystem
 
         // WinchSubsystem
-//        winchSubsystem.setDefaultCommand(new InstantCommand(winchSubsystem::stop));
+        winchSubsystem.setDefaultCommand(new RunCommand(() -> {
+            if (driverGamepad.getButton(GamepadKeys.Button.A)) winchSubsystem.winch();
+            else if (driverGamepad.getButton(GamepadKeys.Button.B)) winchSubsystem.unwinch();
+            else winchSubsystem.stop();
+        }, winchSubsystem));
 
         // Controls for command groups
-        // TODO: Make custom triggers so that you can only move to set positions after we have picked up pixels
-        operatorGamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new SequentialCommandGroup(
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LOW_SCORING_POSITION, opMode.telemetry),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.LOW_SCORING_POSITION, opMode.telemetry)
+        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A));
+        intakeTrigger.whenActive(new SequentialCommandGroup(
+                new InstantCommand(() -> scoringState = ScoringState.INTAKE),
+                new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
+                new InstantCommand(intakeSubsystem::intake, intakeSubsystem),
+                new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
         ));
 
-        operatorGamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new SequentialCommandGroup(
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.MEDIUM_SCORING_POSITION, opMode.telemetry),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.MEDIUM_SCORING_POSITION, opMode.telemetry)
+        Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.INTAKE);
+        cancelIntakeTrigger.whenActive(new SequentialCommandGroup(
+           new InstantCommand(intakeSubsystem::stop, intakeSubsystem),
+           new InstantCommand(intakeSubsystem::mediumPosition, intakeSubsystem),
+           new InstantCommand(() -> scoringState = ScoringState.DRIVING)
         ));
 
-        operatorGamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new SequentialCommandGroup(
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.HIGH_SCORING_POSITION, opMode.telemetry),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.HIGH_SCORING_POSITION, opMode.telemetry)
+        Trigger pickPixelsTrigger = new Trigger(() -> scoringState == ScoringState.INTAKE && operatorGamepad.getButton(GamepadKeys.Button.X));
+        // Elbow to intake
+        // After: close claw
+        // After 500ms: stop intake, move intake up, move elbow to level
+        // After: Intake down
+        // After 250ms: linear slide to tilt
+        // After: elbow to tilt
+        // After: elbow to level
+        // After: ready to drive, slide to zero
+        pickPixelsTrigger.whenActive(new SequentialCommandGroup(
+                new InstantCommand(() -> scoringState = ScoringState.LOADING_PIXELS),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.INTAKE_POSITION),
+                new InstantCommand(clawSubsystem::closeClaw, clawSubsystem),
+                new WaitCommand(500),
+                new InstantCommand(intakeSubsystem::stop, intakeSubsystem),
+                new InstantCommand(intakeSubsystem::mediumPosition, intakeSubsystem),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LEVEL_POSITION),
+                new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
+                new WaitCommand(250),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.TILT_POSITION),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.TILT_POSITION),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LEVEL_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.ElbowConstants.INTAKE_POSITION),
+                new InstantCommand(() -> scoringState = ScoringState.DRIVING)
         ));
 
-        operatorGamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new SequentialCommandGroup(
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION, opMode.telemetry),
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.INTAKE_POSITION, opMode.telemetry)
+        Trigger lowScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
+        lowScoringPositionTrigger.whenActive(new SequentialCommandGroup(
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LOW_SCORING_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.LOW_SCORING_POSITION)
         ));
 
+        Trigger mediumScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP) && scoringState == ScoringState.DRIVING);
+        mediumScoringPositionTrigger.whenActive(new SequentialCommandGroup(
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.MEDIUM_SCORING_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.MEDIUM_SCORING_POSITION)
+        ));
 
+        Trigger highScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT) && scoringState == ScoringState.DRIVING);
+        highScoringPositionTrigger.whenActive(new SequentialCommandGroup(
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.HIGH_SCORING_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.HIGH_SCORING_POSITION)
+        ));
+
+        Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN) && scoringState == ScoringState.DRIVING);
+        homePositionTrigger.whenActive(new SequentialCommandGroup(
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.INTAKE_POSITION)
+        ));
+
+        Trigger leftInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && !operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
+        Trigger centerInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
+        Trigger rightInstructionTrigger = new Trigger(() -> !operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
     }
 
     public Robot(OpMode opMode) {
@@ -171,52 +227,12 @@ public class Robot {
 //        droneSubsystem.startPosition();
     }
 
-    // Main robot control
+    // Main robot loop
     public void run() {
-        // Control all of the subsystems
-
-        // Drive subsystem controls (driver):
-        // Left joystick up and down moves the robot forward and back
-        // Left joystick left and right moves the robot left and right
-        // Right joystick left and right turns the robot left and right
-//        driveLoop();
-
+        // Run the command scheduler, which polls the gamepad inputs, and performs commands created in initCommands
         CommandScheduler.getInstance().run();
 
-
-        // FOR DRIVERS:
-        // Press A to enter intake mode
-        // While in intake mode press X to pick up
-        // Press B to enter driving mode
-
-//        if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
-
-//        if (operatorGamepad.getButton(GamepadKeys.Button.A)) scoringState = ScoringState.INTAKE;
-//        if (operatorGamepad.getButton(GamepadKeys.Button.B)) {
-//            scoringState = ScoringState.LOADED_DRIVING;
-//            intakeSubsystem.stop();
-//            intakeSubsystem.downPosition();
-//            intakeSubsystem.mediumPosition();
-//            elbowSubsystem.levelPosition();
-//        }
-
-//        if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.lowerManually();
-//        else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.raiseManually();
-//        else elbowSubsystem.stop();
-//
-//        if (operatorGamepad.getRightY() >= 0.1) linearSlideSubsystem.retractManually();
-//        else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually();
-//        else linearSlideSubsystem.stop();
-//
-//        if (operatorGamepad.getButton(GamepadKeys.Button.Y)) clawSubsystem.openClaw();
-
-//        scoringLoop();
-//
-//        cameraSubsystem.detect();
-//        opMode.telemetry.addData("Driving State", driveState);
-//        opMode.telemetry.addData("Scoring State", scoringState);
-//        elbowSubsystem.printPosition(opMode.telemetry);
-//        linearSlideSubsystem.printData(opMode.telemetry);
+        opMode.telemetry.addData("ScoringState", scoringState);
         opMode.telemetry.update();
 
         // Instruction controls (driver):
@@ -257,7 +273,7 @@ public class Robot {
                 break;
             case CENTERING_TAG:
                 if (driveSubsystem.isCentered()) {
-                    instructionExecutor.getNextInstruction();
+//                    instructionExecutor.getNextInstruction();
                 }
                 break;
             case STEPPING_LEFT:
@@ -276,127 +292,17 @@ public class Robot {
     }
 
     public void scoringLoop() {
-        switch (scoringState) {
-            case STARTING:
-                intakeSubsystem.mediumPosition();
-                clawSubsystem.openClaw();
-//                linearSlideSubsystem.retract();
-                intakeSubsystem.stop();
-                runPIDControllers();
-                break;
-            case INTAKE:
-                intakeSubsystem.downPosition();
-                intakeSubsystem.intake();
-                clawSubsystem.openClaw();
-                linearSlideSubsystem.retract();
-                elbowSubsystem.drivingPosition();
-                runPIDControllers();
-                if (operatorGamepad.getButton(GamepadKeys.Button.X)) {
-                    scoringState = ScoringState.LOWERING_CLAW;
-                    elbowSubsystem.intakePosition();
-                }
-                break;
-            case LOWERING_CLAW:
-                runPIDControllers();
-                if (elbowSubsystem.isAtTarget()) {
-                    scoringState = ScoringState.WAITING;
-                    elbowSubsystem.stop();
-                    clawSubsystem.closeClaw();
-                    timer = new ElapsedTime();
-                }
-                break;
-            case WAITING:
-                if (timer.milliseconds() >= 500) {
-                    scoringState = ScoringState.RAISING_CLAW;
-                    clawSubsystem.closeClaw();
-                    intakeSubsystem.stop();
-                    intakeSubsystem.mediumPosition();
-                    elbowSubsystem.levelPosition();
-                }
-                break;
-            case RAISING_CLAW:
-                runPIDControllers();
-                if (elbowSubsystem.isAtTarget()) {
-                    scoringState = ScoringState.START_ALIGN;
-                    intakeSubsystem.mediumPosition();
-                    intakeSubsystem.stop();
-                    elbowSubsystem.levelPosition();
-//                    linearSlideSubsystem.tiltPosition();
-                }
-                break;
-            case START_ALIGN:
-                runPIDControllers();
-                if (elbowSubsystem.isAtTarget()) {
-                    scoringState = ScoringState.LOWER_INTAKE;
-                    intakeSubsystem.downPosition();
-                    timer = new ElapsedTime();
-//                    elbowSubsystem.levelPosition();
-                }
-                break;
-            case LOWER_INTAKE:
-                runPIDControllers();
-                if (timer.milliseconds() >= 250) {
-                    scoringState = ScoringState.EXTEND;
-                    linearSlideSubsystem.tiltPosition();
-                }
-                break;
-            case EXTEND:
-                runPIDControllers();
-                if (linearSlideSubsystem.isAtTarget()) {
-                    scoringState = ScoringState.END_ALIGN;
-                    linearSlideSubsystem.tiltPosition();
-                }
-                break;
-            case END_ALIGN:
-                runPIDControllers();
-                if (linearSlideSubsystem.isAtTarget()) {
-                    scoringState = ScoringState.LEVEL;
-                    elbowSubsystem.tiltPosition();
-//                    linearSlideSubsystem.retract();
-                }
-                break;
-            case LEVEL:
-                runPIDControllers();
-                if (elbowSubsystem.isAtTarget()) {
-                    scoringState = ScoringState.LOADED_DRIVING;
-                    elbowSubsystem.levelPosition();
-                }
-                break;
-            // TODO: Change this to move the elbow first, then the slide going up, and vice versa going down
-            case LOADED_DRIVING:
-                runPIDControllers();
-                if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT)) {
-                    scoringState = ScoringState.SCORING_POSITION;
-                    elbowSubsystem.lowScoringPosition();
-                    linearSlideSubsystem.lowScoringPosition();
-                }
-                else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) {
-                    scoringState = ScoringState.SCORING_POSITION;
-                    elbowSubsystem.mediumScoringPosition();
-                    linearSlideSubsystem.mediumScoringPosition();
-                }
-                else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
-                    scoringState = ScoringState.SCORING_POSITION;
-                    elbowSubsystem.highScoringPosition();
-                    linearSlideSubsystem.highScoringPosition();
-                }
-                break;
-            case SCORING_POSITION:
-                runPIDControllers();
-                if (elbowSubsystem.isAtTarget()) scoringState = ScoringState.LOADED_DRIVING;
-                break;
-            case DRIVING:
-                intakeSubsystem.stop();
-                intakeSubsystem.mediumPosition();
-                linearSlideSubsystem.retract();
-                elbowSubsystem.drivingPosition();
-                runPIDControllers();
-                break;
-            case MANUAL:
-                runManually();
-                break;
-
-        }
+//        switch (scoringState) {
+//            case STARTING:
+//            case INTAKE:
+//            case LOADED_DRIVING:
+//                runPIDControllers();
+//                break;
+//            case MANUAL:
+//                runManually();
+//                break;
+//
+//        }
     }
 
     public void runManually() {
@@ -470,16 +376,12 @@ public class Robot {
         driveState = DriveState.STEPPING_RIGHT;
     }
 
-    private boolean isPressed(float controllerInput) {
+    private boolean isPressed(double controllerInput) {
         return Math.abs(controllerInput) >= Constants.DriveConstants.DEADZONE;
     }
 
     private void wait(int ms) {
         ElapsedTime timer = new ElapsedTime();
         while (timer.milliseconds() <= ms) {}
-    }
-
-    public ElbowSubsystem getElbowSubsystem() {
-        return elbowSubsystem;
     }
 }

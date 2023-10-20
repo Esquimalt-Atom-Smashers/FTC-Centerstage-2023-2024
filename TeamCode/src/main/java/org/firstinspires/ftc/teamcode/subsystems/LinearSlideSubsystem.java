@@ -140,7 +140,8 @@ public class LinearSlideSubsystem extends SubsystemBase {
     }
 
     public boolean isSafeToMove() {
-        return !robot.getElbowSubsystem().isBelowLevel();
+        return true;
+//        return !robot.getElbowSubsystem().isBelowLevel();
     }
 
     public boolean isAtTarget() {
