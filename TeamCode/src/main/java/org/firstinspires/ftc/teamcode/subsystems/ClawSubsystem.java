@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.*;
 
-public class ClawSubsystem {
+public class ClawSubsystem extends SubsystemBase {
 
     private final ServoEx clawServo;
 

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,7 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 
-public class IntakeSubsystem {
+public class IntakeSubsystem extends SubsystemBase {
     Telemetry telemetry;
     private final DcMotorEx intakeMotor;
     private final ServoEx intakeServo;

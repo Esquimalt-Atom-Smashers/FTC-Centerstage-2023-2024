@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-public class CameraSubsystem {
+public class CameraSubsystem extends SubsystemBase {
 
 //    private final AprilTagProcessor.Builder aprilTagProcessorBuilder;
     private final AprilTagProcessor aprilTagProcessor;

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -12,7 +13,7 @@ import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 
 import java.util.Arrays;
 
-public class LinearSlideSubsystem extends CustomSubsystemBase {
+public class LinearSlideSubsystem extends SubsystemBase {
     // TODO: Create limits depending on where the elbow is
     private final DcMotorEx slideMotor;
 
@@ -22,9 +23,10 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
 
     public static double target;
     private boolean atTarget;
+    private final Robot robot;
 
     public LinearSlideSubsystem(HardwareMap hardwareMap, Robot robot) {
-        super(hardwareMap, robot);
+        this.robot = robot;
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
 
         slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
@@ -90,7 +92,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         return slideMotor.getCurrentPosition() <= MIN_POSITION;
     }
 
-    private void setTarget(double targetPosition) {
+    public void setTarget(double targetPosition) {
         if (targetPosition < MIN_POSITION || targetPosition > MAX_POSITION) return;
         target = targetPosition;
         atTarget = false;
@@ -131,7 +133,6 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
 //        target = positions[Arrays.asList(positions).indexOf(target) - 1];
 //    }
 
-    @Override
     public void printData(Telemetry telemetry) {
         telemetry.addData("LinearSlidePosition", slideMotor.getCurrentPosition());
         telemetry.addData("Target", target);

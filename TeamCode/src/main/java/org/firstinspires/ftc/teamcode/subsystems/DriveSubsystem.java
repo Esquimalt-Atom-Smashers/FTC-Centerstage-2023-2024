@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,7 +14,7 @@ import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 import java.util.Arrays;
 
-public class DriveSubsystem {
+public class DriveSubsystem extends SubsystemBase {
     // Motors
     private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
     private final DcMotorEx[] motors;

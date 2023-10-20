@@ -146,7 +146,7 @@ public class Constants {
 
         public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
-        public static final double WINCH_SPEED = 0.7;
-        public static final double UNWINCH_SPEED = -0.7;
+        public static final double WINCH_SPEED = .7;
+        public static final double UNWINCH_SPEED = -.7;
     }
 }

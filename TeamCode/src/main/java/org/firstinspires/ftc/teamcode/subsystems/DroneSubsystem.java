@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import static org.firstinspires.ftc.teamcode.Constants.DroneConstants.*;
 
-public class DroneSubsystem {
+public class DroneSubsystem extends SubsystemBase {
     // One ServoEx
     // Method to rotate the servo
     // Method to stop the servo

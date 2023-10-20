@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -8,7 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
 
-public class ElbowSubsystem {
+public class ElbowSubsystem extends SubsystemBase {
     private final DcMotorEx elbowMotor;
 
     private PIDController controller;
@@ -68,7 +69,7 @@ public class ElbowSubsystem {
         elbowMotor.setPower(-MANUAL_MOTOR_SPEED);
     }
 
-    private void setTarget(double targetPosition) {
+    public void setTarget(double targetPosition) {
         target = targetPosition;
         atTarget = false;
     }

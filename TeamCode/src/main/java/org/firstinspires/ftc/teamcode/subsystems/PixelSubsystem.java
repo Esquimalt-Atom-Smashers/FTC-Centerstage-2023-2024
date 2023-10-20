@@ -2,11 +2,12 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.PixelConstants.*;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class PixelSubsystem {
+public class PixelSubsystem extends SubsystemBase {
     // One ServoEx
 
     // Method to rotate to a set position
