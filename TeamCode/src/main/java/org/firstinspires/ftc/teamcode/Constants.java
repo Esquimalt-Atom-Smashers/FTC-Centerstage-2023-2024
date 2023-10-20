@@ -144,7 +144,9 @@ public class Constants {
     public static class WinchConstants {
         public static final String WINCH_MOTOR_NAME = "winchMotor";
 
-        public static final double WINCH_SPEED = -1;
-        public static final double UNWINCH_SPEED = -1;
+        public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+
+        public static final double WINCH_SPEED = 0.7;
+        public static final double UNWINCH_SPEED = -0.7;
     }
 }
