@@ -30,12 +30,10 @@ public class CameraSubsystem extends SubsystemBase {
         // Create a new Builder
         aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
 
-
-
         aprilTagProcessorBuilder.setDrawTagID(true);
         aprilTagProcessorBuilder.setDrawTagOutline(true);
-        aprilTagProcessorBuilder.setDrawAxes(true);
-        aprilTagProcessorBuilder.setDrawCubeProjection(true);
+        aprilTagProcessorBuilder.setDrawAxes(false);
+        aprilTagProcessorBuilder.setDrawCubeProjection(false);
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 //        aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults();

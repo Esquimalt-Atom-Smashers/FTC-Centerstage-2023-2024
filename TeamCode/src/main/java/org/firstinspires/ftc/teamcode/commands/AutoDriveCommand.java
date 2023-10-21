@@ -7,9 +7,9 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
 public class AutoDriveCommand extends CommandBase {
     private final DriveSubsystem driveSubsystem;
-    private final double target;
+    private final int target;
 
-    public AutoDriveCommand(DriveSubsystem subsystem, double target) {
+    public AutoDriveCommand(DriveSubsystem subsystem, int target) {
         driveSubsystem = subsystem;
         this.target = target;
         addRequirements(driveSubsystem);
@@ -22,7 +22,7 @@ public class AutoDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        driveSubsystem.forwardPID();
+        driveSubsystem.drive();
     }
 
     @Override
@@ -32,6 +32,6 @@ public class AutoDriveCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return driveSubsystem.isAtForwardTarget();
+        return driveSubsystem.areMotorsAtPositions();
     }
 }

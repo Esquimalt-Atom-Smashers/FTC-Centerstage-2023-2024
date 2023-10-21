@@ -17,7 +17,6 @@ public class ClawSubsystem extends SubsystemBase {
     public ClawSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
         clawServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
-
     }
 
     // Set the claw to the open position

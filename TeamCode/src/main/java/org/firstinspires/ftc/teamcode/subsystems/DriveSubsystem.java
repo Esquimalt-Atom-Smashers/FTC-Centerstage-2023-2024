@@ -28,7 +28,7 @@ public class DriveSubsystem extends SubsystemBase {
     private double snapTarget;
 
     // PID controllers
-    private PIDController forwardPIDController;
+    private final PIDController forwardPIDController;
 
     public static double forwardTarget;
     private boolean atForwardTarget;
@@ -92,7 +92,12 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Auto drive
     public void drive() {
+//        drive(forward() ? AUTO_DRIVE_SPEED : -AUTO_DRIVE_SPEED, 0, 0);
 
+    }
+
+    public boolean forward() {
+        return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
     }
 
     // Auto strafe
@@ -100,7 +105,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     }
 
-    public void setForwardTarget(double target) {
+    public void setForwardTarget(int target) {
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + target);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + target);
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + target);
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + target);
         forwardTarget = target;
         atForwardTarget = false;
     }
@@ -113,7 +122,7 @@ public class DriveSubsystem extends SubsystemBase {
         if (!atForwardTarget)
         {
             forwardPIDController.setPID(fP, fI, fD);
-            int wheelPositions = frontLeftMotor.getCurrentPosition();
+            double wheelPositions = getAveragePosition();
             double power = forwardPIDController.calculate(wheelPositions, forwardTarget);
             frontLeftMotor.setPower(power);
             frontRightMotor.setPower(power);
@@ -184,6 +193,13 @@ public class DriveSubsystem extends SubsystemBase {
         drive(0, AUTO_STEP_POWER, 0);
     }
 
+    public boolean areMotorsAtPositions() {
+        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
+    }
+
     public boolean isFinishedSteppingLeft() {
         return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
                 isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
@@ -213,8 +229,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public int getNormalizedAngle() {
-        // TODO:                                 |
-        // TODO: Should this be negative?       \/
         return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
@@ -247,9 +261,13 @@ public class DriveSubsystem extends SubsystemBase {
     public void printPosition(Telemetry t) {
         t.addData("Target", forwardTarget);
         t.addData("FL", frontLeftMotor.getCurrentPosition());
+        t.addData("FLT", frontLeftMotor.getTargetPosition());
         t.addData("FR", frontRightMotor.getCurrentPosition());
+        t.addData("FRT", frontRightMotor.getTargetPosition());
         t.addData("RL", rearLeftMotor.getCurrentPosition());
+        t.addData("RLT", rearLeftMotor.getTargetPosition());
         t.addData("RR", rearRightMotor.getCurrentPosition());
+        t.addData("RRT", rearRightMotor.getTargetPosition());
     }
 
     private boolean isWithinTolerance(double input, double target, double tolerance) {
@@ -264,6 +282,13 @@ public class DriveSubsystem extends SubsystemBase {
 
     public BNO055IMU getGyro() {
         return imu;
+    }
+
+    private double getAveragePosition() {
+        return (double) (
+                frontLeftMotor.getCurrentPosition() + frontRightMotor.getCurrentPosition() +
+                rearLeftMotor.getCurrentPosition() + rearRightMotor.getCurrentPosition()
+                ) / 4;
     }
 
     enum TargetPosition {

@@ -32,10 +32,10 @@ public class Constants {
         public static final String REAR_LEFT_MOTOR_NAME = "rearLeftMotor";
         public static final String REAR_RIGHT_MOTOR_NAME = "rearRightMotor";
 
-        public static final DcMotorSimple.Direction FRONT_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
-        public static final DcMotorSimple.Direction FRONT_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
-        public static final DcMotorSimple.Direction REAR_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
-        public static final DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
+        public static final DcMotorSimple.Direction FRONT_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
+        public static final DcMotorSimple.Direction FRONT_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final DcMotorSimple.Direction REAR_LEFT_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
+        public static final DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
         public static final boolean FIELD_CENTRIC = true;
         public static final boolean SCALED = true;
@@ -45,7 +45,7 @@ public class Constants {
         public static final String IMU_NAME = "imu";
 
 
-        public static final double AUTO_DRIVE_SPEED = -1;
+        public static final double AUTO_DRIVE_SPEED = 0.5;
         public static final double AUTO_STRAFE_SPEED = -1;
         public static final double TURN_SPEED = -1;
 
@@ -53,8 +53,8 @@ public class Constants {
         public static final double AUTO_SNAP_POWER = 0.8;
         public static final double AUTO_SNAP_TOLERANCE = 1;
 
-        public static final double AUTO_STEP_POWER = -1;
-        public static final double AUTO_STEP_TOLERANCE = -1;
+        public static final double AUTO_STEP_POWER = 0;
+        public static final double AUTO_STEP_TOLERANCE = 50;
 
         // PID
         // fP was 0.001
