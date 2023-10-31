@@ -21,10 +21,13 @@ public class CameraSubsystem extends SubsystemBase {
     private final AprilTagProcessor.Builder aprilTagProcessorBuilder;
     private final AprilTagProcessor aprilTagProcessor;
     private final VisionPortal visionPortal;
+    private List<AprilTagDetection> detections;
 
     Telemetry telemetry;
 
-
+    public CameraSubsystem(HardwareMap hardwareMap) {
+        this(hardwareMap, null);
+    }
 
     public CameraSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         // Create a new Builder
@@ -41,29 +44,25 @@ public class CameraSubsystem extends SubsystemBase {
         // Create a Vision Portal with the default settings
         visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, CAMERA_NAME), aprilTagProcessor);
 
-
-
         this.telemetry = telemetry;
 
     }
 
     public void detect() {
-        List<AprilTagDetection> aprilTagDetections;
         int aprilTagIdCode;
-
-        aprilTagDetections = aprilTagProcessor.getDetections();
-        telemetry.addData("Detections", aprilTagDetections.size());
-        for (AprilTagDetection aprilTagDetection : aprilTagDetections) {
+        detections = aprilTagProcessor.getDetections();
+//        telemetry.addData("Detections", detections.size());
+        for (AprilTagDetection aprilTagDetection : detections) {
 
             if (aprilTagDetection.metadata != null) {
                 aprilTagIdCode = aprilTagDetection.id;
-                telemetry.addData("Name", aprilTagDetection.metadata.name);
-                telemetry.addData("ID", aprilTagIdCode);
-                telemetry.addData("Position", aprilTagDetection.center);
+//                telemetry.addData("Name", aprilTagDetection.metadata.name);
+//                telemetry.addData("ID", aprilTagIdCode);
+//                telemetry.addData("Position", aprilTagDetection.center);
                 double width = aprilTagDetection.corners[0].x - aprilTagDetection.corners[1].x;
                 double height = aprilTagDetection.corners[2].y - aprilTagDetection.corners[0].y;
-                telemetry.addData("Width", width);
-                telemetry.addData("Height", height);
+//                telemetry.addData("Width", width);
+//                telemetry.addData("Height", height);
                 /*
                 I found this formula by moving the robot specific distances away from the board
                 and recording what the width was:
@@ -82,8 +81,19 @@ public class CameraSubsystem extends SubsystemBase {
                 https://www.desmos.com/calculator/ioaxa6b1so
                  */
                 double distance = 1600 / width;
-                telemetry.addData("Distance (in)", distance);
+//                telemetry.addData("Distance (in)", distance);
             }
         }
+    }
+
+    public double getDistance(int tagID) {
+        if (detections != null && detections.size() < 1) return -1;
+        for (AprilTagDetection aprilTagDetection : detections) {
+            if (aprilTagDetection.id == tagID) {
+                double width = aprilTagDetection.corners[0].x - aprilTagDetection.corners[1].x;
+                return 1600 / width;
+            }
+        }
+        return -1;
     }
 }

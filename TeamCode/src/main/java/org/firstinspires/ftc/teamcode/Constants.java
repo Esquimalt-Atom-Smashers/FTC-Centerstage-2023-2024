@@ -136,7 +136,7 @@ public class Constants {
         public static double TILT_POSITION = 275;
         public static double LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
 
-        public static final double POWER_TOLERANCE = 0.1;
+        public static final double POWER_TOLERANCE = 0.07;
     }
 
     public static class PixelConstants {

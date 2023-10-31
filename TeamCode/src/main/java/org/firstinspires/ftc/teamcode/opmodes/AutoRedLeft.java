@@ -9,7 +9,9 @@ import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 public class AutoRedLeft extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        AutonomousController autonomousController = new AutonomousController(hardwareMap, "redLeft");
+        AutonomousController autonomousController = new AutonomousController(hardwareMap, "redLeft", telemetry);
+        waitForStart();
         if (isStopRequested()) return;
+        autonomousController.run();
     }
 }

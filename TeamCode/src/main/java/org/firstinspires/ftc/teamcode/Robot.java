@@ -42,8 +42,7 @@ public class Robot {
     private final ClawSubsystem clawSubsystem;
     private final LinearSlideSubsystem linearSlideSubsystem;
     private final CameraSubsystem cameraSubsystem;
-    // TODO: Make this final again, was only removed because the drone was taken off of the robot
-    private DroneSubsystem droneSubsystem;
+    private final DroneSubsystem droneSubsystem;
     private final WinchSubsystem winchSubsystem;
 
     private boolean usingPIDControllers;
@@ -83,8 +82,7 @@ public class Robot {
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, this);
         cameraSubsystem = new CameraSubsystem(opMode.hardwareMap, opMode.telemetry);
-        // TODO: Uncomment when the drone subsystem is back on the robot
-//        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
+        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap);
 
         initCommands();
@@ -126,15 +124,15 @@ public class Robot {
 
 
         // DroneSubsystem
-//        droneSubsystem.setDefaultCommand(new RunCommand(() -> {
-//            if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
-//            if (driverGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) droneSubsystem.startPosition();
-//        }));
+        droneSubsystem.setDefaultCommand(new RunCommand(() -> {
+            if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
+            if (driverGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) droneSubsystem.startPosition();
+        }, droneSubsystem));
 
         // ElbowSubsystem
         elbowSubsystem.setDefaultCommand(new RunCommand(() -> {
-            if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.raiseManually();
-            else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.lowerManually();
+            if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.lowerManually();
+            else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.raiseManually();
             else elbowSubsystem.stop();
         }, elbowSubsystem));
 
@@ -161,10 +159,10 @@ public class Robot {
         intakeTrigger.whenActive(new SequentialCommandGroup(
                 new InstantCommand(() -> scoringState = ScoringState.INTAKE),
                 new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
-                new InstantCommand(intakeSubsystem::intake, intakeSubsystem),
-                new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
                 new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION),
+                new InstantCommand(intakeSubsystem::intake, intakeSubsystem),
+                new InstantCommand(clawSubsystem::openClaw, clawSubsystem)
         ));
 
         Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.INTAKE);
@@ -254,7 +252,25 @@ public class Robot {
         // Run the command scheduler, which polls the gamepad inputs, and performs commands created in initCommands
         CommandScheduler.getInstance().run();
 
-        driveSubsystem.printPosition(opMode.telemetry);
+
+//        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT)) {
+//            linearSlideSubsystem.lowScoringPosition();
+//        }
+//        else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) {
+//            linearSlideSubsystem.mediumScoringPosition();
+//        }
+//        else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
+//            linearSlideSubsystem.highScoringPosition();
+//        }
+
+//        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN)) {
+//            linearSlideSubsystem.runPID();
+//        }
+
+
+//        driveSubsystem.printPosition(opMode.telemetry);
+        elbowSubsystem.printPosition(opMode.telemetry);
+        linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
 
         // Instruction controls (driver):
@@ -355,8 +371,8 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.B)) clawSubsystem.closeClaw();
 
         // Drone subsystem
-//        if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
-//        if (driverGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) droneSubsystem.startPosition();
+        if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
+        if (driverGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) droneSubsystem.startPosition();
 
         // Winch subsystem
         if (driverGamepad.getButton(GamepadKeys.Button.A)) winchSubsystem.winch();
