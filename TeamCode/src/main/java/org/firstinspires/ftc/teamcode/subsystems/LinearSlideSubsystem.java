@@ -17,8 +17,6 @@ public class LinearSlideSubsystem extends SubsystemBase {
     // TODO: Create limits depending on where the elbow is
     private final DcMotorEx slideMotor;
 
-    private double[] positions = new double[]{IN_POSITION, TEST_POSITION, OUT_POSITION};
-
     private PIDController controller;
 
     public static double target;
