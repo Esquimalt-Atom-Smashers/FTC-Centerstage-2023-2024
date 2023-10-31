@@ -18,7 +18,7 @@ public class CameraTestingOpMode extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
-            cameraSubsystem.detect();
+            cameraSubsystem.detectAndPrint();
             telemetry.update();
         }
     }
