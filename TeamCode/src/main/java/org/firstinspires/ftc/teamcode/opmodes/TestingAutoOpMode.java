@@ -12,7 +12,6 @@ import org.opencv.core.Mat;
 
 @Autonomous(group = "auto")
 public class TestingAutoOpMode extends LinearOpMode {
-
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -36,9 +35,7 @@ public class TestingAutoOpMode extends LinearOpMode {
                         .build();
 
         waitForStart();
-
         if (isStopRequested()) return;
-
         drive.followTrajectorySequence(trajSeq);
     }
 }
