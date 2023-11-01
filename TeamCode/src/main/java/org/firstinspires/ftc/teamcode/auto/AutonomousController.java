@@ -5,21 +5,15 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import static org.firstinspires.ftc.teamcode.Constants.CameraConstants.CAMERA_NAME;
 
 public class AutonomousController {
     HardwareMap hardwareMap;
     Pose2d startPosition;
     TrajectorySequence pushMovement;
     TrajectorySequence driveToBackdrop;
-    OpenCvCamera camera;
     int aprilTagID;
     int gameElementPosition;
     double aprilTagLateralDistance;
@@ -30,49 +24,42 @@ public class AutonomousController {
     private final SampleMecanumDrive drive;
     private final CameraSubsystem cameraSubsystem;
     private final Telemetry telemetry;
-    private OpenCVPipeline openCV;
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         drive = new SampleMecanumDrive(hardwareMap);
         cameraSubsystem = new CameraSubsystem(hardwareMap);
-        setUpCameraWithOpenCV();
+        gameElementPosition = findGameElement();
     }
 
     public void run() {
-        telemetry.addData("Prop position", gameElementPosition);
-        telemetry.update();
+        // Sets robot position in Road Runner
+        drive.setPoseEstimate(startPosition);
 
-//        // Sets robot position in Road Runner
-//        drive.setPoseEstimate(startPosition);
-//
-//        // Do push movement
-//        setPushMovement(gameElementPosition);
-//        drive.followTrajectorySequence(pushMovement);
-//
-//        if (goToBackDrop) {
-//            drive.followTrajectorySequence(driveToBackdrop);
-//            lineUpWithAprilTag();
-//        }
+        // Do push movement
+        setPushMovement(gameElementPosition);
+        drive.followTrajectorySequence(pushMovement);
+
+        if (goToBackDrop) {
+            drive.followTrajectorySequence(driveToBackdrop);
+            lineUpWithAprilTag();
+        }
     }
 
     public void redLeft(){
         startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
-        gameElementPosition = openCV.findGameElement(0);
         run();
     }
 
     public void blueRight(){
         startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
-        gameElementPosition = openCV.findGameElement(1);
         run();
     }
 
     public void redRight(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
-        gameElementPosition = openCV.findGameElement(0);
 
         // Building Movement to backdrop
         driveToBackdrop = drive.trajectorySequenceBuilder(new Pose2d(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()))
@@ -96,7 +83,6 @@ public class AutonomousController {
     public void blueLeft(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
-        gameElementPosition = openCV.findGameElement(1);
 
         // Building Movement to backdrop
         driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
@@ -118,28 +104,29 @@ public class AutonomousController {
     }
 
     private void setPushMovement(int gameElementPosition){
-        switch (gameElementPosition) {
-            case -1:
-                pushMovement = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .forward(30)
-                        .turn(Math.toRadians(80))
-                        .forward(1)
-                        .back(5)
-                        .strafeLeft(5)
-                        .build();
-            case 0:
-                pushMovement = drive.trajectorySequenceBuilder(startPosition)
-                        .forward(27)
-                        .back(5)
-                        .build();
-            case 1:
-                pushMovement = drive.trajectorySequenceBuilder(startPosition)
-                        .forward(25)
-                        .turn(Math.toRadians(-80))
-                        .forward(3)
-                        .back(5)
-                        .strafeRight(5)
-                        .build();
+        if (gameElementPosition == -1){
+            pushMovement = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .forward(30)
+                    .turn(Math.toRadians(80))
+                    .forward(1)
+                    .back(5)
+                    .strafeLeft(5)
+                    .build();
+        }
+        if (gameElementPosition == 0){
+            pushMovement = drive.trajectorySequenceBuilder(startPosition)
+                    .forward(27)
+                    .back(5)
+                    .build();
+        }
+        if (gameElementPosition == 1){
+            pushMovement = drive.trajectorySequenceBuilder(startPosition)
+                    .forward(25)
+                    .turn(Math.toRadians(-80))
+                    .forward(3)
+                    .back(5)
+                    .strafeRight(5)
+                    .build();
         }
     }
 
@@ -186,25 +173,8 @@ public class AutonomousController {
         } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.5); // +-1/2" tolerance
     }
 
-    private void setUpCameraWithOpenCV(){
-        openCV = new OpenCVPipeline();
-        openCV.passTelemetry(telemetry);
-
-        WebcamName webcamName = hardwareMap.get(WebcamName.class, CAMERA_NAME);
-
-        camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName);
-
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                camera.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
-            }
-            @Override
-            public void onError(int errorCode) {}
-        });
-
-        camera.setPipeline(openCV);
+    private int findGameElement(){
+        // TODO; To test this auto without color/object detection, return: -1, 0, or 1 based on this guide:
+        return 1; // -1: Left, 0: Center, 1: Right
     }
 }

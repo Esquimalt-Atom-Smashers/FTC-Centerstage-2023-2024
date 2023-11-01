@@ -21,8 +21,7 @@ public class Constants {
         public static final double MAX_ANGLE = 270;
 
         public static final double OPEN_POSITION = 0;
-        public static double DROP_POSITION = 40; // TODO: Check if we can to delete this
-        public static final double CLOSE_POSITION = 50; // TODO: Fine tune this value (it is already around the right value)
+        public static final double CLOSE_POSITION = 50;
     }
 
     @Config
@@ -56,13 +55,6 @@ public class Constants {
 
         public static final double AUTO_STEP_POWER = 0;
         public static final double AUTO_STEP_TOLERANCE = 50;
-
-        // PID
-        // fP was 0.001
-        public static double fP = 0, fI = 0, fD = 0;
-        public static double sP = 0, sI = 0, sD = 0;
-        public static double tP = 0, tI = 0, tD = 0;
-
     }
 
     public static class DroneConstants {
@@ -88,13 +80,13 @@ public class Constants {
         // 4750 level
         // 23000 straight up / climbing
         // TODO: Change these to ints (and others of the same type)
-        public static final double INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
-        public static double TILT_POSITION = 3350;
-        public static final double TEST_POSITION = 15000;
+        public static final int INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
+        public static final int TILT_POSITION = 3350;
+        public static final int TEST_POSITION = 15000;
 
-        // Drone position is ~14000, but the biggest issue is the elastic band
+        // Drone position is ~14000
 
-        public static double LOW_SCORING_POSITION = 8400, MEDIUM_SCORING_POSITION = 10400, HIGH_SCORING_POSITION = 12400;
+        public static int LOW_SCORING_POSITION = 8400, MEDIUM_SCORING_POSITION = 10400, HIGH_SCORING_POSITION = 12400;
 
         public static final double POWER_TOLERANCE = 0.09;
     }
@@ -127,27 +119,17 @@ public class Constants {
         // PID values for the PID controller
         public static final double P = 0.013, I = 0, D = 0.0003;
 
-        // DON'T CHANGE THESE VALUES
-        public static final double MIN_POSITION = 80;
-        public static final double MAX_POSITION = 3000;
+        // Min and max values for the arm, don't change them
+        public static final int MIN_POSITION = 80;
+        public static final int MAX_POSITION = 3000;
 
-        public static final double IN_POSITION = MIN_POSITION;
-        public static final double OUT_POSITION = 2000;
-        public static final double TEST_POSITION = 3000;
-        public static double TILT_POSITION = 275;
-        public static double LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
+        public static final int IN_POSITION = MIN_POSITION;
+        public static final int OUT_POSITION = 2000;
+        public static final int TEST_POSITION = 3000;
+        public static int TILT_POSITION = 275;
+        public static int LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
 
         public static final double POWER_TOLERANCE = 0.07;
-    }
-
-    public static class PixelConstants {
-        public static final String PIXEL_SERVO_NAME = "pixelServo";
-
-        public static final double MIN_ANGLE = 0;
-        public static final double MAX_ANGLE = 270;
-
-        public static final double START_POSITION = 0;
-        public static final double PLACE_POSITION = 90;
     }
 
     public static class WinchConstants {
