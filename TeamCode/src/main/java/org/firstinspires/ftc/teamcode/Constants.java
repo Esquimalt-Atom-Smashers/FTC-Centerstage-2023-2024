@@ -11,6 +11,7 @@ public class Constants {
 
     public static class CameraConstants {
         public static final String CAMERA_NAME = "camera";
+        public static final double DETECTION_THRESHOLD = 0.75;
     }
 
     public static class ClawConstants {
