@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.FunctionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -12,9 +11,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.android.AndroidTextToSpeech;
-import org.firstinspires.ftc.robotcore.internal.network.RobotCoreCommandList;
-import org.firstinspires.ftc.teamcode.Instructions.InstructionExecutor;
 import org.firstinspires.ftc.teamcode.commands.AutoDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
@@ -96,9 +92,6 @@ public class Robot {
         // ClawSubsystem
         Trigger clawTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && scoringState == ScoringState.DRIVING);
         clawTrigger.whenActive(new InstantCommand(clawSubsystem::openClaw));
-//        clawSubsystem.setDefaultCommand(new RunCommand(() -> {
-//            if (operatorGamepad.getButton(GamepadKeys.Button.Y)) clawSubsystem.openClaw();
-//        }, clawSubsystem));
 
         // DriveSubsystem
         driveSubsystem.setDefaultCommand(new RunCommand(() -> {
@@ -144,8 +137,6 @@ public class Robot {
             else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually();
             else linearSlideSubsystem.stop();
         }, linearSlideSubsystem));
-
-        // PixelSubsystem
 
         // WinchSubsystem
         winchSubsystem.setDefaultCommand(new RunCommand(() -> {
@@ -249,27 +240,11 @@ public class Robot {
 
     // Main robot loop
     public void run() {
-        // Run the command scheduler, which polls the gamepad inputs, and performs commands created in initCommands
+        // Run the command scheduler, which polls the gamepad inputs, and performs the commands created in initCommands
         CommandScheduler.getInstance().run();
 
-
-//        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT)) {
-//            linearSlideSubsystem.lowScoringPosition();
-//        }
-//        else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) {
-//            linearSlideSubsystem.mediumScoringPosition();
-//        }
-//        else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
-//            linearSlideSubsystem.highScoringPosition();
-//        }
-
-//        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN)) {
-//            linearSlideSubsystem.runPID();
-//        }
-
-
-//        driveSubsystem.printPosition(opMode.telemetry);
-        elbowSubsystem.printPosition(opMode.telemetry);
+        // Print data from subsystems
+        elbowSubsystem.printData(opMode.telemetry);
         linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
 
@@ -329,20 +304,6 @@ public class Robot {
         }
     }
 
-    public void scoringLoop() {
-//        switch (scoringState) {
-//            case STARTING:
-//            case INTAKE:
-//            case LOADED_DRIVING:
-//                runPIDControllers();
-//                break;
-//            case MANUAL:
-//                runManually();
-//                break;
-//
-//        }
-    }
-
     public void runManually() {
 
         driveLoop();
@@ -351,7 +312,7 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually();
         else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually();
         else elbowSubsystem.stop();
-        elbowSubsystem.printPosition(opMode.telemetry);
+        elbowSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
 
         // Intake Subsystem
@@ -416,4 +377,5 @@ public class Robot {
         ElapsedTime timer = new ElapsedTime();
         while (timer.milliseconds() <= ms) {}
     }
+
 }

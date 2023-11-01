@@ -18,7 +18,7 @@ public class ElbowSubsystem extends SubsystemBase {
     private boolean atTarget = false;
     private double lastPower;
 
-    public  ElbowSubsystem(HardwareMap hardwareMap) {
+    public ElbowSubsystem(HardwareMap hardwareMap) {
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
         elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -74,7 +74,7 @@ public class ElbowSubsystem extends SubsystemBase {
         atTarget = false;
     }
 
-    public void printPosition(Telemetry telemetry) {
+    public void printData(Telemetry telemetry) {
         telemetry.addData("Position", elbowMotor.getCurrentPosition());
         telemetry.addData("Target", target);
     }

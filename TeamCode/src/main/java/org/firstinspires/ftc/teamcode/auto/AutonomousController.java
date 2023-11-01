@@ -10,23 +10,23 @@ import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySe
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 
 public class AutonomousController {
-    HardwareMap hardwareMap;
+    private final Telemetry telemetry;
+
+    private final SampleMecanumDrive drive;
+    private final CameraSubsystem cameraSubsystem;
+
     Pose2d startPosition;
     TrajectorySequence pushMovement;
     TrajectorySequence driveToBackdrop;
-    int aprilTagID;
     int gameElementPosition;
-    double aprilTagLateralDistance;
-    double aprilTagLateralTarget = -4;
-    double aprilTagForwardDistance;
-    double aprilTagForwardTarget = 14;
+    int aprilTagID;
+    double lateralDistance;
+    double lateralTarget = 0;
+    double forwardDistance;
+    double forwardTarget = 14;
     boolean goToBackDrop;
-    private final SampleMecanumDrive drive;
-    private final CameraSubsystem cameraSubsystem;
-    private final Telemetry telemetry;
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
-        this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         drive = new SampleMecanumDrive(hardwareMap);
         cameraSubsystem = new CameraSubsystem(hardwareMap);
@@ -134,43 +134,44 @@ public class AutonomousController {
         // Line up with april tag
         do {
             // Re-check lateral distance to april tag
-            aprilTagLateralDistance = cameraSubsystem.getLateralDistance(aprilTagID);
+            lateralDistance = cameraSubsystem.getLateralDistance(aprilTagID);
+            telemetry.addData("Lateral Distance", lateralDistance);
 
             // TODO: It seems to not see any april tags even though in CameraTestingOpMode it can
 
             // Move robot closer to april tag
-            if (aprilTagLateralDistance < 0) {
-                telemetry.addData("Should be going left", aprilTagLateralDistance);
-                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeLeft(-aprilTagLateralDistance).build());
+            if (lateralDistance < 0) {
+                telemetry.addData("Should be going left", lateralDistance);
+                drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeLeft(-lateralDistance).build());
             }
-            if (aprilTagLateralDistance > 0) {
-                telemetry.addData("Should be going right", aprilTagLateralDistance);
-                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeRight(aprilTagLateralDistance).build());
+            if (lateralDistance > 0) {
+                telemetry.addData("Should be going right", lateralDistance);
+                drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeRight(lateralDistance).build());
             }
             telemetry.update();
-        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1); // +-1" tolerance
+        } while (Math.abs(lateralTarget - lateralDistance) >= 1); // +-1" tolerance
 
 
         // Get to the correct distance away from the backdrop
         do {
             // Re-check distance to april tag
             cameraSubsystem.detect();
-            aprilTagForwardDistance = cameraSubsystem.getDistance(aprilTagID);
+            forwardDistance = cameraSubsystem.getDistance(aprilTagID);
 
-            telemetry.addData("Distance", aprilTagForwardDistance);
+            telemetry.addData("Distance", forwardDistance);
 
-            if (aprilTagForwardDistance != -1) {
+            if (forwardDistance != -1) {
                 // Move robot closer to april tag
-                if (aprilTagForwardDistance < aprilTagForwardTarget) {
-                        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).back(aprilTagForwardTarget - aprilTagForwardDistance).build());
+                if (forwardDistance < forwardTarget) {
+                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).back(forwardTarget - forwardDistance).build());
                 }
-                if (aprilTagForwardDistance > aprilTagForwardTarget) {
-                        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(aprilTagForwardDistance - aprilTagForwardTarget).build());
+                if (forwardDistance > forwardTarget) {
+                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(forwardDistance - forwardTarget).build());
                 }
             }
             telemetry.update();
 
-        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.5); // +-1/2" tolerance
+        } while (Math.abs(forwardDistance - forwardTarget) >= 0.5); // +-1/2" tolerance
     }
 
     private int findGameElement(){

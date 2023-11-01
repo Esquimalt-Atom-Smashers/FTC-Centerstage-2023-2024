@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -28,7 +27,7 @@ public class DriveSubsystem extends SubsystemBase {
     private double snapTarget;
 
     // PID controllers
-    private final PIDController forwardPIDController;
+//    private final PIDController forwardPIDController;
 
     public static double forwardTarget;
     private boolean atForwardTarget;
@@ -61,7 +60,7 @@ public class DriveSubsystem extends SubsystemBase {
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         imu.initialize(parameters);
 
-        forwardPIDController = new PIDController(fP, fI, fD);
+//        forwardPIDController = new PIDController(fP, fI, fD);
     }
 
     // Main drive method that controls the robot
@@ -118,21 +117,21 @@ public class DriveSubsystem extends SubsystemBase {
         return forwardTarget;
     }
 
-    public double forwardPID() {
-        if (!atForwardTarget)
-        {
-            forwardPIDController.setPID(fP, fI, fD);
-            double wheelPositions = getAveragePosition();
-            double power = forwardPIDController.calculate(wheelPositions, forwardTarget);
-            frontLeftMotor.setPower(power);
-            frontRightMotor.setPower(power);
-            rearLeftMotor.setPower(power);
-            rearRightMotor.setPower(power);
-            atForwardTarget = Math.abs(power) <= 0.1;
-            return power;
-        }
-        return 0;
-    }
+//    public double forwardPID() {
+//        if (!atForwardTarget)
+//        {
+//            forwardPIDController.setPID(fP, fI, fD);
+//            double wheelPositions = getAveragePosition();
+//            double power = forwardPIDController.calculate(wheelPositions, forwardTarget);
+//            frontLeftMotor.setPower(power);
+//            frontRightMotor.setPower(power);
+//            rearLeftMotor.setPower(power);
+//            rearRightMotor.setPower(power);
+//            atForwardTarget = Math.abs(power) <= 0.1;
+//            return power;
+//        }
+//        return 0;
+//    }
 
     public boolean isAtForwardTarget() {
         return atForwardTarget;
@@ -258,7 +257,7 @@ public class DriveSubsystem extends SubsystemBase {
         }
     }
 
-    public void printPosition(Telemetry t) {
+    public void printData(Telemetry t) {
         t.addData("Target", forwardTarget);
         t.addData("FL", frontLeftMotor.getCurrentPosition());
         t.addData("FLT", frontLeftMotor.getTargetPosition());
