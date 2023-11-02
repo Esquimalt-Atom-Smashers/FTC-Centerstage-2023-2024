@@ -5,9 +5,15 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
 
 public class AutonomousController {
     HardwareMap hardwareMap;
@@ -24,6 +30,7 @@ public class AutonomousController {
     private final SampleMecanumDrive drive;
     private final CameraSubsystem cameraSubsystem;
     private final Telemetry telemetry;
+    private OpenCVPipeline pipeline;
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -31,35 +38,42 @@ public class AutonomousController {
         drive = new SampleMecanumDrive(hardwareMap);
         cameraSubsystem = new CameraSubsystem(hardwareMap);
         gameElementPosition = findGameElement();
+        startOpenCV();
     }
 
     public void run() {
-        // Sets robot position in Road Runner
-        drive.setPoseEstimate(startPosition);
-
-        // Do push movement
-        setPushMovement(gameElementPosition);
-        drive.followTrajectorySequence(pushMovement);
-
-        if (goToBackDrop) {
-            drive.followTrajectorySequence(driveToBackdrop);
-            lineUpWithAprilTag();
-        }
+        telemetry.addData("position", gameElementPosition);
+        telemetry.update();
+//
+//        // Sets robot position in Road Runner
+//        drive.setPoseEstimate(startPosition);
+//
+//        // Do push movement
+//        setPushMovement(gameElementPosition);
+//        drive.followTrajectorySequence(pushMovement);
+//
+//        if (goToBackDrop) {
+//            drive.followTrajectorySequence(driveToBackdrop);
+//            lineUpWithAprilTag();
+//        }
     }
 
     public void redLeft(){
         startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
+        pipeline.findGameElement(0);
         run();
     }
 
     public void blueRight(){
         startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
+        pipeline.findGameElement(1);
         run();
     }
 
     public void redRight(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
+        pipeline.findGameElement(0);
 
         // Building Movement to backdrop
         driveToBackdrop = drive.trajectorySequenceBuilder(new Pose2d(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()))
@@ -83,6 +97,7 @@ public class AutonomousController {
     public void blueLeft(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
+        pipeline.findGameElement(1);
 
         // Building Movement to backdrop
         driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
@@ -176,5 +191,34 @@ public class AutonomousController {
     private int findGameElement(){
         // TODO; To test this auto without color/object detection, return: -1, 0, or 1 based on this guide:
         return 1; // -1: Left, 0: Center, 1: Right
+    }
+
+    private void startOpenCV(){
+        pipeline = new OpenCVPipeline();
+        pipeline.passTelemetry(telemetry);
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        OpenCvCamera camera = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME);
+        OpenCvCamera camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
+
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                camera.startStreaming(320, 240, OpenCvCameraRotation.UPSIDE_DOWN);
+                telemetry.addLine("Done streaming");
+                telemetry.update();
+            }
+            @Override
+            public void onError(int errorCode)
+            {
+                telemetry.addData("Error", errorCode);
+                telemetry.update();
+            }
+        });
+        camera.setPipeline(pipeline);
     }
 }

@@ -32,6 +32,9 @@ public class OpenCVPipeline extends OpenCvPipeline {
         Scalar lower;
         Scalar upper = new Scalar(255, 255, 255);
 
+        telemetry.addLine("Starting now");
+        telemetry.update();
+
         cameraWidth = input.width();
         cameraHeight = input.height();
 

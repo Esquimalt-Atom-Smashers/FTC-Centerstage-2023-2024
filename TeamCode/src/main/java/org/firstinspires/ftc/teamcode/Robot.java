@@ -84,7 +84,11 @@ public class Robot {
         initCommands();
     }
 
-    // Initialize the commands that control the robot
+    public Robot(OpMode opMode) {
+        this(opMode, true);
+    }
+
+        // Initialize the commands that control the robot
     private void initCommands() {
         // Default commands for individual subsystems:
         // CameraSubsystem
@@ -223,10 +227,6 @@ public class Robot {
         Trigger leftInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && !operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
         Trigger centerInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
         Trigger rightInstructionTrigger = new Trigger(() -> !operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-    }
-
-    public Robot(OpMode opMode) {
-        this(opMode, true);
     }
 
     // Perform actions that happen when the robot starts
