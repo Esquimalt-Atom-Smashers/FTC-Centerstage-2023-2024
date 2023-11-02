@@ -81,7 +81,7 @@ public class Constants {
         // 4750 level
         // 23000 straight up / climbing
         // TODO: Change these to ints (and others of the same type)
-        public static final int INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = -1, VERTICAL_POSITION = 23000;
+        public static final int INTAKE_POSITION = 0, DRIVING_POSITION = 1000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = 14000, VERTICAL_POSITION = 23000;
         public static final int TILT_POSITION = 3350;
         public static final int TEST_POSITION = 15000;
 

@@ -56,7 +56,8 @@ public class Robot {
         INTAKE,
         LOADING_PIXELS,
         DRIVING,
-        MANUAL
+        MANUAL,
+        SHOOTING_DRONE
     }
 
     private DriveState driveState = DriveState.DRIVER_CONTROLLED;
@@ -121,10 +122,21 @@ public class Robot {
 
 
         // DroneSubsystem
-        droneSubsystem.setDefaultCommand(new RunCommand(() -> {
-            if (driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) droneSubsystem.release();
-            if (driverGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) droneSubsystem.startPosition();
-        }, droneSubsystem));
+        Trigger droneLaunchModeTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
+        droneLaunchModeTrigger.whenActive(new SequentialCommandGroup(
+                new InstantCommand(() -> scoringState = ScoringState.SHOOTING_DRONE),
+                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRONE_LAUNCH_POSITION)
+        ));
+
+        Trigger droneLaunchTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState == ScoringState.SHOOTING_DRONE);
+        droneLaunchTrigger.whenActive(new SequentialCommandGroup(
+                new InstantCommand(droneSubsystem::release, droneSubsystem),
+                new InstantCommand(() -> scoringState = ScoringState.DRIVING)
+        ));
+
+        Trigger cancelDroneModeTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.SHOOTING_DRONE);
+        cancelDroneModeTrigger.whenActive(new InstantCommand(() -> scoringState = ScoringState.DRIVING));
+
 
         // ElbowSubsystem
         elbowSubsystem.setDefaultCommand(new RunCommand(() -> {
@@ -236,6 +248,7 @@ public class Robot {
 //                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
 //                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
 //        ).schedule();
+//        new InstantCommand(droneSubsystem::startPosition, droneSubsystem).schedule();
     }
 
     // Main robot loop

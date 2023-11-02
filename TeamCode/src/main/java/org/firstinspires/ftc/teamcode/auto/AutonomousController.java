@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -30,6 +31,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera2;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutonomousController {
+    private OpMode opMode;
     HardwareMap hardwareMap;
     Pose2d startPosition;
     TrajectorySequence pushMovement;
@@ -51,6 +53,11 @@ public class AutonomousController {
     private OpenCVPipeline pipeline;
     private int allianceColor;
     private OpenCvWebcam webcam;
+
+    public AutonomousController(OpMode opMode) {
+        this(opMode.hardwareMap, opMode.telemetry);
+        this.opMode = opMode;
+    }
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
