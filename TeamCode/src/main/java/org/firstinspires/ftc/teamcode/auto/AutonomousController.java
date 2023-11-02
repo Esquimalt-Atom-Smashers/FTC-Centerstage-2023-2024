@@ -14,6 +14,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
+import org.openftc.easyopencv.OpenCvInternalCamera2;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutonomousController {
     HardwareMap hardwareMap;
@@ -28,29 +30,32 @@ public class AutonomousController {
     double aprilTagForwardTarget = 14;
     boolean goToBackDrop;
     private final SampleMecanumDrive drive;
-    private final CameraSubsystem cameraSubsystem;
     private final Telemetry telemetry;
     private OpenCVPipeline pipeline;
+    private int allianceColor;
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
         drive = new SampleMecanumDrive(hardwareMap);
-        cameraSubsystem = new CameraSubsystem(hardwareMap);
-        gameElementPosition = findGameElement();
         startOpenCV();
     }
 
     public void run() {
-        telemetry.addData("position", gameElementPosition);
+        while (!pipeline.cameraReady){
+            telemetry.addData("Camera", "Not Ready");
+            telemetry.update();
+        }
+        gameElementPosition = pipeline.findGameElement(allianceColor);
+        telemetry.addData("Position", gameElementPosition);
         telemetry.update();
-//
-//        // Sets robot position in Road Runner
-//        drive.setPoseEstimate(startPosition);
-//
-//        // Do push movement
-//        setPushMovement(gameElementPosition);
-//        drive.followTrajectorySequence(pushMovement);
+
+        // Sets robot position in Road Runner
+        drive.setPoseEstimate(startPosition);
+
+        // Do push movement
+        setPushMovement(gameElementPosition);
+        drive.followTrajectorySequence(pushMovement);
 //
 //        if (goToBackDrop) {
 //            drive.followTrajectorySequence(driveToBackdrop);
@@ -60,20 +65,20 @@ public class AutonomousController {
 
     public void redLeft(){
         startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
-        pipeline.findGameElement(0);
+        allianceColor = 0;
         run();
     }
 
     public void blueRight(){
         startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
-        pipeline.findGameElement(1);
+        allianceColor = 1;
         run();
     }
 
     public void redRight(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
-        pipeline.findGameElement(0);
+        allianceColor = 0;
 
         // Building Movement to backdrop
         driveToBackdrop = drive.trajectorySequenceBuilder(new Pose2d(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()))
@@ -97,7 +102,7 @@ public class AutonomousController {
     public void blueLeft(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
-        pipeline.findGameElement(1);
+        allianceColor = 1;
 
         // Building Movement to backdrop
         driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
@@ -146,6 +151,7 @@ public class AutonomousController {
     }
 
     private void lineUpWithAprilTag(){
+        CameraSubsystem cameraSubsystem = new CameraSubsystem(hardwareMap);
         // Line up with april tag
         do {
             // Re-check lateral distance to april tag
@@ -188,37 +194,23 @@ public class AutonomousController {
         } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.5); // +-1/2" tolerance
     }
 
-    private int findGameElement(){
-        // TODO; To test this auto without color/object detection, return: -1, 0, or 1 based on this guide:
-        return 1; // -1: Left, 0: Center, 1: Right
-    }
-
     private void startOpenCV(){
         pipeline = new OpenCVPipeline();
-        pipeline.passTelemetry(telemetry);
-
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//        OpenCvCamera camera = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-
-        WebcamName webcamName = hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME);
-        OpenCvCamera camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
-
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME), cameraMonitorViewId);
+        webcam.setPipeline(pipeline);
+        webcam.setMillisecondsPermissionTimeout(5000);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
-                camera.startStreaming(320, 240, OpenCvCameraRotation.UPSIDE_DOWN);
-                telemetry.addLine("Done streaming");
-                telemetry.update();
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
             }
             @Override
             public void onError(int errorCode)
             {
-                telemetry.addData("Error", errorCode);
-                telemetry.update();
             }
         });
-        camera.setPipeline(pipeline);
     }
 }

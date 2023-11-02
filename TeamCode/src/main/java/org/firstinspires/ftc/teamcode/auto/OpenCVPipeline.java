@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -12,28 +11,23 @@ import static org.firstinspires.ftc.teamcode.Constants.CameraConstants.*;
 public class OpenCVPipeline extends OpenCvPipeline {
     int cameraWidth;
     int cameraHeight;
-    Mat input;
-    Telemetry telemetry;
+    public boolean cameraReady = false;
+    Mat input = new Mat();
     Mat ycrcbMat = new Mat();
     Mat binaryMat = new Mat();
     Mat maskedInputMat = new Mat();
 
     @Override
     public Mat processFrame(Mat input) {
+        cameraReady = true;
+        // Case: Left Zone
         this.input = input;
-        return null;
-    }
-
-    public void passTelemetry(Telemetry telemetry){
-        this.telemetry = telemetry;
+        return input;
     }
 
     public int findGameElement(int color){ // 0: RED, 1: BLUE
         Scalar lower;
         Scalar upper = new Scalar(255, 255, 255);
-
-        telemetry.addLine("Starting now");
-        telemetry.update();
 
         cameraWidth = input.width();
         cameraHeight = input.height();
@@ -53,10 +47,6 @@ public class OpenCVPipeline extends OpenCvPipeline {
 
         Mat rightZone = maskedInputMat.submat(new Rect(cameraWidth /2, 0 , cameraWidth / 2, cameraHeight));
         Scalar avgColor2 = Core.mean(rightZone);
-
-        telemetry.addData("Middle value", avgColor1);
-        telemetry.addData("Right value", avgColor2);
-        telemetry.update();
 
         // Case: Middle Zone
         if (avgColor1.val[0] > DETECTION_THRESHOLD) return 0;
