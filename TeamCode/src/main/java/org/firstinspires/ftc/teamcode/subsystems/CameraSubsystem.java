@@ -28,6 +28,8 @@ public class CameraSubsystem extends SubsystemBase {
     private final VisionPortal visionPortal;
     private List<AprilTagDetection> detections;
     private int minExposure = 20;
+    private ExposureControl exposureControl;
+
 
     Telemetry telemetry;
 
@@ -46,19 +48,9 @@ public class CameraSubsystem extends SubsystemBase {
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 //        aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults();
-
         // Create a Vision Portal with the default settings
         visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, CAMERA_NAME), aprilTagProcessor);
-
-//        visionPortal.resumeStreaming();
-//        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
-//        if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
-//            exposureControl.setMode(ExposureControl.Mode.Manual);
-//        }
-//        exposureControl.setExposure((long) Math.min(5, minExposure), TimeUnit.MILLISECONDS);
-
         this.telemetry = telemetry;
-
     }
 
     public void detect() {
@@ -76,7 +68,6 @@ public class CameraSubsystem extends SubsystemBase {
                 double height = aprilTagDetection.corners[2].y - aprilTagDetection.corners[0].y;
                 double lateralDistance = getLateralDistance(aprilTagDetection);
                 telemetry.addData("Lateral Distance", lateralDistance);
-
             }
         }
     }
@@ -155,4 +146,6 @@ public class CameraSubsystem extends SubsystemBase {
          */
         return 1600 / width;
     }
+
+    public VisionPortal getVisionPortal() {return visionPortal;}
 }

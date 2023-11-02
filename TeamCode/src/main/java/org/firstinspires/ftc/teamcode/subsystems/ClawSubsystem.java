@@ -11,7 +11,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.*;
 
 public class ClawSubsystem extends SubsystemBase {
-
     private final ServoEx clawServo;
 
     public ClawSubsystem(HardwareMap hardwareMap) {
@@ -27,6 +26,11 @@ public class ClawSubsystem extends SubsystemBase {
     // Set the claw to the closed position
     public void closeClaw() {
         clawServo.turnToAngle(CLOSE_POSITION);
+    }
+
+    // Set the claw to the closed position for holding a single pixel
+    public void closeClawSingle() {
+        clawServo.turnToAngle(SUPER_CLOSE_POSITION);
     }
 
     // Check if the claw is open

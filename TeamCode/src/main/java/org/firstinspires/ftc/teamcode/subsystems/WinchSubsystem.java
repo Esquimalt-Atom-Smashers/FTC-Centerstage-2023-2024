@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class WinchSubsystem extends SubsystemBase {
     private final DcMotorEx winchMotor;
 
-
     public WinchSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
         winchMotor = hardwareMap.get(DcMotorEx.class, WINCH_MOTOR_NAME);
@@ -19,8 +18,6 @@ public class WinchSubsystem extends SubsystemBase {
         winchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         winchMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-
-
     public void winch() {
         winchMotor.setPower(WINCH_SPEED);
     }

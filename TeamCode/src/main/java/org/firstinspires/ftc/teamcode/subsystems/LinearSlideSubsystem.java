@@ -21,17 +21,20 @@ public class LinearSlideSubsystem extends SubsystemBase {
 
     public static double target;
     private boolean atTarget;
-    private final Robot robot;
+    private Robot robot;
     private double lastPower;
 
     public LinearSlideSubsystem(HardwareMap hardwareMap, Robot robot) {
+        this(hardwareMap);
         this.robot = robot;
+    }
+
+    public LinearSlideSubsystem(HardwareMap hardwareMap) {
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
 
         slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
         slideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
 
         controller = new PIDController(P, I, D);
     }

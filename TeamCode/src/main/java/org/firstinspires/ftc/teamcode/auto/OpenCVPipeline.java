@@ -12,15 +12,14 @@ public class OpenCVPipeline extends OpenCvPipeline {
     int cameraWidth;
     int cameraHeight;
     public boolean cameraReady = false;
-    Mat input = new Mat();
-    Mat ycrcbMat = new Mat();
-    Mat binaryMat = new Mat();
-    Mat maskedInputMat = new Mat();
+    private Mat input = new Mat();
+    private final Mat ycrcbMat = new Mat();
+    private final Mat binaryMat = new Mat();
+    private final Mat maskedInputMat = new Mat();
 
     @Override
     public Mat processFrame(Mat input) {
         cameraReady = true;
-        // Case: Left Zone
         this.input = input;
         return input;
     }
@@ -45,7 +44,7 @@ public class OpenCVPipeline extends OpenCvPipeline {
         Mat leftZone = maskedInputMat.submat(new Rect(0, 0 , cameraWidth / 2, cameraHeight));
         Scalar avgColor1 = Core.mean(leftZone);
 
-        Mat rightZone = maskedInputMat.submat(new Rect(cameraWidth /2, 0 , cameraWidth / 2, cameraHeight));
+        Mat rightZone = maskedInputMat.submat(new Rect(cameraWidth / 2, 0 , cameraWidth / 2, cameraHeight));
         Scalar avgColor2 = Core.mean(rightZone);
 
         // Case: Middle Zone

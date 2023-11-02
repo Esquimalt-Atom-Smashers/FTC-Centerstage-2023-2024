@@ -22,6 +22,7 @@ public class Constants {
 
         public static final double OPEN_POSITION = 0;
         public static final double CLOSE_POSITION = 50;
+        public static final double SUPER_CLOSE_POSITION = 60;
     }
 
     @Config
