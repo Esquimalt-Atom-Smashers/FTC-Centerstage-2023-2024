@@ -89,7 +89,7 @@ public class Constants {
 
         public static int LOW_SCORING_POSITION = 8400, MEDIUM_SCORING_POSITION = 10400, HIGH_SCORING_POSITION = 12400;
 
-        public static final double POWER_TOLERANCE = 0.09;
+        public static final double POWER_TOLERANCE = 0.1;
     }
 
     public static class IntakeConstants {
@@ -121,7 +121,7 @@ public class Constants {
         public static final double P = 0.013, I = 0, D = 0.0003;
 
         // Min and max values for the arm, don't change them
-        public static final int MIN_POSITION = 80;
+        public static final int MIN_POSITION = 40;
         public static final int MAX_POSITION = 3000;
 
         public static final int IN_POSITION = MIN_POSITION;

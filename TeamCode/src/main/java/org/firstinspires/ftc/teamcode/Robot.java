@@ -103,8 +103,8 @@ public class Robot {
             driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
         }, driveSubsystem));
 
-        Trigger autoDriveTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
-        autoDriveTrigger.toggleWhenActive(new AutoDriveCommand(driveSubsystem, 1000), new AutoDriveCommand(driveSubsystem, -1000));
+//        Trigger autoDriveTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+//        autoDriveTrigger.toggleWhenActive(new AutoDriveCommand(driveSubsystem, 1000), new AutoDriveCommand(driveSubsystem, -1000));
 
 //        Trigger autoSnapTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
 //        autoSnapTrigger.whenActive(new FunctionalCommand(
@@ -130,12 +130,14 @@ public class Robot {
 
         Trigger droneLaunchTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState == ScoringState.SHOOTING_DRONE);
         droneLaunchTrigger.whenActive(new SequentialCommandGroup(
-                new InstantCommand(droneSubsystem::release, droneSubsystem),
-                new InstantCommand(() -> scoringState = ScoringState.DRIVING)
+                new InstantCommand(() -> scoringState = ScoringState.DRIVING),
+                new InstantCommand(droneSubsystem::release, droneSubsystem)
         ));
 
         Trigger cancelDroneModeTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.SHOOTING_DRONE);
         cancelDroneModeTrigger.whenActive(new InstantCommand(() -> scoringState = ScoringState.DRIVING));
+
+        new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.X)).whenActive(new InstantCommand(droneSubsystem::startPosition, droneSubsystem));
 
 
         // ElbowSubsystem
@@ -166,10 +168,10 @@ public class Robot {
         intakeTrigger.whenActive(new SequentialCommandGroup(
                 new InstantCommand(() -> scoringState = ScoringState.INTAKE),
                 new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
+                new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
                 new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION),
-                new InstantCommand(intakeSubsystem::intake, intakeSubsystem),
-                new InstantCommand(clawSubsystem::openClaw, clawSubsystem)
+                new InstantCommand(intakeSubsystem::intake, intakeSubsystem)
         ));
 
         Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.INTAKE);
@@ -248,7 +250,7 @@ public class Robot {
 //                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
 //                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
 //        ).schedule();
-//        new InstantCommand(droneSubsystem::startPosition, droneSubsystem).schedule();
+        new InstantCommand(droneSubsystem::startPosition, droneSubsystem).schedule();
     }
 
     // Main robot loop
@@ -257,6 +259,8 @@ public class Robot {
         CommandScheduler.getInstance().run();
 
         // Print data from subsystems
+        opMode.telemetry.addData("Scoring state", scoringState);
+        opMode.telemetry.addData("Driving state", driveState);
         elbowSubsystem.printData(opMode.telemetry);
         linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();

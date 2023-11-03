@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
+import org.firstinspires.ftc.teamcode.opmodes.AutoOpMode;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
@@ -31,7 +32,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera2;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutonomousController {
-    private OpMode opMode;
+    private AutoOpMode opMode;
     HardwareMap hardwareMap;
     Pose2d startPosition;
     TrajectorySequence pushMovement;
@@ -54,9 +55,9 @@ public class AutonomousController {
     private int allianceColor;
     private OpenCvWebcam webcam;
 
-    public AutonomousController(OpMode opMode) {
-        this(opMode.hardwareMap, opMode.telemetry);
-        this.opMode = opMode;
+    public AutonomousController(AutoOpMode autoOpMode) {
+        this(autoOpMode.hardwareMap, autoOpMode.telemetry);
+        this.opMode = autoOpMode;
     }
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -69,12 +70,12 @@ public class AutonomousController {
         slide = new LinearSlideSubsystem(hardwareMap);
         updateStatus("Starting OpenCVPipeline");
         startOpenCV();
-        while (!pipeline.cameraReady) updateStatus("Waiting for camera");
+        while (!pipeline.cameraReady && canContinue()) updateStatus("Waiting for camera");
         updateStatus("Ready");
     }
 
     public void run() {
-        while (!pipeline.cameraReady) updateStatus("Waiting for camera");
+        while (!pipeline.cameraReady && canContinue()) updateStatus("Waiting for camera");
         gameElementPosition = pipeline.findGameElement(allianceColor);
         webcam.closeCameraDevice();
 
@@ -90,8 +91,7 @@ public class AutonomousController {
         );
         autoStartCommand.schedule();
 
-        // TODO: For all of these while loops, make sure we check opmode for a requested stop
-        while (!elbowCommand.isFinished()) {
+        while (!elbowCommand.isFinished() && canContinue()) {
             CommandScheduler.getInstance().run();
         }
 
@@ -113,7 +113,7 @@ public class AutonomousController {
                 // Building Movement to backdrop
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .splineToSplineHeading(new Pose2d(35, 59, 0), 0)
-                        .splineToConstantHeading(new Vector2d(44, 35), 0)
+                        .splineToConstantHeading(new Vector2d(48, 35), 0)
                         .strafeRight(extraMovement)
                         .build();
             } else {
@@ -121,7 +121,7 @@ public class AutonomousController {
                 // Building Movement to backdrop
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .splineToSplineHeading(new Pose2d(34, -60, 0), 0)
-                        .splineToConstantHeading(new Vector2d(44, -35), 0)
+                        .splineToConstantHeading(new Vector2d(48, -35), 0)
                         .strafeRight(extraMovement)
                         .build();
             }
@@ -135,11 +135,15 @@ public class AutonomousController {
                     new InstantCommand(claw::openClaw, claw),
                     new WaitCommand(100)
             ).schedule();
-            while (!slideCommand.isFinished()) {
+            while (!slideCommand.isFinished() && canContinue()) {
                 CommandScheduler.getInstance().run();
             }
 
-            drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).back(5).build());
+            drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .back(5)
+                    .turn(Math.toRadians(-80))
+                    .build());
+
             updateStatus("Finished");
         }
     }
@@ -257,7 +261,7 @@ public class AutonomousController {
             }
             telemetry.update();
 
-        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.25); // +-1/4" tolerance
+        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.25 && canContinue()); // +-1/4" tolerance
 
 //         Line up with april tag
         do {
@@ -274,7 +278,7 @@ public class AutonomousController {
                     drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeRight(aprilTagLateralDistance).build());
             }
             telemetry.update();
-        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1); // +-1" tolerance
+        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1 && canContinue()); // +-1" tolerance
     }
 
     private void startOpenCV(){
@@ -297,8 +301,15 @@ public class AutonomousController {
         });
     }
 
-    private void updateStatus(String text){
+    private void updateStatus(String text) {
         telemetry.addData("Status", text);
         telemetry.update();
     }
+
+    private boolean canContinue() {
+        // TODO: figure out a way to check if there is a stop requested from opmode, to stop the controller from crashing when the robot stops its auto routine earlier
+        return true;
+//        return opMode.canContinue();
+    }
+
 }

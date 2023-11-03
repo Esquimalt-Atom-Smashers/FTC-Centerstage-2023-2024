@@ -6,10 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 
 @Autonomous(group = "auto")
-public class AutoBlueRight extends LinearOpMode {
+public class AutoBlueRight extends AutoOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        AutonomousController autonomousController = new AutonomousController(hardwareMap, telemetry);
+        AutonomousController autonomousController = new AutonomousController(this);
         waitForStart();
         if (isStopRequested()) return;
         autonomousController.blueRight();
