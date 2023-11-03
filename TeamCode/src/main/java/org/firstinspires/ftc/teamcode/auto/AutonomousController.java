@@ -107,16 +107,18 @@ public class AutonomousController {
 
         // TODO fix this command
         // Place purple pixel
-        SequentialCommandGroup outtakePurplePixelCommand = new SequentialCommandGroup(
-                new InstantCommand(intake::downPosition, intake),
-                new WaitCommand(250),
-                new InstantCommand(intake::intake, intake),
-                new WaitCommand(500),
-                new InstantCommand(intake::stop, intake),
-                new InstantCommand(intake::mediumPosition, intake)
-        );
-        outtakePurplePixelCommand.schedule();
-        while (!outtakePurplePixelCommand.isFinished()){}
+//        SequentialCommandGroup outtakePurplePixelCommand = new SequentialCommandGroup(
+//                new InstantCommand(intake::downPosition, intake),
+//                new WaitCommand(250),
+//                new InstantCommand(intake::intake, intake),
+//                new WaitCommand(500),
+//                new InstantCommand(intake::stop, intake),
+//                new InstantCommand(intake::mediumPosition, intake)
+//        );
+//        outtakePurplePixelCommand.schedule();
+//        while (!outtakePurplePixelCommand.isFinished()){
+//            CommandScheduler.getInstance().run();
+//        }
 
         setPostPushMovement(gameElementPosition);
         drive.followTrajectorySequence(pushMovementPostOuttake);
@@ -126,14 +128,12 @@ public class AutonomousController {
             updateStatus("Driving to backdrop");
             if (allianceColor == 1) { // Blue side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                        .splineToSplineHeading(new Pose2d(35, 59, 0), 0)
-                        .splineToConstantHeading(new Vector2d(48, 35), 0)
+                        .splineToSplineHeading(new Pose2d(46, 35), 0)
                         .strafeRight(extraMovement)
                         .build();
             } else { // Red side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                        .splineToSplineHeading(new Pose2d(34, -60, 0), 0)
-                        .splineToConstantHeading(new Vector2d(48, -35), 0)
+                        .splineToSplineHeading(new Pose2d(46, -35), 0)
                         .strafeRight(extraMovement)
                         .build();
             }
@@ -146,14 +146,14 @@ public class AutonomousController {
                     new InstantCommand(intake::downPosition),
                     slideCommand,
                     new InstantCommand(claw::openClaw, claw),
-                    new WaitCommand(100)
+                    new WaitCommand(110)
             ).schedule();
             while (!slideCommand.isFinished() && canContinue()) {
                 CommandScheduler.getInstance().run();
             }
             drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                     .back(5)
-                    .turn(Math.toRadians(-80))
+                    .turn(Math.toRadians(-85))
                     .build());
 
             updateStatus("Finished");
@@ -223,42 +223,41 @@ public class AutonomousController {
     private void setPrePushMovement(int gameElementPosition){
         if (gameElementPosition == -1){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(30)
-                    .turn(Math.toRadians(90))
+                    .forward(10)
+                    .turn(Math.toRadians(60))
+                    .forward(6)
                     .build();
             extraMovement = -6;
         }
         if (gameElementPosition == 0){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-                    .forward(24)
+                    .forward(22)
                     .build();
-            extraMovement = 2;
+            extraMovement = 0.1;
         }
         if (gameElementPosition == 1){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-                    .forward(25)
-                    .turn(Math.toRadians(-90))
+                    .forward(10)
+                    .turn(Math.toRadians(-60))
+                    .forward(6)
                     .build();
             extraMovement = 9;
         }
     }
 
     private void setPostPushMovement(int gameElementPosition){
-        switch (gameElementPosition){
-            case -1:
-                pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .back(4)
-                        .strafeLeft(12)
-                        .build();
-            case 0:
-                pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .back(4)
-                        .build();
-            case 1:
-                pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .back(4)
-                        .strafeRight(12)
-                        .build();
+        if(gameElementPosition == -1) {
+            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .back(15)
+                    .build();
+        } else if (gameElementPosition == 0) {
+            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .back(11)
+                    .build();
+        } else if (gameElementPosition == 1) {
+            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .back(12)
+                    .build();
         }
     }
 

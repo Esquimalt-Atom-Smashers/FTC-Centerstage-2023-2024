@@ -16,17 +16,17 @@ public class OpenCVPipeline extends OpenCvPipeline {
     private final Mat ycrcbMat = new Mat();
     private final Mat binaryMat = new Mat();
     private final Mat maskedInputMat = new Mat();
+    Scalar lower = new Scalar(3, 0, 166);
+    Scalar upper = new Scalar(255, 255, 255);
 
     @Override
     public Mat processFrame(Mat input) {
         cameraReady = true;
         this.input = input;
-        return input;
+        return maskedInputMat;
     }
 
     public int findGameElement(int color){ // 0: RED, 1: BLUE
-        Scalar lower;
-        Scalar upper = new Scalar(255, 255, 255);
 
         cameraWidth = input.width();
         cameraHeight = input.height();
