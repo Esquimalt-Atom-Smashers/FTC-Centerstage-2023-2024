@@ -61,12 +61,12 @@ public class ElbowSubsystem extends SubsystemBase {
         elbowMotor.setPower(0);
     }
 
-    public void raiseManually() {
-        elbowMotor.setPower(MANUAL_MOTOR_SPEED);
+    public void raiseManually(double multiplier) {
+        elbowMotor.setPower(MANUAL_MOTOR_SPEED * multiplier);
     }
 
-    public void lowerManually() {
-        elbowMotor.setPower(-MANUAL_MOTOR_SPEED);
+    public void lowerManually(double multiplier) {
+        elbowMotor.setPower(-MANUAL_MOTOR_SPEED * multiplier);
     }
 
     public void setTarget(double targetPosition) {

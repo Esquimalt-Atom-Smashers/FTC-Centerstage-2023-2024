@@ -82,7 +82,6 @@ public class AutonomousController {
 
         // Initial subsystem movements
         MoveElbowCommand elbowCommand = new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION);
-        MoveSlideCommand slideCommand;
         SequentialCommandGroup autoStartCommand = new SequentialCommandGroup(
                 new InstantCommand(claw::closeClawSingle, claw),
                 new WaitCommand(500),
@@ -105,20 +104,20 @@ public class AutonomousController {
         setPrePushMovement(gameElementPosition);
         drive.followTrajectorySequence(pushMovementPreOuttake);
 
-        // TODO fix this command
         // Place purple pixel
-//        SequentialCommandGroup outtakePurplePixelCommand = new SequentialCommandGroup(
-//                new InstantCommand(intake::downPosition, intake),
-//                new WaitCommand(250),
-//                new InstantCommand(intake::intake, intake),
-//                new WaitCommand(500),
-//                new InstantCommand(intake::stop, intake),
-//                new InstantCommand(intake::mediumPosition, intake)
-//        );
-//        outtakePurplePixelCommand.schedule();
-//        while (!outtakePurplePixelCommand.isFinished()){
-//            CommandScheduler.getInstance().run();
-//        }
+        WaitCommand finalCommand = new WaitCommand(1);
+        new SequentialCommandGroup(
+                new InstantCommand(intake::downPosition, intake),
+                new WaitCommand(250),
+                new InstantCommand(intake::intake, intake),
+                new WaitCommand(250),
+                new InstantCommand(intake::stop, intake),
+                new InstantCommand(intake::mediumPosition, intake),
+                finalCommand
+        ).schedule();
+        while (!finalCommand.isFinished()){
+            CommandScheduler.getInstance().run();
+        }
 
         setPostPushMovement(gameElementPosition);
         drive.followTrajectorySequence(pushMovementPostOuttake);
@@ -141,7 +140,7 @@ public class AutonomousController {
 
             // Scoring yellow pixel
             updateStatus("Moving slide");
-            slideCommand = new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION);
+            MoveSlideCommand slideCommand = new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION);
             new SequentialCommandGroup(
                     new InstantCommand(intake::downPosition),
                     slideCommand,
@@ -231,7 +230,8 @@ public class AutonomousController {
         }
         if (gameElementPosition == 0){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-                    .forward(22)
+                    .forward(24)
+                    .strafeLeft(8)
                     .build();
             extraMovement = 0.1;
         }

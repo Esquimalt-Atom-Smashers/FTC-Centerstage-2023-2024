@@ -89,7 +89,9 @@ public class Robot {
         this(opMode, true);
     }
 
-        // Initialize the commands that control the robot
+    /**
+     * Initialize the ftclib commands that control our robot.
+     */
     private void initCommands() {
         // Default commands for individual subsystems:
         // CameraSubsystem
@@ -142,8 +144,8 @@ public class Robot {
 
         // ElbowSubsystem
         elbowSubsystem.setDefaultCommand(new RunCommand(() -> {
-            if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.lowerManually();
-            else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.raiseManually();
+            if (operatorGamepad.getLeftY() <= -0.1) elbowSubsystem.lowerManually(1);
+            else if (operatorGamepad.getLeftY() >= 0.1) elbowSubsystem.raiseManually(1);
             else elbowSubsystem.stop();
         }, elbowSubsystem));
 
@@ -205,7 +207,7 @@ public class Robot {
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.TILT_POSITION),
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LEVEL_POSITION),
                 // Retract the arm again
-                new MoveSlideCommand(linearSlideSubsystem, Constants.ElbowConstants.INTAKE_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
                 // Set the state to driving again
                 new InstantCommand(() -> scoringState = ScoringState.DRIVING)
         ));
@@ -321,16 +323,18 @@ public class Robot {
         }
     }
 
+
+    /**
+     * Controls the elbow, intake, slide, claw, drone and drive subsystem manually, without any commands running or PID controllers.
+     */
     public void runManually() {
 
         driveLoop();
 
         // Elbow Subsystem
-        if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually();
-        else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually();
+        if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually(operatorGamepad.getButton(GamepadKeys.Button.START) ? 0.5 : 1);
+        else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually(operatorGamepad.getButton(GamepadKeys.Button.START) ? 0.5 : 1);
         else elbowSubsystem.stop();
-        elbowSubsystem.printData(opMode.telemetry);
-        opMode.telemetry.update();
 
         // Intake Subsystem
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) intakeSubsystem.mediumPosition();
@@ -386,6 +390,11 @@ public class Robot {
         driveState = DriveState.STEPPING_RIGHT;
     }
 
+    /**
+     * Checks if a input from the controller is outside the dead zone
+     * @param controllerInput the input from the controller, for example gamepad.left_bumper or gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)
+     * @return
+     */
     private boolean isPressed(double controllerInput) {
         return Math.abs(controllerInput) >= Constants.DriveConstants.DEADZONE;
     }

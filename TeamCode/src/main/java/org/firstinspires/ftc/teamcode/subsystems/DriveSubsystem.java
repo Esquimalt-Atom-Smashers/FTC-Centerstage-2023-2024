@@ -64,29 +64,33 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Main drive method that controls the robot
-    public void drive(double forward, double strafe, double turn) {
+    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
         turn = Math.abs(turn) >= DEADZONE ? turn : 0;
-        if (FIELD_CENTRIC) {
+        if (fieldCentric) {
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
             double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
 
-            frontLeftMotor.setPower(scaleInput(rotateY + rotateX + turn));
-            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn));
-            rearLeftMotor.setPower(scaleInput(rotateY - rotateX + turn));
-            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn));
+            frontLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, scaled));
+            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, scaled));
+            rearLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, scaled));
+            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, scaled));
         }
         else {
             // Robot centric drive
-            frontLeftMotor.setPower(scaleInput(forward + strafe + turn));
-            frontRightMotor.setPower(scaleInput(forward - strafe - turn));
-            rearLeftMotor.setPower(scaleInput(forward - strafe + turn));
-            rearRightMotor.setPower(scaleInput(forward + strafe - turn));
+            frontLeftMotor.setPower(scaleInput(forward + strafe + turn, scaled));
+            frontRightMotor.setPower(scaleInput(forward - strafe - turn, scaled));
+            rearLeftMotor.setPower(scaleInput(forward - strafe + turn, scaled));
+            rearRightMotor.setPower(scaleInput(forward + strafe - turn, scaled));
         }
 
+    }
+
+    public void drive(double forward, double strafe, double turn) {
+        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED);
     }
 
     // Auto drive
@@ -245,8 +249,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Take the input and scale it if needed, while also clipping it to between -1 and 1
-    private double scaleInput(double input) {
-        if (SCALED) {
+    private double scaleInput(double input, boolean isScaled) {
+        if (isScaled) {
             // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
             // Current formula just cubes the input and multiplies it by the multiplier
             return  Range.clip(Math.pow(input, 3) * INPUT_MULTIPLIER, -1, 1);
@@ -255,6 +259,10 @@ public class DriveSubsystem extends SubsystemBase {
             // Otherwise, we just multiply the input by the multiplier
             return Range.clip(input * INPUT_MULTIPLIER, -1, 1);
         }
+    }
+
+    private double scaleInput(double input) {
+        return scaleInput(input, SCALED);
     }
 
     public void printData(Telemetry t) {
