@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.opencv.core.Scalar;
+
 //This class holds all constants, the reason we do this is so we can import all the constants 'statically.'
 // i.e.: To import the drive constants, you would add
 // import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
@@ -12,6 +14,9 @@ public class Constants {
     public static class CameraConstants {
         public static final String CAMERA_NAME = "camera";
         public static final double DETECTION_THRESHOLD = 0.75;
+        public static final Scalar LOWER_RED = new Scalar(124.7, 204, 0);
+        public static final Scalar LOWER_BLUE = new Scalar(22.7, 77.9, 184.2);
+        public static final Scalar UPPER = new Scalar(255, 255, 255);
     }
 
     public static class ClawConstants {

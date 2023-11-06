@@ -11,36 +11,41 @@ import static org.firstinspires.ftc.teamcode.Constants.CameraConstants.*;
 public class OpenCVPipeline extends OpenCvPipeline {
     int cameraWidth;
     int cameraHeight;
+    int frameCount = 0;
+    int currentPregameMask = -1;
     public boolean cameraReady = false;
     private Mat input = new Mat();
     private final Mat ycrcbMat = new Mat();
     private final Mat binaryMat = new Mat();
     private final Mat maskedInputMat = new Mat();
-    Scalar lower = new Scalar(3, 0, 166);
-    Scalar upper = new Scalar(255, 255, 255);
+    private final Mat pregameMaskedInputMat = new Mat();
+    Scalar lower;
+    Scalar upper = UPPER;
 
     @Override
     public Mat processFrame(Mat input) {
         cameraReady = true;
         this.input = input;
-        return maskedInputMat;
+        frameCount++;
+        if (frameCount < 30){ addPreGameColorMask(currentPregameMask); }
+        else if (currentPregameMask < 1){
+            frameCount = 0;
+            currentPregameMask++;
+        } else {
+            frameCount = 0;
+            currentPregameMask = -1;
+        }
+        return pregameMaskedInputMat;
     }
 
     public int findGameElement(int color){ // 0: RED, 1: BLUE
-
         cameraWidth = input.width();
         cameraHeight = input.height();
 
-        // Determine what color to look for
-        lower = (color == 0) ? new Scalar(88, 190, 82) : new Scalar(3, 0, 166);
-
         // Add color mask
-        Imgproc.cvtColor(input, ycrcbMat, Imgproc.COLOR_RGB2YCrCb);
-        Core.inRange(ycrcbMat, lower, upper, binaryMat);
-        maskedInputMat.release();
-        Core.bitwise_and(input, input, maskedInputMat, binaryMat);
+        addColorMask(color);
 
-        // Find how much color is in each section
+        // Find how much color is in each half
         Mat leftZone = maskedInputMat.submat(new Rect(0, 0 , cameraWidth / 2, cameraHeight));
         Scalar avgColor1 = Core.mean(leftZone);
 
@@ -55,5 +60,27 @@ public class OpenCVPipeline extends OpenCvPipeline {
 
         // Case: Left Zone
         return -1;
+    }
+
+    private void addColorMask(int color){ // 0: RED, 1: BLUE
+        lower = (color == 0) ? LOWER_RED : LOWER_BLUE;
+        Imgproc.cvtColor(input, ycrcbMat, Imgproc.COLOR_RGB2YCrCb);
+        Core.inRange(ycrcbMat, lower, upper, binaryMat);
+        maskedInputMat.release();
+        Core.bitwise_and(input, input, maskedInputMat, binaryMat);
+    }
+
+    private void addPreGameColorMask(int color){ // -1: No mask, 0: RED, 1: BLUE
+        if (color == -1){
+            lower = new Scalar(0, 0, 0);
+        } else if (color == 0){
+            lower = LOWER_RED;
+        } else if (color == 1){
+            lower = LOWER_BLUE;
+        }
+        Imgproc.cvtColor(input, ycrcbMat, Imgproc.COLOR_RGB2YCrCb);
+        Core.inRange(ycrcbMat, lower, upper, binaryMat);
+        pregameMaskedInputMat.release();
+        Core.bitwise_and(input, input, pregameMaskedInputMat, binaryMat);
     }
 }

@@ -69,9 +69,9 @@ public class AutonomousController {
         intake = new IntakeSubsystem(hardwareMap);
         elbow = new ElbowSubsystem(hardwareMap);
         slide = new LinearSlideSubsystem(hardwareMap);
-        updateStatus("Starting OpenCVPipeline");
+        updateStatus("Not Ready (Starting OpenCVPipeline)");
         startOpenCV();
-        while (!pipeline.cameraReady && canContinue()) updateStatus("Waiting for camera");
+        while (!pipeline.cameraReady && canContinue()) updateStatus("Not Ready (Waiting for camera)");
         updateStatus("Ready");
     }
 
