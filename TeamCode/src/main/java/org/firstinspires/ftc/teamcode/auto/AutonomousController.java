@@ -127,12 +127,12 @@ public class AutonomousController {
             updateStatus("Driving to backdrop");
             if (allianceColor == 1) { // Blue side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .splineToSplineHeading(new Pose2d(48, 35), 0)
+                        .splineToSplineHeading(new Pose2d(46, 35), 0)
                         .strafeRight(extraMovement)
                         .build();
             } else { // Red side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .splineToSplineHeading(new Pose2d(48, -35), 0)
+                        .splineToSplineHeading(new Pose2d(46, -35), 0)
                         .strafeRight(extraMovement)
                         .build();
             }
@@ -231,8 +231,7 @@ public class AutonomousController {
         if (gameElementPosition == 0){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
                     .forward(24)
-                    .strafeLeft(8)
-                    .back(2)
+                    .strafeLeft(4)
                     .build();
             extraMovement = 0.1;
         }
