@@ -127,12 +127,12 @@ public class AutonomousController {
             updateStatus("Driving to backdrop");
             if (allianceColor == 1) { // Blue side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .splineToSplineHeading(new Pose2d(46, 35), 0)
+                        .lineToSplineHeading(new Pose2d(46, 35, Math.toRadians(0)))
                         .strafeRight(extraMovement)
                         .build();
             } else { // Red side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .splineToSplineHeading(new Pose2d(46, -35), 0)
+                        .lineToSplineHeading(new Pose2d(46, -35, 0))
                         .strafeRight(extraMovement)
                         .build();
             }
@@ -150,10 +150,17 @@ public class AutonomousController {
             while (!slideCommand.isFinished() && canContinue()) {
                 CommandScheduler.getInstance().run();
             }
-            drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .back(5)
-                    .turn(Math.toRadians(-85))
-                    .build());
+            if (allianceColor == 0) {
+                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                        .back(3)
+                        .turn(Math.toRadians(85))
+                        .build());
+            } else if (allianceColor == 1){
+                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                        .back(3)
+                        .turn(Math.toRadians(-85))
+                        .build());
+            }
 
             updateStatus("Finished");
         }
@@ -225,13 +232,14 @@ public class AutonomousController {
                     .forward(24)
                     .turn(Math.toRadians(90))
                     .strafeRight(5)
+                    .back(2)
                     .build();
             extraMovement = -6;
         }
         if (gameElementPosition == 0){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-                    .forward(24)
-                    .strafeLeft(4)
+                    .forward(25)
+                    .strafeLeft(6)
                     .build();
             extraMovement = 0.1;
         }
@@ -253,6 +261,7 @@ public class AutonomousController {
                     .build();
         } else if (gameElementPosition == 0) {
             pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .strafeRight(6)
                     .back(11)
                     .build();
         } else if (gameElementPosition == 1) {
