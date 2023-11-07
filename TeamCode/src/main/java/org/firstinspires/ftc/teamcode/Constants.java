@@ -14,7 +14,7 @@ public class Constants {
     public static class CameraConstants {
         public static final String CAMERA_NAME = "camera";
         public static final double DETECTION_THRESHOLD = 0.75;
-        public static final Scalar LOWER_RED = new Scalar(124.7, 204, 0);
+        public static final Scalar LOWER_RED = new Scalar(0, 198, 72);
         public static final Scalar LOWER_BLUE = new Scalar(22.7, 77.9, 184.2);
         public static final Scalar UPPER = new Scalar(255, 255, 255);
     }
