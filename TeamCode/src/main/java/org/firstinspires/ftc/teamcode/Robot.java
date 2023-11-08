@@ -200,14 +200,14 @@ public class Robot {
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LEVEL_POSITION),
                 // Move the intake down and wait 250ms for it to get there
                 new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
-                new WaitCommand(250),
+//                new WaitCommand(250),
                 // Extend the arm a little bit
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.TILT_POSITION),
+//                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.TILT_POSITION),
                 // Move the arm down and up to tilt the pixels in the grip
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.TILT_POSITION),
-                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LEVEL_POSITION),
+//                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.TILT_POSITION),
+//                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LEVEL_POSITION),
                 // Retract the arm again
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
+//                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
                 // Set the state to driving again
                 new InstantCommand(() -> scoringState = ScoringState.DRIVING)
         ));

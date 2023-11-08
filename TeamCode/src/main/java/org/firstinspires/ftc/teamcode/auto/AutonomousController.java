@@ -140,25 +140,31 @@ public class AutonomousController {
 
             // Scoring yellow pixel
             updateStatus("Moving slide");
-            MoveSlideCommand slideCommand = new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION);
-            new SequentialCommandGroup(
+            MoveSlideCommand slideCommand = new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION);
+            finalCommand = new WaitCommand(1);
+            SequentialCommandGroup placeYellowPixel = new SequentialCommandGroup(
                     new InstantCommand(intake::downPosition),
-                    slideCommand,
+                    new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION),
                     new InstantCommand(claw::openClaw, claw),
-                    new WaitCommand(110)
-            ).schedule();
-            while (!slideCommand.isFinished() && canContinue()) {
+                    new WaitCommand(110),
+                    slideCommand,
+                    finalCommand
+            );
+            placeYellowPixel.schedule();
+            while (!finalCommand.isFinished() && canContinue()) {
                 CommandScheduler.getInstance().run();
             }
             if (allianceColor == 0) {
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
                         .turn(Math.toRadians(85))
+                        .lineTo(new Vector2d(46, -60))
                         .build());
             } else if (allianceColor == 1){
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
                         .turn(Math.toRadians(-85))
+                        .lineTo(new Vector2d(46, 60))
                         .build());
             }
 
