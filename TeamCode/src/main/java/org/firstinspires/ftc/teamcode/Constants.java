@@ -11,6 +11,12 @@ import org.opencv.core.Scalar;
 
 public class Constants {
 
+    public enum PIDSubsystemState {
+        MANUAL,
+        MOVING_TO_TARGET,
+        AT_TARGET
+    }
+
     public static class CameraConstants {
         public static final String CAMERA_NAME = "camera";
         public static final double DETECTION_THRESHOLD = 0.75;

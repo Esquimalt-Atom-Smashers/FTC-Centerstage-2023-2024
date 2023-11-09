@@ -2,13 +2,10 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -27,33 +24,45 @@ import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.easyopencv.OpenCvInternalCamera2;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutonomousController {
+
+    /*
+    TODO after scrimmage: Implement a finite state machine like
+        https://github.com/NoahBres/road-runner-quickstart/blob/advanced-examples/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/drive/advanced/AsyncFollowingFSM.java
+        so we can move PID controlled subsystem while we are moving
+    */
     private AutoOpMode opMode;
-    HardwareMap hardwareMap;
-    Pose2d startPosition;
-    TrajectorySequence pushMovementPreOuttake;
-    TrajectorySequence pushMovementPostOuttake;
-    TrajectorySequence driveToBackdrop;
-    int aprilTagID;
-    int gameElementPosition;
-    double aprilTagLateralDistance;
-    double aprilTagLateralTarget = -4;
-    double aprilTagForwardDistance;
-    double aprilTagForwardTarget = 14;
-    double extraMovement;
-    boolean goToBackDrop;
-    private final SampleMecanumDrive drive;
+    private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
+
+    // Positional things and trajectories
+    private Pose2d startPosition;
+    private TrajectorySequence pushMovementPreOuttake;
+    private TrajectorySequence pushMovementPostOuttake;
+    private TrajectorySequence driveToBackdrop;
+
+    // Trajectory variables
+    private boolean isBlueAlliance;
+    private int aprilTagID;
+    private int gameElementPosition;
+    private double extraMovement;
+    private boolean goToBackDrop;
+    private double aprilTagLateralDistance;
+    private double aprilTagLateralTarget = -4;
+    private double aprilTagForwardDistance;
+    private double aprilTagForwardTarget = 14;
+
+    // Subsystems used by the autonomous
+    private final SampleMecanumDrive drive;
     private final ClawSubsystem claw;
     private final IntakeSubsystem intake;
     private final ElbowSubsystem elbow;
     private final LinearSlideSubsystem slide;
+
+    // Camera things
     private OpenCVPipeline pipeline;
-    private int allianceColor;
     private OpenCvWebcam webcam;
 
     public AutonomousController(AutoOpMode autoOpMode) {
@@ -77,7 +86,7 @@ public class AutonomousController {
 
     public void run() {
         while (!pipeline.cameraReady && canContinue()) updateStatus("Waiting for camera");
-        gameElementPosition = pipeline.findGameElement(allianceColor);
+        gameElementPosition = pipeline.findGameElement(isBlueAlliance);
         webcam.closeCameraDevice();
 
         // Initial subsystem movements
@@ -125,7 +134,7 @@ public class AutonomousController {
         if (goToBackDrop) {
             // Driving to backdrop
             updateStatus("Driving to backdrop");
-            if (allianceColor == 1) { // Blue side movement
+            if (isBlueAlliance) { // Blue side movement
                 driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .lineToSplineHeading(new Pose2d(46, 35, Math.toRadians(0)))
                         .strafeRight(extraMovement)
@@ -154,17 +163,17 @@ public class AutonomousController {
             while (!finalCommand.isFinished() && canContinue()) {
                 CommandScheduler.getInstance().run();
             }
-            if (allianceColor == 0) {
-                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .back(3)
-                        .turn(Math.toRadians(85))
-                        .lineTo(new Vector2d(46, -60))
-                        .build());
-            } else if (allianceColor == 1){
+            if (isBlueAlliance) {
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
                         .turn(Math.toRadians(-85))
                         .lineTo(new Vector2d(46, 60))
+                        .build());
+            } else {
+                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                        .back(3)
+                        .turn(Math.toRadians(85))
+                        .lineTo(new Vector2d(46, -60))
                         .build());
             }
 
@@ -174,20 +183,20 @@ public class AutonomousController {
 
     public void redLeft(){
         startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
-        allianceColor = 0;
+        isBlueAlliance = false;
         run();
     }
 
     public void blueRight(){
         startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
-        allianceColor = 1;
+        isBlueAlliance = true;
         run();
     }
 
     public void redRight(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
-        allianceColor = 0;
+        isBlueAlliance = false;
 
 //        // Building Movement to backdrop
 //        driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
@@ -211,7 +220,7 @@ public class AutonomousController {
     public void blueLeft(){
         goToBackDrop = true;
         startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
-        allianceColor = 1;
+        isBlueAlliance = true;
 
 //        // Building Movement to backdrop
 //        driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())

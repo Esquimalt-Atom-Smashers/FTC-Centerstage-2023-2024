@@ -18,7 +18,7 @@ public class ClawSubsystem extends SubsystemBase {
         clawServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
-    // Set the claw to the open position
+
     public void openClaw() {
         clawServo.turnToAngle(OPEN_POSITION);
     }

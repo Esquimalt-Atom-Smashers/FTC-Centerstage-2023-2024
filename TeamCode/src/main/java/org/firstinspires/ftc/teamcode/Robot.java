@@ -77,8 +77,8 @@ public class Robot {
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap);
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap);
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
-        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, this);
-        cameraSubsystem = new CameraSubsystem(opMode.hardwareMap, opMode.telemetry);
+        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap);
+        cameraSubsystem = new CameraSubsystem(opMode.hardwareMap);
         droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap);
 
