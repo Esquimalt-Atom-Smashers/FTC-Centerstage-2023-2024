@@ -135,7 +135,7 @@ public class Constants {
         public static int TILT_POSITION = 275;
         public static int LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
 
-        public static final double POWER_TOLERANCE = 0.07;
+        public static final double POWER_TOLERANCE = 0.08;
     }
 
     public static class WinchConstants {

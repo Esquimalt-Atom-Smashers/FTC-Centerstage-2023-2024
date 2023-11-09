@@ -98,7 +98,11 @@ public class Robot {
 
         // ClawSubsystem
         Trigger clawTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && scoringState == ScoringState.DRIVING);
-        clawTrigger.whenActive(new InstantCommand(clawSubsystem::openClaw));
+        clawTrigger.whenActive(new SequentialCommandGroup(
+                new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
+                new WaitCommand(250),
+                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION)
+        ));
 
         // DriveSubsystem
         driveSubsystem.setDefaultCommand(new RunCommand(() -> {

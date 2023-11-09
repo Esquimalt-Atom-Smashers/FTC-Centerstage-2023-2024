@@ -23,6 +23,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
     private boolean atTarget;
     private Robot robot;
     private double lastPower;
+    private double lastLastPower;
 
     public LinearSlideSubsystem(HardwareMap hardwareMap, Robot robot) {
         this(hardwareMap);
@@ -117,6 +118,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
         // If the power isn't much, we are about as close to the target as we are going to get, don't update anymore
         atTarget = Math.abs(power) <= POWER_TOLERANCE;
         if (atTarget) {
+            lastLastPower = power;
             slideMotor.setPower(0);
         }
         lastPower = power;
@@ -139,10 +141,11 @@ public class LinearSlideSubsystem extends SubsystemBase {
 //    }
 
     public void printData(Telemetry telemetry) {
-        telemetry.addData("LinearSlidePosition", slideMotor.getCurrentPosition());
-        telemetry.addData("Target", target);
-        telemetry.addData("Error", Math.abs(slideMotor.getCurrentPosition() - target));
-        telemetry.addData("Last power", lastPower);
+        telemetry.addData("Slide: LinearSlidePosition", slideMotor.getCurrentPosition());
+        telemetry.addData("Slide: Target", target);
+        telemetry.addData("Slide: Error", Math.abs(slideMotor.getCurrentPosition() - target));
+        telemetry.addData("Slide: Last power", lastPower);
+        telemetry.addData("Slide: Last last power", lastLastPower);
 //        telemetry.addData("Is safe to move slide?", isSafeToMove());
     }
 
