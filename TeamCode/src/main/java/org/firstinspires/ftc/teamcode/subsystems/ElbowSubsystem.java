@@ -7,22 +7,29 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Constants;
+
 import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
+import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
 
 public class ElbowSubsystem extends SubsystemBase {
+    // Motor used for this subsystem
     private final DcMotorEx elbowMotor;
 
-    private PIDController controller;
+    private final PIDController controller;
 
     public static double target;
-    private boolean atTarget = false;
     private double lastPower;
+
+    private PIDSubsystemState state;
 
     public ElbowSubsystem(HardwareMap hardwareMap) {
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
         elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         controller = new PIDController(P, I, D);
+
+        state = PIDSubsystemState.MANUAL;
     }
 
     public void intakePosition() {
@@ -62,26 +69,30 @@ public class ElbowSubsystem extends SubsystemBase {
     }
 
     public void raiseManually(double multiplier) {
+        state = PIDSubsystemState.MANUAL;
         elbowMotor.setPower(MANUAL_MOTOR_SPEED * multiplier);
     }
 
     public void lowerManually(double multiplier) {
+        state = PIDSubsystemState.MANUAL;
         elbowMotor.setPower(-MANUAL_MOTOR_SPEED * multiplier);
     }
 
     public void setTarget(double targetPosition) {
         target = targetPosition;
-        atTarget = false;
+        state = PIDSubsystemState.MOVING_TO_TARGET;
     }
 
     public void printData(Telemetry telemetry) {
+        telemetry.addLine("--- Elbow Subsystem ---");
         telemetry.addData("Position", elbowMotor.getCurrentPosition());
         telemetry.addData("Target", target);
+        telemetry.addData("State", state);
     }
 
     public void runPID() {
         // If we aren't at the target
-        if (!atTarget)
+        if (state == PIDSubsystemState.MOVING_TO_TARGET)
         {
             // Calculate how much we need to move the motor by
             controller.setPID(P, I, D);
@@ -90,7 +101,9 @@ public class ElbowSubsystem extends SubsystemBase {
             lastPower = power;
             elbowMotor.setPower(power);
             // If the power we are setting is basically none, we are close enough to the target
-            atTarget = Math.abs(power) <= POWER_TOLERANCE;
+            if (Math.abs(power) <= POWER_TOLERANCE) {
+                state = PIDSubsystemState.AT_TARGET;
+            }
         }
     }
 
@@ -99,6 +112,6 @@ public class ElbowSubsystem extends SubsystemBase {
     }
 
     public boolean isAtTarget() {
-        return atTarget;
+        return state == PIDSubsystemState.AT_TARGET;
     }
 }

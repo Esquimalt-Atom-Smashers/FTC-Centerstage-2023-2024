@@ -11,7 +11,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 
 public class IntakeSubsystem extends SubsystemBase {
-    Telemetry telemetry;
     private final DcMotorEx intakeMotor;
     private final ServoEx intakeServo;
 

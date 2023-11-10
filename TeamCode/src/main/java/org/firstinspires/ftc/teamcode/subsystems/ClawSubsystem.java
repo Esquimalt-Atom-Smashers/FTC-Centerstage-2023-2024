@@ -10,50 +10,57 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.ClawConstants.*;
 
+/**
+ * A subsystem representing the claw on the end of the arm. Contains a {@link ServoEx} used to hold pixels.
+ */
 public class ClawSubsystem extends SubsystemBase {
     private final ServoEx clawServo;
 
+    /**
+     * Initializes the {@link ServoEx} using the provided {@link HardwareMap}.
+     * @param hardwareMap The hardware map of the robot
+     */
     public ClawSubsystem(HardwareMap hardwareMap) {
-        // Initialize the servo
         clawServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
-    // Set the claw to the open position
+    /**
+     * Opens the claw.
+     */
     public void openClaw() {
         clawServo.turnToAngle(OPEN_POSITION);
     }
 
-    // Set the claw to the closed position
+    /**
+     * Closes the claw.
+     */
     public void closeClaw() {
         clawServo.turnToAngle(CLOSE_POSITION);
     }
 
-    // Set the claw to the closed position for holding a single pixel
+    /**
+     * Closes the claw tighter than normal, for holding a single pixel.
+     */
     public void closeClawSingle() {
         clawServo.turnToAngle(SUPER_CLOSE_POSITION);
     }
 
-    // Check if the claw is open
+    /**
+     * Check if the claw is open.
+     * @return Whether the claw is open or not
+     */
     public boolean isClawOpen() {
         return clawServo.getPosition() == OPEN_POSITION;
     }
 
-    public void toggleClaw() {
-        if (isClawOpen()) {
-            closeClaw();
-        } else {
-            openClaw();
-        }
-    }
-
+    /**
+     * Prints data to the provided {@link Telemetry}.
+     * @param telemetry The telemetry to print data to.
+     */
     public void printPosition(Telemetry telemetry) {
-        telemetry.addData("Claw servo angle", clawServo.getAngle());
-        telemetry.addData("Claw position", clawServo.getPosition());
-        telemetry.addData("Angle in degrees", clawServo.getAngle(AngleUnit.DEGREES));
-    }
-
-    public ServoEx getClawServo()
-    {
-        return clawServo;
+        telemetry.addLine("--- Claw ---");
+        telemetry.addData("Angle", clawServo.getAngle());
+        telemetry.addData("Angle (degrees)", clawServo.getAngle(AngleUnit.DEGREES));
+        telemetry.addData("Position", clawServo.getPosition());
     }
 }

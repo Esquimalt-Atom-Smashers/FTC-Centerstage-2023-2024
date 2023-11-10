@@ -20,7 +20,9 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Config
+/**
+ * A subsystem that represents the camera of the robot. Contains an {@link AprilTagProcessor} to detect april tags.
+ */
 public class CameraSubsystem extends SubsystemBase {
 
     private final AprilTagProcessor.Builder aprilTagProcessorBuilder;
@@ -31,13 +33,11 @@ public class CameraSubsystem extends SubsystemBase {
     private ExposureControl exposureControl;
 
 
-    Telemetry telemetry;
-
+    /**
+     * Initialize the {@link AprilTagProcessor} using the {@link AprilTagProcessor.Builder}. Also initializes the {@link VisionPortal}
+     * @param hardwareMap The hardware map of the robot
+     */
     public CameraSubsystem(HardwareMap hardwareMap) {
-        this(hardwareMap, null);
-    }
-
-    public CameraSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         // Create a new Builder
         aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
 
@@ -50,71 +50,39 @@ public class CameraSubsystem extends SubsystemBase {
 //        aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults();
         // Create a Vision Portal with the default settings
         visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, CAMERA_NAME), aprilTagProcessor);
-        this.telemetry = telemetry;
     }
 
+    /**
+     * Get the april tag detections from the camera.
+     */
     public void detect() {
         detections = aprilTagProcessor.getDetections();
     }
 
-    public void detectAndPrint() {
+    /**
+     * First detect any april tags and save them, then iterate over them and print out information about each one using the provided telemetry
+     * @param telemetry The telemetry the information will be printed to
+     */
+    public void detectAndPrint(Telemetry telemetry) {
         detect();
         for (AprilTagDetection aprilTagDetection : detections) {
             if (aprilTagDetection.metadata != null) {
                 int aprilTagIdCode = aprilTagDetection.id;
                 telemetry.addData("Name", aprilTagDetection.metadata.name);
                 telemetry.addData("ID", aprilTagIdCode);
-                double width = aprilTagDetection.corners[0].x - aprilTagDetection.corners[1].x;
-                double height = aprilTagDetection.corners[2].y - aprilTagDetection.corners[0].y;
+                double distance = getDistance(aprilTagDetection);
+                telemetry.addData("Distance", distance);
                 double lateralDistance = getLateralDistance(aprilTagDetection);
                 telemetry.addData("Lateral Distance", lateralDistance);
             }
         }
     }
 
-    // Return the number of inches the robot is laterally away from the specified april tag
-    public double getLateralDistance(int tagID) {
-        if (detections == null || detections.size() < 1) return -1;
-        for (AprilTagDetection aprilTagDetection : detections) {
-            if (aprilTagDetection.id == tagID) {
-                return getLateralDistance(aprilTagDetection);
-            }
-        }
-        return -1;
-//        // If the tag we are looking for is the center one, we give up
-//        if (tagID == 2 || tagID == 5) return -1;
-//        double distanceBetweenTags = 6;
-//        // If we can't find the tag we want to, we can look to the center tags to figure out which way we need to go
-//        if (tagID >= 4) {
-            // TODO: Figure out which 6 should be where
-//            return getLateralDistance(5) + (tagID == 4 ? 6 : -6);
-//        }
-//        else {
-//            return getLateralDistance(2) + (tagID == 1 ? 6 : -6);
-//        }
-    }
-
-    public double getLateralDistance(AprilTagDetection aprilTag) {
-        // TODO: Fix this to account for distance from the board
-        /*
-        This formula was found by putting the robot at specific lateral distances
-        away from the tag it was sensing and reading the center point.
-        These values were found quite close to the board
-        d   c
-        0   539
-        -2  450
-        -4  350
-        -6  265
-        -8  163
-        -9  113
-
-        Graph on Desmos:
-        https://www.desmos.com/calculator/ysofiovqff
-         */
-        return -(aprilTag.center.x - 540) / 45;
-    }
-
-
+    /**
+     * Gets the distance the robot is from the april tag with the specified ID
+     * @param tagID The ID of the tag we are looking for
+     * @return The distance in inches that the robot is from the april tag, or -1 if the camera can't find the april tag
+     */
     public double getDistance(int tagID) {
         if (detections == null || detections.size() < 1) return -1;
         for (AprilTagDetection aprilTagDetection : detections) {
@@ -125,6 +93,11 @@ public class CameraSubsystem extends SubsystemBase {
         return -1;
     }
 
+    /**
+     * Gets the distance the robot is from the specified april tag
+     * @param aprilTag The april tag we are looking at
+     * @return The distance in inches that the robot is from the april tag
+     */
     public double getDistance(AprilTagDetection aprilTag) {
         double width = aprilTag.corners[0].x - aprilTag.corners[1].x;
          /*
@@ -147,5 +120,43 @@ public class CameraSubsystem extends SubsystemBase {
         return 1600 / width;
     }
 
-    public VisionPortal getVisionPortal() {return visionPortal;}
+    /**
+     * Gets the number of inches the robot is laterally away from the april tag with the specified ID
+     * @param tagID The ID of the tag we are looking for
+     * @return The lateral distance from the robot to the tag, or -1 if the camera can't find the april tag
+     */
+    public double getLateralDistance(int tagID) {
+        if (detections == null || detections.size() < 1) return -1;
+        for (AprilTagDetection aprilTagDetection : detections) {
+            if (aprilTagDetection.id == tagID) {
+                return getLateralDistance(aprilTagDetection);
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Gets the number of inches the robot is laterally away from the specified april tag
+     * @param aprilTag The april tag we are looking at
+     * @return The lateral distance from the robot to the tag
+     */
+    public double getLateralDistance(AprilTagDetection aprilTag) {
+        // TODO: Fix this to account for distance from the board
+        /*
+        This formula was found by putting the robot at specific lateral distances
+        away from the tag it was sensing and reading the center point.
+        These values were found quite close to the board
+        d   c
+        0   539
+        -2  450
+        -4  350
+        -6  265
+        -8  163
+        -9  113
+
+        Graph on Desmos:
+        https://www.desmos.com/calculator/ysofiovqff
+         */
+        return -(aprilTag.center.x - 540) / 45;
+    }
 }

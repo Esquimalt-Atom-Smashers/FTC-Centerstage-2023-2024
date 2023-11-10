@@ -11,6 +11,12 @@ import org.opencv.core.Scalar;
 
 public class Constants {
 
+    public enum PIDSubsystemState {
+        MANUAL,
+        MOVING_TO_TARGET,
+        AT_TARGET
+    }
+
     public static class CameraConstants {
         public static final String CAMERA_NAME = "camera";
         public static final double DETECTION_THRESHOLD = 0.75;
@@ -61,6 +67,8 @@ public class Constants {
 
         public static final double AUTO_STEP_POWER = 0;
         public static final double AUTO_STEP_TOLERANCE = 50;
+
+        public static final int HALF_STEP_VALUE = -1;
     }
 
     public static class DroneConstants {
@@ -135,7 +143,7 @@ public class Constants {
         public static int TILT_POSITION = 275;
         public static int LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
 
-        public static final double POWER_TOLERANCE = 0.07;
+        public static final double POWER_TOLERANCE = 0.08;
     }
 
     public static class WinchConstants {

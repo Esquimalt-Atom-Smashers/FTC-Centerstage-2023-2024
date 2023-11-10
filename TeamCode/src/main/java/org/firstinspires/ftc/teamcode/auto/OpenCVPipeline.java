@@ -38,12 +38,12 @@ public class OpenCVPipeline extends OpenCvPipeline {
         return pregameMaskedInputMat;
     }
 
-    public int findGameElement(int color){ // 0: RED, 1: BLUE
+    public int findGameElement(boolean isBlue){ // 0: RED, 1: BLUE
         cameraWidth = input.width();
         cameraHeight = input.height();
 
         // Add color mask
-        addColorMask(color);
+        addColorMask(isBlue ? 1 : 0);
 
         // Find how much color is in each half
         Mat leftZone = maskedInputMat.submat(new Rect(0, 0 , cameraWidth / 2, cameraHeight));
