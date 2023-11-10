@@ -39,7 +39,7 @@ public class ClawSubsystem extends SubsystemBase {
     }
 
     /**
-     * Closes the claw for holding a single pixel.
+     * Closes the claw tighter than normal, for holding a single pixel.
      */
     public void closeClawSingle() {
         clawServo.turnToAngle(SUPER_CLOSE_POSITION);
@@ -62,6 +62,5 @@ public class ClawSubsystem extends SubsystemBase {
         telemetry.addData("Angle", clawServo.getAngle());
         telemetry.addData("Angle (degrees)", clawServo.getAngle(AngleUnit.DEGREES));
         telemetry.addData("Position", clawServo.getPosition());
-        telemetry.addLine("--- ---");
     }
 }

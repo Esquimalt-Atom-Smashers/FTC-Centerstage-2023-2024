@@ -125,7 +125,6 @@ public class LinearSlideSubsystem extends SubsystemBase {
         telemetry.addData("Error", Math.abs(slideMotor.getCurrentPosition() - target));
         telemetry.addData("Last power", lastPower);
         telemetry.addData("Last last power", lastLastPower);
-        telemetry.addLine("--- ---");
     }
 
     public boolean isSafeToMove() {
@@ -134,6 +133,6 @@ public class LinearSlideSubsystem extends SubsystemBase {
     }
 
     public boolean isAtTarget() {
-        return state != PIDSubsystemState.MOVING_TO_TARGET;
+        return state == PIDSubsystemState.AT_TARGET;
     }
 }

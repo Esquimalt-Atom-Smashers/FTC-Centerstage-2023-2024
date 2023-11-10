@@ -242,7 +242,6 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void printData(Telemetry telemetry) {
         telemetry.addLine("--- Drive base ---");
-        telemetry.addLine("--- ---");
     }
 
     //Define lower-level methods here. (Methods that are private or work behind the scenes)

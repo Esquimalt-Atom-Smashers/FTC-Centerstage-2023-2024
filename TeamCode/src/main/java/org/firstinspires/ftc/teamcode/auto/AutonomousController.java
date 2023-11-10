@@ -92,16 +92,18 @@ public class AutonomousController {
         // Initial subsystem movements
         MoveElbowCommand elbowCommand = new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION);
         SequentialCommandGroup autoStartCommand = new SequentialCommandGroup(
-                new InstantCommand(claw::closeClawSingle, claw),
+                new InstantCommand(claw::closeClawSingle),
                 new WaitCommand(500),
-                new InstantCommand(intake::mediumPosition, intake),
+                new InstantCommand(intake::mediumPosition),
                 new WaitCommand(1000),
                 elbowCommand
         );
         autoStartCommand.schedule();
         while (!elbowCommand.isFinished() && canContinue()) {
             CommandScheduler.getInstance().run();
+            updateStatus("Running commands");
         }
+
 
         // Sets robot position in Road Runner
         drive.setPoseEstimate(startPosition);
@@ -155,7 +157,7 @@ public class AutonomousController {
                     new InstantCommand(intake::downPosition),
                     new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION),
                     new InstantCommand(claw::openClaw, claw),
-                    new WaitCommand(110),
+                    new WaitCommand(250),
                     slideCommand,
                     finalCommand
             );
@@ -166,13 +168,13 @@ public class AutonomousController {
             if (isBlueAlliance) {
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
-                        .turn(Math.toRadians(-85))
+                        .turn(Math.toRadians(-90))
                         .lineTo(new Vector2d(46, 60))
                         .build());
             } else {
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
-                        .turn(Math.toRadians(85))
+                        .turn(Math.toRadians(90))
                         .lineTo(new Vector2d(46, -60))
                         .build());
             }
@@ -254,7 +256,7 @@ public class AutonomousController {
         if (gameElementPosition == 0){
             pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
                     .forward(25)
-                    .strafeLeft(6)
+                    .strafeLeft(8)
                     .build();
             extraMovement = 0.1;
         }

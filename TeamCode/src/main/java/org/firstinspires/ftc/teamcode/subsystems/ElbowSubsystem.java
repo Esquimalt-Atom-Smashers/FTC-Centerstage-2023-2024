@@ -88,7 +88,6 @@ public class ElbowSubsystem extends SubsystemBase {
         telemetry.addData("Position", elbowMotor.getCurrentPosition());
         telemetry.addData("Target", target);
         telemetry.addData("State", state);
-        telemetry.addLine("--- ---");
     }
 
     public void runPID() {
@@ -113,6 +112,6 @@ public class ElbowSubsystem extends SubsystemBase {
     }
 
     public boolean isAtTarget() {
-        return state != PIDSubsystemState.MOVING_TO_TARGET;
+        return state == PIDSubsystemState.AT_TARGET;
     }
 }
