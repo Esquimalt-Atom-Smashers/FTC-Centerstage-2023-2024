@@ -10,12 +10,15 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.roadrunner.util.Encoder;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 import java.util.Arrays;
 
-@Config
+/**
+ * A subsystem representing the wheels and gyro of the robot. Uses four {@link DcMotorEx} for the wheels and a {@link BNO055IMU} for the gyro
+ */
 public class DriveSubsystem extends SubsystemBase {
     // Motors
     private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
@@ -26,12 +29,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     private double snapTarget;
 
-    // PID controllers
-//    private final PIDController forwardPIDController;
-
     public static double forwardTarget;
     private boolean atForwardTarget;
 
+    /**
+     * Constructor that initializes the four {@link DcMotorEx} and adds them to an array. Also sets their direction
+     * correctly, sets their zero power behaviour to brake, resets their encoders. Initializes the gyro.
+     * @param hardwareMap The hardware map of the robot
+     */
     public DriveSubsystem(HardwareMap hardwareMap) {
         // Initialize the motors
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, FRONT_LEFT_MOTOR_NAME);
@@ -162,7 +167,7 @@ public class DriveSubsystem extends SubsystemBase {
             t.addData("Would be turning", -AUTO_SNAP_POWER);
             drive(0, 0, -AUTO_SNAP_POWER);
 
-        };
+        }
     }
 
     public boolean isFinishedSnapping() {
@@ -180,19 +185,19 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void halfStepLeft() {
         // Add or subtract the half step value to strafe to the left
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - HALF_STEP_VALUE);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + HALF_STEP_VALUE);
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - HALF_STEP_VALUE);
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + HALF_STEP_VALUE);
         drive(0, -AUTO_STEP_POWER, 0);
     }
 
     public void halfStepRight() {
         // Add or subtract the half step value to strafe to the right
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + TargetPosition.HALF_STEP.getTarget());
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - TargetPosition.HALF_STEP.getTarget());
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + HALF_STEP_VALUE);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - HALF_STEP_VALUE);
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + HALF_STEP_VALUE);
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - HALF_STEP_VALUE);
         drive(0, AUTO_STEP_POWER, 0);
     }
 
@@ -235,11 +240,9 @@ public class DriveSubsystem extends SubsystemBase {
         return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
-    public void printPower(Telemetry telemetry) {
-        telemetry.addData("FLM", frontLeftMotor.getVelocity());
-        telemetry.addData("FRM", frontRightMotor.getVelocity());
-        telemetry.addData("RLM", rearLeftMotor.getVelocity());
-        telemetry.addData("RRM", rearRightMotor.getVelocity());
+    public void printData(Telemetry telemetry) {
+        telemetry.addLine("--- Drive base ---");
+        telemetry.addLine("--- ---");
     }
 
     //Define lower-level methods here. (Methods that are private or work behind the scenes)
@@ -265,18 +268,6 @@ public class DriveSubsystem extends SubsystemBase {
         return scaleInput(input, SCALED);
     }
 
-    public void printData(Telemetry t) {
-        t.addData("Target", forwardTarget);
-        t.addData("FL", frontLeftMotor.getCurrentPosition());
-        t.addData("FLT", frontLeftMotor.getTargetPosition());
-        t.addData("FR", frontRightMotor.getCurrentPosition());
-        t.addData("FRT", frontRightMotor.getTargetPosition());
-        t.addData("RL", rearLeftMotor.getCurrentPosition());
-        t.addData("RLT", rearLeftMotor.getTargetPosition());
-        t.addData("RR", rearRightMotor.getCurrentPosition());
-        t.addData("RRT", rearRightMotor.getTargetPosition());
-    }
-
     private boolean isWithinTolerance(double input, double target, double tolerance) {
         return Math.abs(input - target) <= tolerance;
     }
@@ -296,18 +287,5 @@ public class DriveSubsystem extends SubsystemBase {
                 frontLeftMotor.getCurrentPosition() + frontRightMotor.getCurrentPosition() +
                 rearLeftMotor.getCurrentPosition() + rearRightMotor.getCurrentPosition()
                 ) / 4;
-    }
-
-    enum TargetPosition {
-        HALF_STEP(-1);
-
-        private int inches;
-        TargetPosition(int inches) {
-            this.inches = inches;
-        }
-
-        int getTarget() {
-            return (int) (inches);
-        }
     }
 }

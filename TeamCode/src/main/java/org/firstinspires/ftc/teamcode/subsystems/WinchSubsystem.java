@@ -11,7 +11,6 @@ public class WinchSubsystem extends SubsystemBase {
     private final DcMotorEx winchMotor;
 
     public WinchSubsystem(HardwareMap hardwareMap) {
-        // Initialize the servo
         winchMotor = hardwareMap.get(DcMotorEx.class, WINCH_MOTOR_NAME);
 
         winchMotor.setDirection(WINCH_MOTOR_DIRECTION);

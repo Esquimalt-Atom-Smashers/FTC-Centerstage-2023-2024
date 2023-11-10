@@ -67,6 +67,8 @@ public class Constants {
 
         public static final double AUTO_STEP_POWER = 0;
         public static final double AUTO_STEP_TOLERANCE = 50;
+
+        public static final int HALF_STEP_VALUE = -1;
     }
 
     public static class DroneConstants {
