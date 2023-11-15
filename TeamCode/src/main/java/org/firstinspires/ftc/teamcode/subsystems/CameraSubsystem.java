@@ -34,7 +34,8 @@ public class CameraSubsystem extends SubsystemBase {
 
 
     /**
-     * Initialize the {@link AprilTagProcessor} using the {@link AprilTagProcessor.Builder}. Also initializes the {@link VisionPortal}
+     * Creates a new CameraSubsystem. Initializes the {@link AprilTagProcessor} using the {@link AprilTagProcessor.Builder}.
+     * Also initializes the {@link VisionPortal} using the webcam connected to the robot.
      * @param hardwareMap The hardware map of the robot
      */
     public CameraSubsystem(HardwareMap hardwareMap) {

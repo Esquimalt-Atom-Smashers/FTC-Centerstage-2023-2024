@@ -17,7 +17,7 @@ public class ClawSubsystem extends SubsystemBase {
     private final ServoEx clawServo;
 
     /**
-     * Initializes the {@link ServoEx} using the provided {@link HardwareMap}.
+     * Creates a new ClawSubsystem. Initializes the {@link ServoEx} using the provided {@link HardwareMap}.
      * @param hardwareMap The hardware map of the robot
      */
     public ClawSubsystem(HardwareMap hardwareMap) {

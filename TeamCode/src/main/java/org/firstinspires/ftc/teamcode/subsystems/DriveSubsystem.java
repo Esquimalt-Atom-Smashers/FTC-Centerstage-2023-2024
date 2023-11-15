@@ -33,7 +33,7 @@ public class DriveSubsystem extends SubsystemBase {
     private boolean atForwardTarget;
 
     /**
-     * Constructor that initializes the four {@link DcMotorEx} and adds them to an array. Also sets their direction
+     * Create a new DriveSubsystem. Initializes the four {@link DcMotorEx} and adds them to an array. Also sets their direction
      * correctly, sets their zero power behaviour to brake, resets their encoders. Initializes the gyro.
      * @param hardwareMap The hardware map of the robot
      */
@@ -68,7 +68,14 @@ public class DriveSubsystem extends SubsystemBase {
 //        forwardPIDController = new PIDController(fP, fI, fD);
     }
 
-    // Main drive method that controls the robot
+    /**
+     * Drives the robot using joystick input.
+     * @param forward The amount to move forward
+     * @param strafe The amount to move left and right
+     * @param turn The amount to turn
+     * @param fieldCentric If we want this drive to be field centric. Default is true
+     * @param scaled If we want the inputs to be scaled. Default is true
+     */
     public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
@@ -94,11 +101,19 @@ public class DriveSubsystem extends SubsystemBase {
 
     }
 
+    /**
+     * Drives the robot using joystick input.
+     * @param forward The amount to move forward
+     * @param strafe The amount to move left and right
+     * @param turn The amount to turn
+     */
     public void drive(double forward, double strafe, double turn) {
         drive(forward, strafe, turn, FIELD_CENTRIC, SCALED);
     }
 
-    // Auto drive
+    /**
+     * Unused method
+     */
     public void drive() {
 //        drive(forward() ? AUTO_DRIVE_SPEED : -AUTO_DRIVE_SPEED, 0, 0);
 
@@ -251,6 +266,13 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Take the input and scale it if needed, while also clipping it to between -1 and 1
+
+    /**
+     * Takes a joystick input and clips it.
+     * @param input The input to scale
+     * @param isScaled If we want to scale the input
+     * @return The input clipped between -1 and 1
+     */
     private double scaleInput(double input, boolean isScaled) {
         if (isScaled) {
             // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
