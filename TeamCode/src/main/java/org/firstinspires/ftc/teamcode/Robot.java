@@ -108,9 +108,7 @@ public class Robot {
         ));
 
         // DriveSubsystem
-        driveSubsystem.setDefaultCommand(new RunCommand(() -> {
-            driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
-        }, driveSubsystem));
+        driveSubsystem.setDefaultCommand(new RunCommand(() -> driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX()), driveSubsystem));
 
 //        Trigger autoDriveTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
 //        autoDriveTrigger.toggleWhenActive(new AutoDriveCommand(driveSubsystem, 1000), new AutoDriveCommand(driveSubsystem, -1000));
@@ -160,8 +158,8 @@ public class Robot {
 
         // LinearSlideSubsystem
         linearSlideSubsystem.setDefaultCommand(new RunCommand(() -> {
-            if (operatorGamepad.getRightY() >= 0.1) linearSlideSubsystem.retractManually();
-            else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually();
+            if (operatorGamepad.getRightY() >= 0.1) linearSlideSubsystem.retractManually(1);
+            else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually(1);
             else linearSlideSubsystem.stop();
         }, linearSlideSubsystem));
 
@@ -348,10 +346,11 @@ public class Robot {
         driveLoop();
 
         // Elbow Subsystem (operator)
-        // X -> Raise, Y -> Lower, Start(held) ->  halves the speed
-        if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually(operatorGamepad.getButton(GamepadKeys.Button.START) ? 0.5 : 1);
-        else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually(operatorGamepad.getButton(GamepadKeys.Button.START) ? 0.5 : 1);
+        // X -> Raise, Y -> Lower, Moving the left joystick from bottom to top increases the speed
+        if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually((operatorGamepad.getLeftY() + 1) / 2);
+        else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually((operatorGamepad.getLeftY() + 1) / 2);
         else elbowSubsystem.stop();
+        elbowSubsystem.printData(opMode.telemetry);
 
         // Intake Subsystem (operator)
         // Left -> Intake, Right -> Outtake, Up -> Move intake up, Down -> Move intake down
@@ -362,15 +361,17 @@ public class Robot {
         else intakeSubsystem.stop();
 
         // Linear Slide Subsystem (operator)
-        // Right bumper -> Extend, Left bumper -> Retract
-        if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) linearSlideSubsystem.extendManually();
-        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) linearSlideSubsystem.retractManually();
+        // Right bumper -> Extend, Left bumper -> Retract, Moving the left joystick from bottom to top increases the speed
+        if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) linearSlideSubsystem.extendManually((operatorGamepad.getLeftY() + 1) / 2);
+        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) linearSlideSubsystem.retractManually((operatorGamepad.getLeftY() + 1) / 2);
         else linearSlideSubsystem.stop();
+        linearSlideSubsystem.printData(opMode.telemetry);
 
         // Claw Subsystem (operator)
         // A -> Open, B -> Close
         if (operatorGamepad.getButton(GamepadKeys.Button.A)) clawSubsystem.openClaw();
         if (operatorGamepad.getButton(GamepadKeys.Button.B)) clawSubsystem.closeClaw();
+        clawSubsystem.printPosition(opMode.telemetry);
 
         // Drone subsystem (driver)
         // Right bumper -> Release, Left bumper -> Go to start position

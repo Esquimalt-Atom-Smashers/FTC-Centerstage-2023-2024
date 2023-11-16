@@ -55,18 +55,18 @@ public class LinearSlideSubsystem extends SubsystemBase {
         setTarget(TILT_POSITION);
     }
 
-    public void extendManually() {
+    public void extendManually(double multiplier) {
         state = PIDSubsystemState.MANUAL;
         if (isSafeToMove())
-            slideMotor.setPower(EXTEND_POWER);
+            slideMotor.setPower(EXTEND_POWER * multiplier);
         else
             stop();
     }
 
-    public void retractManually() {
+    public void retractManually(double multiplier) {
         state = PIDSubsystemState.MANUAL;
         if (isSafeToMove())
-            slideMotor.setPower(RETRACT_POWER);
+            slideMotor.setPower(RETRACT_POWER * multiplier);
         else
             stop();
     }
@@ -122,6 +122,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
         telemetry.addLine("--- Slide ---");
         telemetry.addData("Position", slideMotor.getCurrentPosition());
         telemetry.addData("Target", target);
+        telemetry.addData("State", state);
         telemetry.addData("Error", Math.abs(slideMotor.getCurrentPosition() - target));
         telemetry.addData("Last power", lastPower);
         telemetry.addData("Last last power", lastLastPower);

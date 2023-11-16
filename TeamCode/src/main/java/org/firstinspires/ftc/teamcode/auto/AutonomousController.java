@@ -92,6 +92,8 @@ public class AutonomousController {
         // Initial subsystem movements
         MoveElbowCommand elbowCommand = new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION);
         SequentialCommandGroup autoStartCommand = new SequentialCommandGroup(
+//                new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
+                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
                 new InstantCommand(claw::closeClawSingle),
                 new WaitCommand(500),
                 new InstantCommand(intake::mediumPosition),

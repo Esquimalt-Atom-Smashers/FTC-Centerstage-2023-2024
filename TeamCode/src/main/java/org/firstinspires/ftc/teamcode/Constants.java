@@ -50,7 +50,7 @@ public class Constants {
         public static final DcMotorSimple.Direction REAR_RIGHT_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
         public static final boolean FIELD_CENTRIC = true;
-        public static final boolean SCALED = true;
+        public static final boolean SCALED = false;
         public static final double INPUT_MULTIPLIER = 1f;
         public static final double DEADZONE = 0.1;
 
