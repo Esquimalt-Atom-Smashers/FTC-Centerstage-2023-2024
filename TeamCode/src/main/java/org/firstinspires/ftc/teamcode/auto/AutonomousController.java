@@ -158,8 +158,9 @@ public class AutonomousController {
             SequentialCommandGroup placeYellowPixel = new SequentialCommandGroup(
                     new InstantCommand(intake::downPosition),
                     new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION),
+                    new WaitCommand(500),
                     new InstantCommand(claw::openClaw, claw),
-                    new WaitCommand(250),
+                    new WaitCommand(500),
                     slideCommand,
                     finalCommand
             );
@@ -171,13 +172,13 @@ public class AutonomousController {
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
                         .turn(Math.toRadians(-90))
-                        .lineTo(new Vector2d(46, 60))
+                        .lineTo(new Vector2d(49, 60))
                         .build());
             } else {
                 drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                         .back(3)
                         .turn(Math.toRadians(90))
-                        .lineTo(new Vector2d(46, -60))
+                        .lineTo(new Vector2d(49, -60))
                         .build());
             }
 

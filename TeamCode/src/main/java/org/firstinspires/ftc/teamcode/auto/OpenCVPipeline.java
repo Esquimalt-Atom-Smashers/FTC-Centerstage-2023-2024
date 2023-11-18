@@ -26,6 +26,8 @@ public class OpenCVPipeline extends OpenCvPipeline {
     public Mat processFrame(Mat input) {
         cameraReady = true;
         this.input = input;
+
+        // Cycle between masks for the drivers to look at pregame. I mean they wont be able to do anything about it anyways.
         frameCount++;
         if (frameCount < 30){ addPreGameColorMask(currentPregameMask); }
         else if (currentPregameMask < 1){

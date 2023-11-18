@@ -19,9 +19,9 @@ public class Constants {
 
     public static class CameraConstants {
         public static final String CAMERA_NAME = "camera";
-        public static final double DETECTION_THRESHOLD = 0.75;
-        public static final Scalar LOWER_RED = new Scalar(0, 198, 72);
-        public static final Scalar LOWER_BLUE = new Scalar(22.7, 77.9, 184.2);
+        public static final double DETECTION_THRESHOLD = 0.60;
+        public static final Scalar LOWER_RED = new Scalar(0, 167, 75);
+        public static final Scalar LOWER_BLUE = new Scalar(23, 78, 184);
         public static final Scalar UPPER = new Scalar(255, 255, 255);
     }
 
@@ -94,7 +94,7 @@ public class Constants {
         // 4750 level
         // 23000 straight up / climbing
         // TODO: Change these to ints (and others of the same type)
-        public static final int INTAKE_POSITION = 500, DRIVING_POSITION = 2000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = 13000, VERTICAL_POSITION = 23000;
+        public static final int INTAKE_POSITION = 500, DRIVING_POSITION = 2000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = 11000, VERTICAL_POSITION = 23000;
         public static final int TILT_POSITION = 3350;
         public static final int TEST_POSITION = 15000;
 

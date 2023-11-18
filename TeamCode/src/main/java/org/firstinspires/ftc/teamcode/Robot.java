@@ -370,6 +370,7 @@ public class Robot {
         // Claw Subsystem (operator)
         // A -> Open, B -> Close
         if (operatorGamepad.getButton(GamepadKeys.Button.A)) clawSubsystem.openClaw();
+        if (operatorGamepad.getButton(GamepadKeys.Button.START)) clawSubsystem.closeClawSingle();
         if (operatorGamepad.getButton(GamepadKeys.Button.B)) clawSubsystem.closeClaw();
         clawSubsystem.printPosition(opMode.telemetry);
 

@@ -24,9 +24,9 @@ import org.openftc.easyopencv.OpenCvPipeline;
  * ** Note that these values will not save and will need to be copied into the Constants.CameraConstants class. **
  */
 public class OpenCVTesting extends OpenCvPipeline {
-    public double DETECTION_THRESHOLD = 0.75;
-    public Scalar LOWER_RED = new Scalar(88, 190, 82);
-    public Scalar LOWER_BLUE = new Scalar(3, 0, 166);
+    public double DETECTION_THRESHOLD = 0.7;
+    public Scalar LOWER_RED = new Scalar(79, 91, 167);
+    public Scalar LOWER_BLUE = new Scalar(23, 78, 184);
     Scalar UPPER = new Scalar(255, 255, 255);
     public int setMask = -2;
 
