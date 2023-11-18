@@ -153,15 +153,15 @@ public class AutonomousController {
 
             // Scoring yellow pixel
             updateStatus("Moving slide");
-            MoveSlideCommand slideCommand = new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION);
             finalCommand = new WaitCommand(1);
             SequentialCommandGroup placeYellowPixel = new SequentialCommandGroup(
                     new InstantCommand(intake::downPosition),
+                    new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION),
                     new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION),
-                    new WaitCommand(500),
+                    new WaitCommand(750),
                     new InstantCommand(claw::openClaw, claw),
-                    new WaitCommand(500),
-                    slideCommand,
+                    new WaitCommand(750),
+                    new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
                     finalCommand
             );
             placeYellowPixel.schedule();

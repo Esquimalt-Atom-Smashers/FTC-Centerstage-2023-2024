@@ -100,6 +100,10 @@ public class Robot {
         // CameraSubsystem
 
         // ClawSubsystem
+        clawSubsystem.setDefaultCommand(new RunCommand(() -> {
+            if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) clawSubsystem.closeClaw();
+            if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) clawSubsystem.openClaw();
+        }, clawSubsystem));
         Trigger clawTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && scoringState == ScoringState.DRIVING);
         clawTrigger.whenActive(new SequentialCommandGroup(
                 new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
@@ -245,9 +249,9 @@ public class Robot {
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
         ));
 
-        Trigger leftInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && !operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-        Trigger centerInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-        Trigger rightInstructionTrigger = new Trigger(() -> !operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
+//        Trigger leftInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && !operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
+//        Trigger centerInstructionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
+//        Trigger rightInstructionTrigger = new Trigger(() -> !operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
     }
 
     /**
