@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Robot;
 
 import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
@@ -120,12 +121,13 @@ public class LinearSlideSubsystem extends SubsystemBase {
 
     public void printData(Telemetry telemetry) {
         telemetry.addLine("--- Slide ---");
+        telemetry.addData("State", state);
         telemetry.addData("Position", slideMotor.getCurrentPosition());
         telemetry.addData("Target", target);
-        telemetry.addData("State", state);
-        telemetry.addData("Error", Math.abs(slideMotor.getCurrentPosition() - target));
-        telemetry.addData("Last power", lastPower);
-        telemetry.addData("Last last power", lastLastPower);
+        telemetry.addData("Power", slideMotor.getPower());
+        telemetry.addData("Velocity", slideMotor.getVelocity());
+        telemetry.addData("Current (amps)", slideMotor.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Is over current?", slideMotor.isOverCurrent());
     }
 
     public boolean isSafeToMove() {

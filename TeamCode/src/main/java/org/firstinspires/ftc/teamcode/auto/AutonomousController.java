@@ -28,12 +28,22 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutonomousController {
 
+    enum State {
+        SETTING_UP,
+        MOVING_TO_SPIKE_MARKS,
+        MOVING_TO_ELEMENT,
+        PLACING_PURPLE,
+        MOVING_TO_BACKDROP,
+        PLACING_YELLOW,
+        HIDING,
+        IDLE
+    }
+
     /*
     TODO after scrimmage: Implement a finite state machine like
         https://github.com/NoahBres/road-runner-quickstart/blob/advanced-examples/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/drive/advanced/AsyncFollowingFSM.java
         so we can move PID controlled subsystem while we are moving
     */
-    private AutoOpMode opMode;
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
 
@@ -65,9 +75,18 @@ public class AutonomousController {
     private OpenCVPipeline pipeline;
     private OpenCvWebcam webcam;
 
+    private State currentState = State.IDLE;
+
+    private SequentialCommandGroup setUpCommand;
+    private SequentialCommandGroup placePurplePixel;
+    private SequentialCommandGroup armToPlacePosition;
+    private SequentialCommandGroup placeYellowPixel;
+
+    private WaitCommand currentCommand;
+
+
     public AutonomousController(AutoOpMode autoOpMode) {
         this(autoOpMode.hardwareMap, autoOpMode.telemetry);
-        this.opMode = autoOpMode;
     }
 
     public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -80,12 +99,89 @@ public class AutonomousController {
         slide = new LinearSlideSubsystem(hardwareMap);
         updateStatus("Not Ready (Starting OpenCVPipeline)");
         startOpenCV();
-        while (!pipeline.cameraReady && canContinue()) updateStatus("Not Ready (Waiting for camera)");
+        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)");
         updateStatus("Ready");
     }
 
+    public void initializeCommands() {
+        setUpCommand = new SequentialCommandGroup(
+                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
+                new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
+                new InstantCommand(claw::closeClawSingle),
+                new WaitCommand(500),
+                new InstantCommand(intake::mediumPosition)
+        );
+    }
+
+    public void startStateMachine() {
+        currentCommand = scheduleCommand(setUpCommand);
+    }
+
+    public void runStateMachine() {
+
+        switch (currentState) {
+            case SETTING_UP:
+                if (currentCommand.isFinished()) {
+                    currentState = State.MOVING_TO_SPIKE_MARKS;
+                    // Start moving to spike marks
+                }
+                break;
+            case MOVING_TO_SPIKE_MARKS:
+                if (!drive.isBusy()) {
+                    currentState = State.MOVING_TO_ELEMENT;
+                    // Start moving to the correct spike mark (could maybe move in one motion)
+                }
+                break;
+            case MOVING_TO_ELEMENT:
+                if (!drive.isBusy()) {
+                    currentState = State.PLACING_PURPLE;
+                    // Place the purple pixel on the correct spike mark
+                }
+                break;
+            case PLACING_PURPLE:
+                // TODO: Replace with command
+                if (true) {
+                    currentState = State.MOVING_TO_BACKDROP;
+                    // Start moving to the backdrop
+                }
+                break;
+            case MOVING_TO_BACKDROP:
+                if (!drive.isBusy()) {
+                    currentState = State.PLACING_YELLOW;
+                    // Place the yellow pixel on the backdrop
+                }
+                break;
+            case PLACING_YELLOW:
+                // TODO: Replace with command
+                if (true) {
+                    currentState = State.HIDING;
+                    // Move to the corner to get out of the way
+                }
+                break;
+            case HIDING:
+                if (!drive.isBusy()) {
+                    currentState = State.IDLE;
+                    // We are done, idle
+                }
+                break;
+            case IDLE:
+                break;
+        }
+
+        CommandScheduler.getInstance().run();
+        drive.update();
+        updateStatus(currentState.toString());
+    }
+
+    private WaitCommand scheduleCommand(SequentialCommandGroup command) {
+        WaitCommand waitCommand = new WaitCommand(1);
+        command.addCommands(waitCommand);
+        command.schedule();
+        return waitCommand;
+    }
+
     public void run() {
-        while (!pipeline.cameraReady && canContinue()) updateStatus("Waiting for camera");
+        while (!pipeline.cameraReady) updateStatus("Waiting for camera");
         gameElementPosition = pipeline.findGameElement(isBlueAlliance);
         webcam.closeCameraDevice();
 
@@ -101,7 +197,7 @@ public class AutonomousController {
                 elbowCommand
         );
         autoStartCommand.schedule();
-        while (!elbowCommand.isFinished() && canContinue()) {
+        while (!elbowCommand.isFinished()) {
             CommandScheduler.getInstance().run();
             updateStatus("Running commands");
         }
@@ -165,7 +261,7 @@ public class AutonomousController {
                     finalCommand
             );
             placeYellowPixel.schedule();
-            while (!finalCommand.isFinished() && canContinue()) {
+            while (!finalCommand.isFinished()) {
                 CommandScheduler.getInstance().run();
             }
             if (isBlueAlliance) {
@@ -314,7 +410,7 @@ public class AutonomousController {
             }
             telemetry.update();
 
-        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.25 && canContinue()); // +-1/4" tolerance
+        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.25); // +-1/4" tolerance
 
 //         Line up with april tag
         do {
@@ -331,7 +427,7 @@ public class AutonomousController {
                     drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeRight(aprilTagLateralDistance).build());
             }
             telemetry.update();
-        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1 && canContinue()); // +-1" tolerance
+        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1); // +-1" tolerance
     }
 
     private void startOpenCV(){
@@ -358,11 +454,4 @@ public class AutonomousController {
         telemetry.addData("Status", text);
         telemetry.update();
     }
-
-    private boolean canContinue() {
-        // TODO: figure out a way to check if there is a stop requested from opmode, to stop the controller from crashing when the robot stops its auto routine earlier
-        return true;
-//        return opMode.canContinue();
-    }
-
 }

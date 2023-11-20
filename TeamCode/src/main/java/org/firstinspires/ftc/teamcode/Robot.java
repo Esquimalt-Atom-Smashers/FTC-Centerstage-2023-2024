@@ -165,6 +165,8 @@ public class Robot {
             if (operatorGamepad.getRightY() >= 0.1) linearSlideSubsystem.retractManually(1);
             else if (operatorGamepad.getRightY() <= -0.1) linearSlideSubsystem.extendManually(1);
             else linearSlideSubsystem.stop();
+
+            opMode.telemetry.addData("Input", operatorGamepad.getRightY());
         }, linearSlideSubsystem));
 
         // WinchSubsystem
@@ -278,7 +280,7 @@ public class Robot {
         // Print data from subsystems
         opMode.telemetry.addData("Scoring state", scoringState);
         opMode.telemetry.addData("Driving state", driveState);
-        elbowSubsystem.printData(opMode.telemetry);
+//        elbowSubsystem.printData(opMode.telemetry);
         linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
 
