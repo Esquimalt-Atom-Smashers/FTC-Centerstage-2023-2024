@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
-@TeleOp(name = "Manual Opmode", group = "Linear Opmode")
+@TeleOp(name = "Manual", group = "Testing")
 public class ManualOpMode extends LinearOpMode {
 
     private Robot robot;

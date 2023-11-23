@@ -104,6 +104,7 @@ public class Robot {
             if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) clawSubsystem.closeClaw();
             if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) clawSubsystem.openClaw();
         }, clawSubsystem));
+
         Trigger clawTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && scoringState == ScoringState.DRIVING);
         clawTrigger.whenActive(new SequentialCommandGroup(
                 new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
@@ -256,11 +257,16 @@ public class Robot {
 //        Trigger rightInstructionTrigger = new Trigger(() -> !operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER) && operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
     }
 
+    public void resetEncoders() {
+        linearSlideSubsystem.resetEncoder();
+        elbowSubsystem.resetEncoder();
+        driveSubsystem.resetEncoder();
+    }
+
     /**
      * Schedule any commands that run at the start of teleop mode
      */
     public void start() {
-//        droneSubsystem.startPosition();
 //        new SequentialCommandGroup(
 //                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
 //                new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
@@ -278,9 +284,10 @@ public class Robot {
             CommandScheduler.getInstance().run();
 
         // Print data from subsystems
-        opMode.telemetry.addData("Scoring state", scoringState);
-        opMode.telemetry.addData("Driving state", driveState);
+//        opMode.telemetry.addData("Scoring state", scoringState);
+//        opMode.telemetry.addData("Driving state", driveState);
 //        elbowSubsystem.printData(opMode.telemetry);
+        driveSubsystem.printData(opMode.telemetry);
         linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
 
@@ -390,6 +397,12 @@ public class Robot {
         if (driverGamepad.getButton(GamepadKeys.Button.A)) winchSubsystem.winch();
         else if (driverGamepad.getButton(GamepadKeys.Button.B)) winchSubsystem.unwinch();
         else winchSubsystem.stop();
+
+        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) linearSlideSubsystem.resetEncoder();
+
+        linearSlideSubsystem.printData(opMode.telemetry);
+        opMode.telemetry.update();
+
     }
 
 //    public void runPIDControllers() {

@@ -96,7 +96,9 @@ public class AutonomousController {
         claw = new ClawSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         elbow = new ElbowSubsystem(hardwareMap);
+        elbow.resetEncoder();
         slide = new LinearSlideSubsystem(hardwareMap);
+        slide.resetEncoder();
         updateStatus("Not Ready (Starting OpenCVPipeline)");
         startOpenCV();
         while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)");

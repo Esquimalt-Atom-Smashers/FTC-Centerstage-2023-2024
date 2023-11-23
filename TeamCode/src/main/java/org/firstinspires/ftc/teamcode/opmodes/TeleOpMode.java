@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
+@TeleOp(name = "Tele OpMode", group = "Real")
+public class TeleOpMode extends LinearOpMode {
 
-@TeleOp(name="Main", group = "Real")
-public class MainOpMode extends LinearOpMode {
     private Robot robot;
 
     @Override
@@ -17,11 +17,11 @@ public class MainOpMode extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         robot = new Robot(this);
 
-        // Perform actions that happen before the Robot starts
-
+        robot.resetEncoders();
         robot.start();
 
         waitForStart();
+
         while (opModeIsActive() && !isStopRequested()) {
             robot.run();
         }

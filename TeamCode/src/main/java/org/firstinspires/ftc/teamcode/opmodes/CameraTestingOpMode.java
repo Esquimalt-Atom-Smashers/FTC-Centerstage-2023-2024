@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name="Camera Testing Opmode", group="Linear Opmode")
+@TeleOp(name="Camera Testing Opmode", group="Testing")
 public class CameraTestingOpMode extends LinearOpMode {
 
     ExposureControl exposureControl;

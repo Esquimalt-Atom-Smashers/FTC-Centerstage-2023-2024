@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.roadrunner.util.Encoder;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
@@ -54,8 +55,6 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Set the motor modes and zero power behavior
         Arrays.stream(motors).forEach(motor -> motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE));
-        setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize the imu
         imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
@@ -66,6 +65,11 @@ public class DriveSubsystem extends SubsystemBase {
         imu.initialize(parameters);
 
 //        forwardPIDController = new PIDController(fP, fI, fD);
+    }
+
+    public void resetEncoder() {
+        setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     /**
@@ -257,6 +261,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void printData(Telemetry telemetry) {
         telemetry.addLine("--- Drive base ---");
+        telemetry.addData("Position", frontLeftMotor.getCurrentPosition());
+        telemetry.addData("Power", frontLeftMotor.getPower());
+        telemetry.addData("Velocity", frontLeftMotor.getVelocity());
+        telemetry.addData("Current (amps)", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Is over current?", frontLeftMotor.isOverCurrent());
     }
 
     //Define lower-level methods here. (Methods that are private or work behind the scenes)

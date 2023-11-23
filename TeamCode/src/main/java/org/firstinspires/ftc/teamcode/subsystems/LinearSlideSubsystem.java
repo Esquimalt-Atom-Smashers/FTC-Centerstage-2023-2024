@@ -39,6 +39,10 @@ public class LinearSlideSubsystem extends SubsystemBase {
         state = PIDSubsystemState.MANUAL;
     }
 
+    public void resetEncoder() {
+        slideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
     public void extend() {
         setTarget(OUT_POSITION);
