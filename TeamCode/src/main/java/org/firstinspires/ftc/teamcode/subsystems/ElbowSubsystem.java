@@ -45,7 +45,7 @@ public class ElbowSubsystem extends SubsystemBase {
      */
     public void resetEncoder() {
         elbowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbowMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        elbowMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     /**

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 
 @Autonomous(group = "auto")
-public class AutoRedRight extends AutoOpMode {
+public class AutoRedRight extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         AutonomousController autonomousController = new AutonomousController(this);

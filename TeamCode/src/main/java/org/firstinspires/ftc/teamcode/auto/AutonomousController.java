@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -13,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
-import org.firstinspires.ftc.teamcode.opmodes.AutoOpMode;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
@@ -29,7 +29,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 public class AutonomousController {
 
     enum State {
-        SETTING_UP,
+        PICKING_UP_PIXELS,
         MOVING_TO_SPIKE_MARKS,
         MOVING_TO_ELEMENT,
         PLACING_PURPLE,
@@ -54,7 +54,6 @@ public class AutonomousController {
     private TrajectorySequence driveToBackdrop;
 
     // Trajectory variables
-    private boolean isBlueAlliance;
     private int aprilTagID;
     private int gameElementPosition;
     private double extraMovement;
@@ -75,6 +74,13 @@ public class AutonomousController {
     private OpenCVPipeline pipeline;
     private OpenCvWebcam webcam;
 
+    private boolean isBlueAlliance;
+    private boolean isUpstage;
+    private boolean isPlacingYellow;
+
+    private float positionMultiplier;
+    private float rotationalOffset;
+
     private State currentState = State.IDLE;
 
     private SequentialCommandGroup setUpCommand;
@@ -85,7 +91,7 @@ public class AutonomousController {
     private WaitCommand currentCommand;
 
 
-    public AutonomousController(AutoOpMode autoOpMode) {
+    public AutonomousController(LinearOpMode autoOpMode) {
         this(autoOpMode.hardwareMap, autoOpMode.telemetry);
     }
 
@@ -101,7 +107,7 @@ public class AutonomousController {
         slide.resetEncoder();
         updateStatus("Not Ready (Starting OpenCVPipeline)");
         startOpenCV();
-        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)");
+        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera) Do not press stop");
         updateStatus("Ready");
     }
 
@@ -109,57 +115,85 @@ public class AutonomousController {
         setUpCommand = new SequentialCommandGroup(
                 new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
                 new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
-                new InstantCommand(claw::closeClawSingle),
+                new InstantCommand(claw::closeClawSingle, claw),
                 new WaitCommand(500),
-                new InstantCommand(intake::mediumPosition)
+                new InstantCommand(intake::mediumPosition, intake),
+                new MoveElbowCommand(elbow, Constants.ElbowConstants.DRIVING_POSITION)
+        );
+        placePurplePixel = new SequentialCommandGroup(
+                new InstantCommand(intake::downPosition, intake),
+                new WaitCommand(250),
+                new InstantCommand(intake::intake, intake),
+                new WaitCommand(250),
+                new InstantCommand(intake::stop, intake),
+                new InstantCommand(intake::mediumPosition, intake)
+        );
+        armToPlacePosition = new SequentialCommandGroup(
+                new InstantCommand(intake::downPosition, intake),
+                new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION),
+                new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION)
+        );
+        placeYellowPixel = new SequentialCommandGroup(
+                new InstantCommand(claw::openClaw, claw),
+                new WaitCommand(750),
+                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION)
         );
     }
 
     public void startStateMachine() {
+        currentState = State.PICKING_UP_PIXELS;
         currentCommand = scheduleCommand(setUpCommand);
+        drive.setPoseEstimate(startPosition);
     }
 
     public void runStateMachine() {
-
         switch (currentState) {
-            case SETTING_UP:
-                if (currentCommand.isFinished()) {
+            // Picking up the pixel from the ground as well as waiting for the camera to be ready
+            case PICKING_UP_PIXELS:
+                if (currentCommand.isFinished() && pipeline.cameraReady) {
+                    gameElementPosition = pipeline.findGameElement(isBlueAlliance);
+                    webcam.closeCameraDevice();
                     currentState = State.MOVING_TO_SPIKE_MARKS;
-                    // Start moving to spike marks
+                    drive.followTrajectorySequenceAsync(driveToSpikeMarks());
                 }
                 break;
+            // Carrying the pixels, moving to the center of the spike marks
             case MOVING_TO_SPIKE_MARKS:
                 if (!drive.isBusy()) {
                     currentState = State.MOVING_TO_ELEMENT;
-                    // Start moving to the correct spike mark (could maybe move in one motion)
+                    drive.followTrajectorySequenceAsync(driveToCorrectSpikeMark());
                 }
                 break;
+            // Moving to the correct place to place the purple pixel on the spike mark
             case MOVING_TO_ELEMENT:
                 if (!drive.isBusy()) {
                     currentState = State.PLACING_PURPLE;
-                    // Place the purple pixel on the correct spike mark
+                    currentCommand = scheduleCommand(placePurplePixel);
                 }
                 break;
+            // Placing the purple pixel on the spike mark using the intake
             case PLACING_PURPLE:
-                // TODO: Replace with command
-                if (true) {
-                    currentState = State.MOVING_TO_BACKDROP;
-                    // Start moving to the backdrop
+                if (currentCommand.isFinished()) {
+                    currentState = isUpstage && isPlacingYellow ? State.MOVING_TO_BACKDROP : State.IDLE;
+                    currentCommand = scheduleCommand(armToPlacePosition);
+                    drive.followTrajectorySequenceAsync(driveToBackdrop());
                 }
                 break;
+            // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
-                if (!drive.isBusy()) {
+                if (currentCommand.isFinished() && !drive.isBusy()) {
                     currentState = State.PLACING_YELLOW;
-                    // Place the yellow pixel on the backdrop
+                    currentCommand = scheduleCommand(placeYellowPixel);
                 }
                 break;
+            // Placing the yellow pixel on the backstage
             case PLACING_YELLOW:
-                // TODO: Replace with command
-                if (true) {
+                if (currentCommand.isFinished()) {
                     currentState = State.HIDING;
-                    // Move to the corner to get out of the way
+                    drive.followTrajectorySequenceAsync(driveToCorner());
                 }
                 break;
+            // Moving to the corner to leave room
             case HIDING:
                 if (!drive.isBusy()) {
                     currentState = State.IDLE;
@@ -173,6 +207,7 @@ public class AutonomousController {
         CommandScheduler.getInstance().run();
         drive.update();
         updateStatus(currentState.toString());
+
     }
 
     private WaitCommand scheduleCommand(SequentialCommandGroup command) {
@@ -181,6 +216,51 @@ public class AutonomousController {
         command.schedule();
         return waitCommand;
     }
+
+    public void setSettings(boolean isBlue, boolean isUpstage, boolean isPlacingYellow) {
+        isBlueAlliance = isBlue;
+        this.isUpstage = isUpstage;
+        this.isPlacingYellow = isPlacingYellow;
+        // TODO: Check this
+        positionMultiplier = isBlueAlliance ? 1 : -1;
+        rotationalOffset = isBlueAlliance ? 0 : 180;
+        // TODO: Check
+        startPosition = new Pose2d(isUpstage ? 11.5 : -35.5, 62 * positionMultiplier, Math.toRadians(isBlue ? 270 : 90));
+//        public void redLeft(){
+//            startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
+//        public void blueRight(){
+//            startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
+//        public void redRight(){
+//            startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
+//        public void blueLeft(){
+//            startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
+    }
+
+    private TrajectorySequence driveToSpikeMarks() {
+        // TODO: Get trajectory
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
+    }
+
+    private TrajectorySequence driveToCorrectSpikeMark() {
+        // TODO: Get trajectory
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
+    }
+
+    private TrajectorySequence driveToBackdrop() {
+        // TODO: Get trajectory
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
+    }
+
+    private TrajectorySequence driveToCorner() {
+        // TODO: Check the math in this trajectory
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                .back(3)
+                .turn(Math.toRadians(isBlueAlliance ? -90 : 90))
+                .lineTo(new Vector2d(49, 60 * positionMultiplier))
+                .build();
+    }
+
+    // -------------------------------------------------------------------------------------------
 
     public void run() {
         while (!pipeline.cameraReady) updateStatus("Waiting for camera");
