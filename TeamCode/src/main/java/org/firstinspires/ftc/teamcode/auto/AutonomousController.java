@@ -31,12 +31,18 @@ public class AutonomousController {
     enum State {
         PICKING_UP_PIXELS,
         MOVING_TO_SPIKE_MARKS,
-        MOVING_TO_ELEMENT,
+        MOVING_FROM_SPIKE_MARKS,
         PLACING_PURPLE,
         MOVING_TO_BACKDROP,
         PLACING_YELLOW,
         HIDING,
         IDLE
+    }
+
+    enum SpikeMark {
+        LEFT,
+        RIGHT,
+        MIDDLE
     }
 
     /*
@@ -82,6 +88,7 @@ public class AutonomousController {
     private float rotationalOffset;
 
     private State currentState = State.IDLE;
+    private SpikeMark spikeMarkPosition;
 
     private SequentialCommandGroup setUpCommand;
     private SequentialCommandGroup placePurplePixel;
@@ -152,6 +159,7 @@ public class AutonomousController {
             case PICKING_UP_PIXELS:
                 if (currentCommand.isFinished() && pipeline.cameraReady) {
                     gameElementPosition = pipeline.findGameElement(isBlueAlliance);
+                    spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
                     webcam.closeCameraDevice();
                     currentState = State.MOVING_TO_SPIKE_MARKS;
                     drive.followTrajectorySequenceAsync(driveToSpikeMarks());
@@ -160,13 +168,6 @@ public class AutonomousController {
             // Carrying the pixels, moving to the center of the spike marks
             case MOVING_TO_SPIKE_MARKS:
                 if (!drive.isBusy()) {
-                    currentState = State.MOVING_TO_ELEMENT;
-                    drive.followTrajectorySequenceAsync(driveToCorrectSpikeMark());
-                }
-                break;
-            // Moving to the correct place to place the purple pixel on the spike mark
-            case MOVING_TO_ELEMENT:
-                if (!drive.isBusy()) {
                     currentState = State.PLACING_PURPLE;
                     currentCommand = scheduleCommand(placePurplePixel);
                 }
@@ -174,14 +175,25 @@ public class AutonomousController {
             // Placing the purple pixel on the spike mark using the intake
             case PLACING_PURPLE:
                 if (currentCommand.isFinished()) {
-                    currentState = isUpstage && isPlacingYellow ? State.MOVING_TO_BACKDROP : State.IDLE;
-                    currentCommand = scheduleCommand(armToPlacePosition);
+                    // TODO: Make a way to always turn the correct direction at the end of auto
+                    if (isUpstage && isPlacingYellow) {
+                        currentState = State.MOVING_FROM_SPIKE_MARKS;
+                        currentCommand = scheduleCommand(armToPlacePosition);
+                        drive.followTrajectorySequenceAsync(driveFromSpikeMarks());
+                    }
+                    else currentState = State.IDLE;
+                }
+                break;
+            // Moving out of the way of the pixel and game element
+            case MOVING_FROM_SPIKE_MARKS:
+                if (currentCommand.isFinished() && !drive.isBusy()) {
+                    currentState = State.MOVING_TO_BACKDROP;
                     drive.followTrajectorySequenceAsync(driveToBackdrop());
                 }
                 break;
             // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
-                if (currentCommand.isFinished() && !drive.isBusy()) {
+                if (currentCommand.isFinished()) {
                     currentState = State.PLACING_YELLOW;
                     currentCommand = scheduleCommand(placeYellowPixel);
                 }
@@ -206,7 +218,8 @@ public class AutonomousController {
 
         CommandScheduler.getInstance().run();
         drive.update();
-        updateStatus(currentState.toString());
+        telemetry.addData("State", currentState);
+        telemetry.update();
 
     }
 
@@ -218,7 +231,7 @@ public class AutonomousController {
     }
 
     public void setSettings(boolean isBlue, boolean isUpstage, boolean isPlacingYellow) {
-        isBlueAlliance = isBlue;
+        this.isBlueAlliance = isBlue;
         this.isUpstage = isUpstage;
         this.isPlacingYellow = isPlacingYellow;
         // TODO: Check this
@@ -236,19 +249,54 @@ public class AutonomousController {
 //            startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
     }
 
+    // TODO: Test all trajectories
     private TrajectorySequence driveToSpikeMarks() {
-        // TODO: Get trajectory
+        // I think this drives to the correct spike mark position
+        if (spikeMarkPosition == SpikeMark.LEFT)
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .forward(24)
+                    .turn(Math.toRadians(90))
+                    .strafeRight(5)
+                    .back(2)
+                    .build();
+        else if (spikeMarkPosition == SpikeMark.MIDDLE)
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .forward(25)
+                    .strafeLeft(8)
+                    .build();
+        else if (spikeMarkPosition == SpikeMark.RIGHT)
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .forward(24)
+                    .turn(Math.toRadians(-90))
+                    .strafeLeft(5)
+                    .back(2)
+                    .build();
+
         return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
     }
 
-    private TrajectorySequence driveToCorrectSpikeMark() {
-        // TODO: Get trajectory
+    private TrajectorySequence driveFromSpikeMarks() {
+        if (spikeMarkPosition == SpikeMark.LEFT)
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .strafeLeft(30)
+                    .build();
+        else if (spikeMarkPosition == SpikeMark.MIDDLE)
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .strafeRight(6)
+                    .back(11)
+                    .build();
+        else if (spikeMarkPosition == SpikeMark.RIGHT)
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .strafeRight(30)
+                    .build();
         return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
     }
 
     private TrajectorySequence driveToBackdrop() {
-        // TODO: Get trajectory
-        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                .lineToSplineHeading(new Pose2d(46, 35 * positionMultiplier, Math.toRadians(0)))
+                .strafeRight(extraMovement)
+                .build();
     }
 
     private TrajectorySequence driveToCorner() {
@@ -257,6 +305,12 @@ public class AutonomousController {
                 .back(3)
                 .turn(Math.toRadians(isBlueAlliance ? -90 : 90))
                 .lineTo(new Vector2d(49, 60 * positionMultiplier))
+                .build();
+    }
+
+    private TrajectorySequence testing() {
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                .waitSeconds(1000)
                 .build();
     }
 

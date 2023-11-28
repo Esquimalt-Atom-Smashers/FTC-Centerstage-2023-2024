@@ -55,6 +55,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Set the motor modes and zero power behavior
         Arrays.stream(motors).forEach(motor -> motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE));
+        resetEncoder();
 
         // Initialize the imu
         imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
@@ -63,8 +64,6 @@ public class DriveSubsystem extends SubsystemBase {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         imu.initialize(parameters);
-
-//        forwardPIDController = new PIDController(fP, fI, fD);
     }
 
     public void resetEncoder() {
