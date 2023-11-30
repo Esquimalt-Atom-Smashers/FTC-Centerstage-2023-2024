@@ -114,7 +114,7 @@ public class AutonomousController {
         slide.resetEncoder();
         updateStatus("Not Ready (Starting OpenCVPipeline)");
         startOpenCV();
-        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera) Do not press stop");
+        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)\n!Do not press stop!");
         updateStatus("Ready");
     }
 
@@ -123,10 +123,13 @@ public class AutonomousController {
                 new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
                 new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
                 new InstantCommand(claw::closeClawSingle, claw),
-                new WaitCommand(500),
                 new InstantCommand(intake::mediumPosition, intake),
+                new WaitCommand(500),
                 new MoveElbowCommand(elbow, Constants.ElbowConstants.DRIVING_POSITION)
         );
+//        placePurplePixel = new SequentialCommandGroup(
+//                new WaitCommand(1000)
+//        );
         placePurplePixel = new SequentialCommandGroup(
                 new InstantCommand(intake::downPosition, intake),
                 new WaitCommand(250),
@@ -135,11 +138,16 @@ public class AutonomousController {
                 new InstantCommand(intake::stop, intake),
                 new InstantCommand(intake::mediumPosition, intake)
         );
+//        armToPlacePosition = new SequentialCommandGroup(
+//                new WaitCommand(1000)
+//        );
         armToPlacePosition = new SequentialCommandGroup(
-                new InstantCommand(intake::downPosition, intake),
                 new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION),
                 new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION)
         );
+//        placeYellowPixel = new SequentialCommandGroup(
+//                new WaitCommand(1000)
+//        );
         placeYellowPixel = new SequentialCommandGroup(
                 new InstantCommand(claw::openClaw, claw),
                 new WaitCommand(750),
@@ -163,6 +171,7 @@ public class AutonomousController {
                     webcam.closeCameraDevice();
                     currentState = State.MOVING_TO_SPIKE_MARKS;
                     drive.followTrajectorySequenceAsync(driveToSpikeMarks());
+//                    drive.followTrajectorySequenceAsync(doNothing());
                 }
                 break;
             // Carrying the pixels, moving to the center of the spike marks
@@ -180,6 +189,8 @@ public class AutonomousController {
                         currentState = State.MOVING_FROM_SPIKE_MARKS;
                         currentCommand = scheduleCommand(armToPlacePosition);
                         drive.followTrajectorySequenceAsync(driveFromSpikeMarks());
+//                        drive.followTrajectorySequenceAsync(doNothing());
+
                     }
                     else currentState = State.IDLE;
                 }
@@ -189,11 +200,13 @@ public class AutonomousController {
                 if (currentCommand.isFinished() && !drive.isBusy()) {
                     currentState = State.MOVING_TO_BACKDROP;
                     drive.followTrajectorySequenceAsync(driveToBackdrop());
+//                    drive.followTrajectorySequenceAsync(doNothing());
+
                 }
                 break;
             // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
-                if (currentCommand.isFinished()) {
+                if (!drive.isBusy()) {
                     currentState = State.PLACING_YELLOW;
                     currentCommand = scheduleCommand(placeYellowPixel);
                 }
@@ -203,6 +216,8 @@ public class AutonomousController {
                 if (currentCommand.isFinished()) {
                     currentState = State.HIDING;
                     drive.followTrajectorySequenceAsync(driveToCorner());
+//                    drive.followTrajectorySequenceAsync(doNothing());
+
                 }
                 break;
             // Moving to the corner to leave room
@@ -218,16 +233,10 @@ public class AutonomousController {
 
         CommandScheduler.getInstance().run();
         drive.update();
+        telemetry.addData("Spike mark position", spikeMarkPosition);
         telemetry.addData("State", currentState);
         telemetry.update();
 
-    }
-
-    private WaitCommand scheduleCommand(SequentialCommandGroup command) {
-        WaitCommand waitCommand = new WaitCommand(1);
-        command.addCommands(waitCommand);
-        command.schedule();
-        return waitCommand;
     }
 
     public void setSettings(boolean isBlue, boolean isUpstage, boolean isPlacingYellow) {
@@ -249,6 +258,13 @@ public class AutonomousController {
 //            startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
     }
 
+    private WaitCommand scheduleCommand(SequentialCommandGroup command) {
+        WaitCommand waitCommand = new WaitCommand(1);
+        command.addCommands(waitCommand);
+        command.schedule();
+        return waitCommand;
+    }
+
     // TODO: Test all trajectories
     private TrajectorySequence driveToSpikeMarks() {
         // I think this drives to the correct spike mark position
@@ -264,7 +280,7 @@ public class AutonomousController {
                     .forward(25)
                     .strafeLeft(8)
                     .build();
-        else if (spikeMarkPosition == SpikeMark.RIGHT)
+        else /*if (spikeMarkPosition == SpikeMark.RIGHT)*/
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                     .forward(24)
                     .turn(Math.toRadians(-90))
@@ -272,7 +288,7 @@ public class AutonomousController {
                     .back(2)
                     .build();
 
-        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
+//        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
     }
 
     private TrajectorySequence driveFromSpikeMarks() {
@@ -285,17 +301,17 @@ public class AutonomousController {
                     .strafeRight(6)
                     .back(11)
                     .build();
-        else if (spikeMarkPosition == SpikeMark.RIGHT)
+        else /*if (spikeMarkPosition == SpikeMark.RIGHT)*/
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                     .strafeRight(30)
                     .build();
-        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
+//        return drive.trajectorySequenceBuilder(drive.getPoseEstimate()).build();
     }
 
     private TrajectorySequence driveToBackdrop() {
         return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(new Pose2d(46, 35 * positionMultiplier, Math.toRadians(0)))
-                .strafeRight(extraMovement)
+                .strafeRight(spikeMarkPosition == SpikeMark.LEFT ? -6 : spikeMarkPosition == SpikeMark.MIDDLE ? 0.1 : 9)
                 .build();
     }
 
@@ -308,9 +324,10 @@ public class AutonomousController {
                 .build();
     }
 
-    private TrajectorySequence testing() {
+    private TrajectorySequence doNothing() {
         return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                .waitSeconds(1000)
+                .forward(3)
+                .back(3)
                 .build();
     }
 
