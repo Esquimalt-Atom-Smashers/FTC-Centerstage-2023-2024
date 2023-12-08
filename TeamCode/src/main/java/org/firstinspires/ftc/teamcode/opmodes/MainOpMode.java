@@ -10,12 +10,11 @@ import org.firstinspires.ftc.teamcode.Robot;
 
 @TeleOp(name="Main", group = "Real")
 public class MainOpMode extends LinearOpMode {
-    private Robot robot;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        robot = new Robot(this);
+        Robot robot = new Robot(this);
 
         // Perform actions that happen before the Robot starts
 

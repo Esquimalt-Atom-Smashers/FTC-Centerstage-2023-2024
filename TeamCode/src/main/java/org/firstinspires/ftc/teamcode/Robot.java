@@ -183,7 +183,7 @@ public class Robot {
                 new InstantCommand(() -> scoringState = ScoringState.INTAKE),
                 new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
                 new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getInPosition()),
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION),
                 new InstantCommand(intakeSubsystem::intake, intakeSubsystem)
         ));
@@ -228,27 +228,27 @@ public class Robot {
         Trigger lowScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
         lowScoringPositionTrigger.whenActive(new SequentialCommandGroup(
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.LOW_SCORING_POSITION),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.LOW_SCORING_POSITION)
+                new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getLowScoringPosition())
         ));
 
         // Press up dpad while in driving mode to move the arm to medium scoring position
         Trigger mediumScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP) && scoringState == ScoringState.DRIVING);
         mediumScoringPositionTrigger.whenActive(new SequentialCommandGroup(
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.MEDIUM_SCORING_POSITION),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.MEDIUM_SCORING_POSITION)
+                new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getMediumScoringPosition())
         ));
 
         // Press right dpad while in driving mode to move the arm to high scoring position
         Trigger highScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT) && scoringState == ScoringState.DRIVING);
         highScoringPositionTrigger.whenActive(new SequentialCommandGroup(
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.HIGH_SCORING_POSITION),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.HIGH_SCORING_POSITION)
+                new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getHighScoringPosition())
         ));
 
         // Press down dpad while in driving mode to move the arm to home position (used while driving)
         Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN) && scoringState == ScoringState.DRIVING);
         homePositionTrigger.whenActive(new SequentialCommandGroup(
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION),
+                new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getInPosition()),
                 new MoveElbowCommand(elbowSubsystem, Constants.ElbowConstants.DRIVING_POSITION)
         ));
 
@@ -331,9 +331,9 @@ public class Robot {
             case DETECTING_TAG:
                 break;
             case CENTERING_TAG:
-                if (driveSubsystem.isCentered()) {
+//                if (driveSubsystem.isCentered()) {
 //                    instructionExecutor.getNextInstruction();
-                }
+//                }
                 break;
             case STEPPING_LEFT:
                 if (driveSubsystem.isFinishedSteppingLeft()) {

@@ -10,12 +10,10 @@ import org.firstinspires.ftc.teamcode.Robot;
 @TeleOp(name = "Tele OpMode", group = "Real")
 public class TeleOpMode extends LinearOpMode {
 
-    private Robot robot;
-
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        robot = new Robot(this);
+        Robot robot = new Robot(this);
 
         robot.resetEncoders();
         robot.start();

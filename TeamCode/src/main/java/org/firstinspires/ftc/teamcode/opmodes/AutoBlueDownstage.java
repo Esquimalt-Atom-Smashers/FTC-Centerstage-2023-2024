@@ -11,9 +11,9 @@ public class AutoBlueDownstage extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         AutonomousController autonomousController = new AutonomousController(this, true, false, false);
         waitForStart();
-        autonomousController.startStateMachine();
+        autonomousController.start();
         while (opModeIsActive() && !isStopRequested()) {
-            autonomousController.runStateMachine();
+            autonomousController.run();
         }
     }
 }

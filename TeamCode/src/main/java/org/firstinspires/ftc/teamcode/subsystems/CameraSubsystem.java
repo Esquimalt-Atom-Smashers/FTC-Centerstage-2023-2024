@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -11,14 +10,9 @@ import static org.firstinspires.ftc.teamcode.Constants.CameraConstants.*;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A subsystem that represents the camera of the robot. Contains an {@link AprilTagProcessor} to detect april tags.
@@ -56,7 +50,7 @@ public class CameraSubsystem extends SubsystemBase {
     /**
      * Get the april tag detections from the camera.
      */
-    public void detect() {
+    public void detectAprilTags() {
         detections = aprilTagProcessor.getDetections();
     }
 
@@ -64,8 +58,8 @@ public class CameraSubsystem extends SubsystemBase {
      * First detect any april tags and save them, then iterate over them and print out information about each one using the provided telemetry
      * @param telemetry The telemetry the information will be printed to
      */
-    public void detectAndPrint(Telemetry telemetry) {
-        detect();
+    public void detectAndPrintAprilTags(Telemetry telemetry) {
+        detectAprilTags();
         for (AprilTagDetection aprilTagDetection : detections) {
             if (aprilTagDetection.metadata != null) {
                 int aprilTagIdCode = aprilTagDetection.id;

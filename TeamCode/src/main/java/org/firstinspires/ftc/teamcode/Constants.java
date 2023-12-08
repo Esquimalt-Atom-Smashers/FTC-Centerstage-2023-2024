@@ -139,7 +139,6 @@ public class Constants {
 
         public static final int IN_POSITION = MIN_POSITION;
         public static final int OUT_POSITION = 2000;
-        public static final int TEST_POSITION = 3000;
         public static int TILT_POSITION = 275;
         public static int LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
 

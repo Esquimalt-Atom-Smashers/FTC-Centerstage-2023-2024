@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
@@ -48,29 +47,11 @@ public class AutonomousController {
         MIDDLE
     }
 
-    /*
-    TODO after scrimmage: Implement a finite state machine like
-        https://github.com/NoahBres/road-runner-quickstart/blob/advanced-examples/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/drive/advanced/AsyncFollowingFSM.java
-        so we can move PID controlled subsystem while we are moving
-    */
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
 
-    // Positional things and trajectories
+    // Our starting function
     private Pose2d startPosition;
-//    private TrajectorySequence pushMovementPreOuttake;
-//    private TrajectorySequence pushMovementPostOuttake;
-//    private TrajectorySequence driveToBackdrop;
-
-    // Trajectory variables
-//    private int aprilTagID;
-//    private int gameElementPosition;
-//    private double extraMovement;
-//    private boolean goToBackDrop;
-//    private double aprilTagLateralDistance;
-//    private double aprilTagLateralTarget = -4;
-//    private double aprilTagForwardDistance;
-//    private double aprilTagForwardTarget = 14;
 
     // Subsystems used by the autonomous
     private final SampleMecanumDrive drive;
@@ -108,27 +89,6 @@ public class AutonomousController {
     private WaitCommand currentCommand;
 
     /**
-     * Creates a new AutonomousController, initializing the subsystems using the HardwareMap from the provided LinearOpMode
-     *
-     * @param opMode The LinearOpMode that created the controller.
-     */
-    public AutonomousController(LinearOpMode opMode) {
-        hardwareMap = opMode.hardwareMap;
-        telemetry = opMode.telemetry;
-        drive = new SampleMecanumDrive(hardwareMap);
-        claw = new ClawSubsystem(hardwareMap);
-        intake = new IntakeSubsystem(hardwareMap);
-        elbow = new ElbowSubsystem(hardwareMap);
-        elbow.resetEncoder();
-        slide = new LinearSlideSubsystem(hardwareMap);
-        slide.resetEncoder();
-        updateStatus("Not Ready (Starting OpenCVPipeline)");
-        startOpenCV();
-        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)\nDo not press stop!");
-        updateStatus("Ready");
-    }
-
-    /**
      * Creates a new AutonomousController, initializing the subsystems using the HardwareMap from the provided LinearOpMode.
      * Also sets settings and initializes the commands using the provided condition
      *
@@ -138,8 +98,20 @@ public class AutonomousController {
      * @param isPlacingYellow Whether we want to place the yellow pixel on the backdrop.
      */
     public AutonomousController(LinearOpMode opMode, boolean isBlueAlliance, boolean isUpstage, boolean isPlacingYellow) {
-        this(opMode);
+        hardwareMap = opMode.hardwareMap;
+        telemetry = opMode.telemetry;
+        drive = new SampleMecanumDrive(hardwareMap);
+        claw = new ClawSubsystem(hardwareMap);
+        intake = new IntakeSubsystem(hardwareMap);
+        elbow = new ElbowSubsystem(hardwareMap);
+        elbow.resetEncoder();
+        slide = new LinearSlideSubsystem(hardwareMap);
+        slide.resetEncoder();
         setSettings(isBlueAlliance, isUpstage, isPlacingYellow);
+        updateStatus("Not Ready (Starting OpenCVPipeline)");
+        startOpenCV();
+        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)\nDo not press stop!");
+        updateStatus("Ready");
     }
 
     /**
@@ -176,10 +148,8 @@ public class AutonomousController {
         this.isBlueAlliance = isBlue;
         this.isUpstage = isUpstage;
         this.isPlacingYellow = isPlacingYellow;
-        // TODO: Check this
         positionMultiplier = isBlueAlliance ? 1 : -1;
         rotationalOffset = isBlueAlliance ? 0 : 180;
-        // TODO: Check
         startPosition = new Pose2d(isUpstage ? 11.5 : -35.5, 62 * positionMultiplier, Math.toRadians(isBlue ? 270 : 90));
         isSetUp = true;
         initializeCommands();
@@ -220,7 +190,7 @@ public class AutonomousController {
     /**
      * Starts the state machine by starting the first command and setting the state to picking up pixels.
      */
-    public void startStateMachine() {
+    public void start() {
         if (!isSetUp) {
             currentState = State.IDLE;
             return;
@@ -233,68 +203,61 @@ public class AutonomousController {
     /**
      * Runs the state machine. Switches states if needed, runs commands, updates the drive, and updating the telemetry
      */
-    public void runStateMachine() {
+    public void run() {
         switch (currentState) {
             // Picking up the pixel from the ground as well as waiting for the camera to be ready
             case PICKING_UP_PIXELS:
-                if (currentCommand.isFinished() && pipeline.cameraReady) {
+                if (canContinue() && pipeline.cameraReady) {
                     int gameElementPosition = pipeline.findGameElement(isBlueAlliance);
                     spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
                     webcam.closeCameraDevice();
                     currentState = State.MOVING_TO_SPIKE_MARKS;
                     drive.followTrajectorySequenceAsync(driveToSpikeMarks());
-//                    drive.followTrajectorySequenceAsync(doNothing());
                 }
                 break;
             // Carrying the pixels, moving to the center of the spike marks
             case MOVING_TO_SPIKE_MARKS:
-                if (!drive.isBusy()) {
+                if (canContinue()) {
                     currentState = State.PLACING_PURPLE;
                     currentCommand = scheduleCommand(placePurplePixel);
                 }
                 break;
             // Placing the purple pixel on the spike mark using the intake
             case PLACING_PURPLE:
-                if (currentCommand.isFinished()) {
+                if (canContinue()) {
                     // TODO: Make a way to always turn the correct direction at the end of auto
                     if (isUpstage && isPlacingYellow) {
                         currentState = State.MOVING_FROM_SPIKE_MARKS;
                         currentCommand = scheduleCommand(armToPlacePosition);
                         drive.followTrajectorySequenceAsync(driveFromSpikeMarks());
-//                        drive.followTrajectorySequenceAsync(doNothing());
-
                     }
                     else currentState = State.IDLE;
                 }
                 break;
             // Moving out of the way of the pixel and game element
             case MOVING_FROM_SPIKE_MARKS:
-                if (currentCommand.isFinished() && !drive.isBusy()) {
+                if (canContinue()) {
                     currentState = State.MOVING_TO_BACKDROP;
                     drive.followTrajectorySequenceAsync(driveToBackdrop());
-//                    drive.followTrajectorySequenceAsync(doNothing());
-
                 }
                 break;
             // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
-                if (!drive.isBusy()) {
+                if (canContinue()) {
                     currentState = State.PLACING_YELLOW;
                     currentCommand = scheduleCommand(placeYellowPixel);
                 }
                 break;
             // Placing the yellow pixel on the backstage
             case PLACING_YELLOW:
-                if (currentCommand.isFinished()) {
+                if (canContinue()) {
                     currentState = State.HIDING;
                     drive.followTrajectorySequenceAsync(driveToCorner());
-//                    drive.followTrajectorySequenceAsync(doNothing());
-
                 }
                 break;
-            // Moving to the corner to leave room
+            // Moving to the corner to take up the least amount of room
             case HIDING:
-                if (!drive.isBusy()) {
+                if (canContinue()) {
                     currentState = State.IDLE;
                     // We are done, idle
                 }
@@ -399,219 +362,14 @@ public class AutonomousController {
                 .build();
     }
 
+    private boolean canContinue() {
+        return currentCommand.isFinished() && !drive.isBusy();
+    }
+
     private void updateStatus(String text) {
         telemetry.addData("Status", text);
         telemetry.update();
     }
-
-    // -------------------------------------------------------------------------------------------
-
-//    public void run() {
-//        while (!pipeline.cameraReady) updateStatus("Waiting for camera");
-//        gameElementPosition = pipeline.findGameElement(isBlueAlliance);
-//        webcam.closeCameraDevice();
-//
-//        // Initial subsystem movements
-//        MoveElbowCommand elbowCommand = new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION);
-//        SequentialCommandGroup autoStartCommand = new SequentialCommandGroup(
-////                new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
-//                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
-//                new InstantCommand(claw::closeClawSingle),
-//                new WaitCommand(500),
-//                new InstantCommand(intake::mediumPosition),
-//                new WaitCommand(1000),
-//                elbowCommand
-//        );
-//        autoStartCommand.schedule();
-//        while (!elbowCommand.isFinished()) {
-//            CommandScheduler.getInstance().run();
-//            updateStatus("Running commands");
-//        }
-//
-//
-//        // Sets robot position in Road Runner
-//        drive.setPoseEstimate(startPosition);
-//        telemetry.addData("Start Position", startPosition.getX());
-//        telemetry.update();
-//
-//        // Do push movement
-//        updateStatus("Pushing pixel to: " + gameElementPosition + " position");
-//        setPrePushMovement(gameElementPosition);
-//        drive.followTrajectorySequence(pushMovementPreOuttake);
-//
-//        // Place purple pixel
-//        WaitCommand finalCommand = new WaitCommand(1);
-//        new SequentialCommandGroup(
-//                new InstantCommand(intake::downPosition, intake),
-//                new WaitCommand(250),
-//                new InstantCommand(intake::intake, intake),
-//                new WaitCommand(250),
-//                new InstantCommand(intake::stop, intake),
-//                new InstantCommand(intake::mediumPosition, intake),
-//                finalCommand
-//        ).schedule();
-//        while (!finalCommand.isFinished()){
-//            CommandScheduler.getInstance().run();
-//        }
-//
-//        setPostPushMovement(gameElementPosition);
-//        drive.followTrajectorySequence(pushMovementPostOuttake);
-//
-//        if (goToBackDrop) {
-//            // Driving to backdrop
-//            updateStatus("Driving to backdrop");
-//            if (isBlueAlliance) { // Blue side movement
-//                driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                        .lineToSplineHeading(new Pose2d(46, 35, Math.toRadians(0)))
-//                        .strafeRight(extraMovement)
-//                        .build();
-//            } else { // Red side movement
-//                driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                        .lineToSplineHeading(new Pose2d(46, -35, 0))
-//                        .strafeRight(extraMovement)
-//                        .build();
-//            }
-//            drive.followTrajectorySequence(driveToBackdrop);
-//
-//            // Scoring yellow pixel
-//            updateStatus("Moving slide");
-//            finalCommand = new WaitCommand(1);
-//            SequentialCommandGroup placeYellowPixel = new SequentialCommandGroup(
-//                    new InstantCommand(intake::downPosition),
-//                    new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION),
-//                    new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION),
-//                    new WaitCommand(750),
-//                    new InstantCommand(claw::openClaw, claw),
-//                    new WaitCommand(750),
-//                    new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
-//                    finalCommand
-//            );
-//            placeYellowPixel.schedule();
-//            while (!finalCommand.isFinished()) {
-//                CommandScheduler.getInstance().run();
-//            }
-//            if (isBlueAlliance) {
-//                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                        .back(3)
-//                        .turn(Math.toRadians(-90))
-//                        .lineTo(new Vector2d(49, 60))
-//                        .build());
-//            } else {
-//                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                        .back(3)
-//                        .turn(Math.toRadians(90))
-//                        .lineTo(new Vector2d(49, -60))
-//                        .build());
-//            }
-//
-//            updateStatus("Finished");
-//        }
-//    }
-
-//    public void redLeft(){
-//        startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
-//        isBlueAlliance = false;
-//        run();
-//    }
-//
-//    public void blueRight(){
-//        startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
-//        isBlueAlliance = true;
-//        run();
-//    }
-//
-//    public void redRight(){
-//        goToBackDrop = true;
-//        startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
-//        isBlueAlliance = false;
-//
-////        // Building Movement to backdrop
-////        driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-////                .splineToSplineHeading(new Pose2d(34, -60, 0), 0)
-////                .splineToConstantHeading(new Vector2d(35, -35), 0)
-////                .build();
-//
-//        // Determine April Tag to line up with
-//        if (gameElementPosition == -1){
-//            aprilTagID = 4;
-//        }
-//        if (gameElementPosition == 0){
-//            aprilTagID = 5;
-//        }
-//        if (gameElementPosition == 1){
-//            aprilTagID = 6;
-//        }
-//        run();
-//    }
-//
-//    public void blueLeft(){
-//        goToBackDrop = true;
-//        startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
-//        isBlueAlliance = true;
-//
-////        // Building Movement to backdrop
-////        driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-////                .splineToSplineHeading(new Pose2d(35, 59, 0), 0)
-////                .splineToConstantHeading(new Vector2d(25, 35), 0)
-////                .build();
-//
-//        // Determine April Tag to line up with
-//        if (gameElementPosition == -1){
-//            aprilTagID = 1;
-//        }
-//        if (gameElementPosition == 0){
-//            aprilTagID = 2;
-//        }
-//        if (gameElementPosition == 1){
-//            aprilTagID = 3;
-//        }
-//        run();
-//    }
-
-//    private void setPrePushMovement(int gameElementPosition){
-//        if (gameElementPosition == -1){
-//            pushMovementPreOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                    .forward(24)
-//                    .turn(Math.toRadians(90))
-//                    .strafeRight(5)
-//                    .back(2)
-//                    .build();
-//            extraMovement = -6;
-//        }
-//        if (gameElementPosition == 0){
-//            pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-//                    .forward(25)
-//                    .strafeLeft(8)
-//                    .build();
-//            extraMovement = 0.1;
-//        }
-//        if (gameElementPosition == 1){
-//            pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-//                    .forward(24)
-//                    .turn(Math.toRadians(-90))
-//                    .strafeLeft(5)
-//                    .back(2)
-//                    .build();
-//            extraMovement = 9;
-//        }
-//    }
-
-//    private void setPostPushMovement(int gameElementPosition){
-//        if(gameElementPosition == -1) {
-//            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                    .strafeLeft(30)
-//                    .build();
-//        } else if (gameElementPosition == 0) {
-//            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                    .strafeRight(6)
-//                    .back(11)
-//                    .build();
-//        } else if (gameElementPosition == 1) {
-//            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                    .strafeRight(30)
-//                    .build();
-//        }
-//    }
 
 //    private void lineUpWithAprilTag(){
 //        CameraSubsystem cameraSubsystem = new CameraSubsystem(hardwareMap);

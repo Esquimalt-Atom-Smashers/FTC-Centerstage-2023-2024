@@ -10,10 +10,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 
+/**
+ * A subsystem that represents the servo and motor that control the intake.
+ */
 public class IntakeSubsystem extends SubsystemBase {
     private final DcMotorEx intakeMotor;
     private final ServoEx intakeServo;
 
+    /**
+     * Creates a new ElbowSubsystem.
+     * @param hardwareMap The hardware map of the robot
+     */
     public IntakeSubsystem(HardwareMap hardwareMap) {
         // Initialize the servo
         intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
@@ -25,31 +32,44 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    // Set the servo to the down position
+    /**
+     * Lower the intake by setting the servo to the down position.
+     */
     public void downPosition() {
         intakeServo.turnToAngle(INTAKE_DOWN_POSITION);
     }
 
+    /**
+     * Half raise the intake by setting the servo to the medium position.
+     */
     public void mediumPosition() {
         intakeServo.turnToAngle(INTAKE_DRIVING_POSITION);
     }
 
-    // Set the servo to the up position
+    /**
+     * Raise the intake by setting the servo to the high position.
+     */
     public void upPosition() {
         intakeServo.turnToAngle(INTAKE_UP_POSITION);
     }
 
-    // Set the motor to intake
+    /**
+     * Start intaking by moving the motor.
+     */
     public void intake() {
         intakeMotor.setPower(INTAKE_SPEED);
     }
 
-    // Set the motor to outtake
+    /**
+     * Start outtaking by moving the motor backwards.
+     */
     public void outtake() {
         intakeMotor.setPower(OUTTAKE_SPEED);
     }
 
-    // Stop the motor
+    /**
+     * Stop intaking.
+     */
     public void stop() {
         intakeMotor.setPower(0);
     }

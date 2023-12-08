@@ -46,14 +46,6 @@ public class ClawSubsystem extends SubsystemBase {
     }
 
     /**
-     * Check if the claw is open.
-     * @return Whether the claw is open or not
-     */
-    public boolean isClawOpen() {
-        return clawServo.getPosition() == OPEN_POSITION;
-    }
-
-    /**
      * Prints data to the provided {@link Telemetry}.
      * @param telemetry The telemetry to print data to.
      */

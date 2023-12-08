@@ -105,7 +105,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Drives the robot using joystick input.
+     * Drives the robot using joystick input. Uses the default values for field centric and scaling.
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn
@@ -114,21 +114,8 @@ public class DriveSubsystem extends SubsystemBase {
         drive(forward, strafe, turn, FIELD_CENTRIC, SCALED);
     }
 
-    /**
-     * Unused method
-     */
-    public void drive() {
-//        drive(forward() ? AUTO_DRIVE_SPEED : -AUTO_DRIVE_SPEED, 0, 0);
-
-    }
-
     public boolean forward() {
         return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
-    }
-
-    // Auto strafe
-    public void strafe() {
-
     }
 
     public void setForwardTarget(int target) {
@@ -140,33 +127,6 @@ public class DriveSubsystem extends SubsystemBase {
         atForwardTarget = false;
     }
 
-    public double getForwardTarget() {
-        return forwardTarget;
-    }
-
-//    public double forwardPID() {
-//        if (!atForwardTarget)
-//        {
-//            forwardPIDController.setPID(fP, fI, fD);
-//            double wheelPositions = getAveragePosition();
-//            double power = forwardPIDController.calculate(wheelPositions, forwardTarget);
-//            frontLeftMotor.setPower(power);
-//            frontRightMotor.setPower(power);
-//            rearLeftMotor.setPower(power);
-//            rearRightMotor.setPower(power);
-//            atForwardTarget = Math.abs(power) <= 0.1;
-//            return power;
-//        }
-//        return 0;
-//    }
-
-    public boolean isAtForwardTarget() {
-        return atForwardTarget;
-    }
-
-    public void autoDrive(double position) {
-
-    }
 
     public void autoSnap() {
         // Our snap target is a predetermined angle
@@ -191,14 +151,6 @@ public class DriveSubsystem extends SubsystemBase {
     public boolean isFinishedSnapping() {
         // Checks if we are within the tolerance to auto snap
         return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
-    }
-
-    public void centerWithTag() {
-
-    }
-
-    public boolean isCentered() {
-        return false;
     }
 
     public void halfStepLeft() {
@@ -240,11 +192,6 @@ public class DriveSubsystem extends SubsystemBase {
                 isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
     }
 
-    // Used for autonomous driving
-    public void driveToPosition() {
-
-    }
-
     // Stop all of the motors
     public void stop() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
@@ -267,13 +214,9 @@ public class DriveSubsystem extends SubsystemBase {
         telemetry.addData("Is over current?", frontLeftMotor.isOverCurrent());
     }
 
-    //Define lower-level methods here. (Methods that are private or work behind the scenes)
-
     private void setMotorMode(DcMotor.RunMode runMode) {
         Arrays.stream(motors).forEach(motor -> motor.setMode(runMode));
     }
-
-    // Take the input and scale it if needed, while also clipping it to between -1 and 1
 
     /**
      * Takes a joystick input and clips it.
@@ -304,8 +247,6 @@ public class DriveSubsystem extends SubsystemBase {
     private double getHeading() {
         return imu.getAngularOrientation().firstAngle;
     }
-
-    //Define getter/setter's here.
 
     public BNO055IMU getGyro() {
         return imu;

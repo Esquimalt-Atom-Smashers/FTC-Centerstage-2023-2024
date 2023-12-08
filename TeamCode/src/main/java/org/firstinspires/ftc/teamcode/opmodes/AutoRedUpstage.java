@@ -11,9 +11,9 @@ public class AutoRedUpstage extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         AutonomousController autonomousController = new AutonomousController(this, false, true, true);
         waitForStart();
-        autonomousController.startStateMachine();
+        autonomousController.start();
         while (opModeIsActive() && !isStopRequested()) {
-            autonomousController.runStateMachine();
+            autonomousController.run();
         }
     }
 }

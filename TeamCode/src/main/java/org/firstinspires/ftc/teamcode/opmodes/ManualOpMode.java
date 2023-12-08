@@ -10,12 +10,10 @@ import org.firstinspires.ftc.teamcode.Robot;
 @TeleOp(name = "Manual", group = "Testing")
 public class ManualOpMode extends LinearOpMode {
 
-    private Robot robot;
-
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        robot = new Robot(this, true);
+        Robot robot = new Robot(this, true);
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {

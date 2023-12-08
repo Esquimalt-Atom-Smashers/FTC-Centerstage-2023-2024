@@ -14,7 +14,7 @@ import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
 
 /**
- * A subsystem that represents the motor that controls the arm.
+ * A subsystem that represents the motor that controls the elbow of the arm.
  */
 public class ElbowSubsystem extends SubsystemBase {
     // Motor used for this subsystem
