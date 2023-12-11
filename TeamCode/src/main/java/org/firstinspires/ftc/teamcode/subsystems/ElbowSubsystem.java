@@ -17,13 +17,12 @@ import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
  * A subsystem that represents the motor that controls the elbow of the arm.
  */
 public class ElbowSubsystem extends SubsystemBase {
-    // Motor used for this subsystem
     private final DcMotorEx elbowMotor;
 
     private final PIDController controller;
 
     public static double target;
-    private double lastPower;
+//    private double lastPower;
 
     private PIDSubsystemState state;
 
@@ -55,54 +54,54 @@ public class ElbowSubsystem extends SubsystemBase {
         setTarget(INTAKE_POSITION);
     }
 
-    /**
-     * Sets the target to driving position, used when driving.
-     */
-    public void drivingPosition() {
-        setTarget(DRIVING_POSITION);
-    }
-
-    /**
-     * Sets the target to level position.
-     */
-    public void levelPosition() {
-        setTarget(LEVEL_POSITION);
-    }
-
-    /**
-     * Sets the target to test position, used for testing where position are.
-     */
-    public void testPosition() {
-        setTarget(TEST_POSITION);
-    }
-
-    /**
-     * Sets the target to tilt position, used to push the pixels against the intake to angle better for the board.
-     */
-    public void tiltPosition() {
-        setTarget(TILT_POSITION);
-    }
-
-    /**
-     * Sets the target to low scoring position, used for scoring from the first set line and down.
-     */
-    public void lowScoringPosition() {
-        setTarget(LOW_SCORING_POSITION);
-    }
-
-    /**
-     * Sets the target to medium scoring position, used for scoring from around the second set line to the first.
-     */
-    public void mediumScoringPosition() {
-        setTarget(MEDIUM_SCORING_POSITION);
-    }
-
-    /**
-     * Sets the target to high scoring position, used for scoring on the highest level.
-     */
-    public void highScoringPosition() {
-        setTarget(HIGH_SCORING_POSITION);
-    }
+//    /**
+//     * Sets the target to driving position, used when driving.
+//     */
+//    public void drivingPosition() {
+//        setTarget(DRIVING_POSITION);
+//    }
+//
+//    /**
+//     * Sets the target to level position.
+//     */
+//    public void levelPosition() {
+//        setTarget(LEVEL_POSITION);
+//    }
+//
+//    /**
+//     * Sets the target to test position, used for testing where position are.
+//     */
+//    public void testPosition() {
+//        setTarget(TEST_POSITION);
+//    }
+//
+//    /**
+//     * Sets the target to tilt position, used to push the pixels against the intake to angle better for the board.
+//     */
+//    public void tiltPosition() {
+//        setTarget(TILT_POSITION);
+//    }
+//
+//    /**
+//     * Sets the target to low scoring position, used for scoring from the first set line and down.
+//     */
+//    public void lowScoringPosition() {
+//        setTarget(LOW_SCORING_POSITION);
+//    }
+//
+//    /**
+//     * Sets the target to medium scoring position, used for scoring from around the second set line to the first.
+//     */
+//    public void mediumScoringPosition() {
+//        setTarget(MEDIUM_SCORING_POSITION);
+//    }
+//
+//    /**
+//     * Sets the target to high scoring position, used for scoring on the highest level.
+//     */
+//    public void highScoringPosition() {
+//        setTarget(HIGH_SCORING_POSITION);
+//    }
 
     /**
      * Stop the arm from moving.
@@ -161,7 +160,7 @@ public class ElbowSubsystem extends SubsystemBase {
             controller.setPID(P, I, D);
             int elbowPosition = elbowMotor.getCurrentPosition();
             double power = controller.calculate(elbowPosition, target);
-            lastPower = power;
+//            lastPower = power;
             elbowMotor.setPower(power);
             // If the power we are setting is basically none, we are close enough to the target
             if (Math.abs(power) <= POWER_TOLERANCE) {
@@ -170,18 +169,7 @@ public class ElbowSubsystem extends SubsystemBase {
         }
     }
 
-    /**
-     * Checks if the arm is below level, for safety concerns with the slide.
-     * @return Whether the arm is below level/flat
-     */
-    public boolean isBelowLevel() {
-        return elbowMotor.getCurrentPosition() <= LEVEL_POSITION;
-    }
-
-    /**
-     * Checks if the motor is at the target.
-     * @return Whether the motor is at the target
-     */
+    /** @return true if the motor is at the target, false otherwise. */
     public boolean isAtTarget() {
         return state == PIDSubsystemState.AT_TARGET;
     }

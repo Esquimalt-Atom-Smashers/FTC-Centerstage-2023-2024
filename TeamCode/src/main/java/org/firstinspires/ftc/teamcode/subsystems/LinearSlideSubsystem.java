@@ -19,11 +19,11 @@ import java.util.Arrays;
  * A subsystem that represents the motor and PID controller that controls the slide.
  */
 public class LinearSlideSubsystem extends SubsystemBase {
-    // Motor used in this subsystem
     private final DcMotorEx slideMotor;
 
     private PIDController controller;
     public static double target;
+
     private double lastPower;
     private double lastLastPower;
 
@@ -35,16 +35,18 @@ public class LinearSlideSubsystem extends SubsystemBase {
      */
     public LinearSlideSubsystem(HardwareMap hardwareMap) {
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
-
-        slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
-        slideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        configureSlide();
 
         controller = new PIDController(P, I, D);
 
         state = PIDSubsystemState.MANUAL;
     }
 
+    private void configureSlide() {
+        slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
+        slideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
     /**
      * Reset the encoders on the slide motor.
      */
@@ -82,17 +84,17 @@ public class LinearSlideSubsystem extends SubsystemBase {
      * Checks whether we are at the max extension.
      * @return If we are at the maximum position
      */
-    public boolean isMaxExtension() {
-        return slideMotor.getCurrentPosition() >= MAX_POSITION;
-    }
+//    public boolean isMaxExtension() {
+//        return slideMotor.getCurrentPosition() >= MAX_POSITION;
+//    }
 
     /**
      * Checks whether we are at the max retraction.
      * @return If we are at the minimum position
      */
-    public boolean isMaxRetraction() {
-        return slideMotor.getCurrentPosition() <= MIN_POSITION;
-    }
+//    public boolean isMaxRetraction() {
+//        return slideMotor.getCurrentPosition() <= MIN_POSITION;
+//    }
 
     /**
      * Sets the target position and sets the mode to use PIDs.

@@ -11,7 +11,6 @@ import static org.firstinspires.ftc.teamcode.Constants.DroneConstants.*;
  * A subsystem that represents the servo on the arm that releases the paper drone.
  */
 public class DroneSubsystem extends SubsystemBase {
-
     private final ServoEx droneServo;
 
     /**
@@ -19,20 +18,15 @@ public class DroneSubsystem extends SubsystemBase {
      * @param hardwareMap The hardware map of the robot
      */
     public DroneSubsystem(HardwareMap hardwareMap) {
-        // Initialize the servo
         droneServo = new SimpleServo(hardwareMap, DRONE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
-    /**
-     * Turns the servo to release the drone.
-     */
+    /** Turns the servo to release the drone. */
     public void release() {
         droneServo.turnToAngle(RELEASE_ANGLE);
     }
 
-    /**
-     * Turns the servo to the starting position.
-     */
+    /** Turns the servo to the starting position. */
     public void startPosition() {
         droneServo.turnToAngle(START_POSITION);
     }

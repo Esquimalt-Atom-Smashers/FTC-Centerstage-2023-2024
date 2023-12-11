@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.roadrunner.util.Encoder;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
@@ -21,11 +20,14 @@ import java.util.Arrays;
  * A subsystem representing the wheels and gyro of the robot. Uses four {@link DcMotorEx} for the wheels and a {@link BNO055IMU} for the gyro
  */
 public class DriveSubsystem extends SubsystemBase {
-    // Motors
-    private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
+    /** The DC motors on the robot. */
+    private final DcMotorEx frontLeftMotor;
+    private final DcMotorEx frontRightMotor;
+    private final DcMotorEx rearLeftMotor;
+    private final DcMotorEx rearRightMotor;
     private final DcMotorEx[] motors;
 
-    // Gyro
+    /** The built-in IMU(gyro) on the control hub. */
     private final BNO055IMU imu;
 
     private double snapTarget;
@@ -46,7 +48,13 @@ public class DriveSubsystem extends SubsystemBase {
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
 
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
+        configureMotors();
 
+        imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
+        configureIMU();
+    }
+
+    private void configureMotors() {
         // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);
         frontRightMotor.setDirection(FRONT_RIGHT_MOTOR_DIRECTION);
@@ -56,9 +64,9 @@ public class DriveSubsystem extends SubsystemBase {
         // Set the motor modes and zero power behavior
         Arrays.stream(motors).forEach(motor -> motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE));
         resetEncoder();
+    }
 
-        // Initialize the imu
-        imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
+    private void configureIMU() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -73,6 +81,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     /**
      * Drives the robot using joystick input.
+     *
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn
@@ -118,64 +127,9 @@ public class DriveSubsystem extends SubsystemBase {
         return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
     }
 
-    public void setForwardTarget(int target) {
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + target);
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + target);
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + target);
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + target);
-        forwardTarget = target;
-        atForwardTarget = false;
-    }
-
-
-    public void autoSnap() {
-        // Our snap target is a predetermined angle
-        snapTarget = SNAP_TARGET;
-        if (getNormalizedAngle() >= -90) drive(0, 0, AUTO_SNAP_POWER);
-        if (getNormalizedAngle() <= -90) drive(0, 0, -AUTO_SNAP_POWER);
-    }
-
-    public void autoSnap(Telemetry t) {
-        snapTarget = SNAP_TARGET;
-        if (getNormalizedAngle() >= -90) {
-            t.addData("Would be turning", AUTO_SNAP_POWER);
-            drive(0, 0, AUTO_SNAP_POWER);
-        };
-        if (getNormalizedAngle() <= -90) {
-            t.addData("Would be turning", -AUTO_SNAP_POWER);
-            drive(0, 0, -AUTO_SNAP_POWER);
-
-        }
-    }
-
     public boolean isFinishedSnapping() {
         // Checks if we are within the tolerance to auto snap
         return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
-    }
-
-    public void halfStepLeft() {
-        // Add or subtract the half step value to strafe to the left
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        drive(0, -AUTO_STEP_POWER, 0);
-    }
-
-    public void halfStepRight() {
-        // Add or subtract the half step value to strafe to the right
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        drive(0, AUTO_STEP_POWER, 0);
-    }
-
-    public boolean areMotorsAtPositions() {
-        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
     }
 
     public boolean isFinishedSteppingLeft() {
@@ -193,12 +147,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Stop all of the motors
-    public void stop() {
+    public void stopMotors() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
-    }
-
-    public void setMotorPositions(int position) {
-        Arrays.stream(motors).forEach(motor -> motor.setTargetPosition(position));
     }
 
     public int getNormalizedAngle() {
@@ -236,26 +186,11 @@ public class DriveSubsystem extends SubsystemBase {
         }
     }
 
-    private double scaleInput(double input) {
-        return scaleInput(input, SCALED);
-    }
-
     private boolean isWithinTolerance(double input, double target, double tolerance) {
         return Math.abs(input - target) <= tolerance;
     }
 
     private double getHeading() {
         return imu.getAngularOrientation().firstAngle;
-    }
-
-    public BNO055IMU getGyro() {
-        return imu;
-    }
-
-    private double getAveragePosition() {
-        return (double) (
-                frontLeftMotor.getCurrentPosition() + frontRightMotor.getCurrentPosition() +
-                rearLeftMotor.getCurrentPosition() + rearRightMotor.getCurrentPosition()
-                ) / 4;
     }
 }

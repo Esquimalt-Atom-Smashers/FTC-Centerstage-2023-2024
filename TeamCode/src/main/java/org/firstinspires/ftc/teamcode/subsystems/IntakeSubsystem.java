@@ -22,16 +22,17 @@ public class IntakeSubsystem extends SubsystemBase {
      * @param hardwareMap The hardware map of the robot
      */
     public IntakeSubsystem(HardwareMap hardwareMap) {
-        // Initialize the servo
         intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
-        intakeMotor = hardwareMap.get(DcMotorEx.class, INTAKE_MOTOR_NAME);
 
-        // Initialize the motor
+        intakeMotor = hardwareMap.get(DcMotorEx.class, INTAKE_MOTOR_NAME);
+        configureIntake();
+    }
+
+    private void configureIntake() {
         intakeMotor.setDirection(INTAKE_MOTOR_DIRECTION);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-
     /**
      * Lower the intake by setting the servo to the down position.
      */
@@ -49,9 +50,9 @@ public class IntakeSubsystem extends SubsystemBase {
     /**
      * Raise the intake by setting the servo to the high position.
      */
-    public void upPosition() {
-        intakeServo.turnToAngle(INTAKE_UP_POSITION);
-    }
+//    public void upPosition() {
+//        intakeServo.turnToAngle(INTAKE_UP_POSITION);
+//    }
 
     /**
      * Start intaking by moving the motor.

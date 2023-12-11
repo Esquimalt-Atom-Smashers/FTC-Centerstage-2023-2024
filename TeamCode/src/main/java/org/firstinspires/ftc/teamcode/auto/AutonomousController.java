@@ -148,10 +148,12 @@ public class AutonomousController {
         this.isBlueAlliance = isBlue;
         this.isUpstage = isUpstage;
         this.isPlacingYellow = isPlacingYellow;
+
         positionMultiplier = isBlueAlliance ? 1 : -1;
         rotationalOffset = isBlueAlliance ? 0 : 180;
         startPosition = new Pose2d(isUpstage ? 11.5 : -35.5, 62 * positionMultiplier, Math.toRadians(isBlue ? 270 : 90));
         isSetUp = true;
+
         initializeCommands();
     }
 
