@@ -7,19 +7,21 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 
 /**
  * A subsystem that represents the servo and motor that control the intake.
+ *
+ * @author Esquimalt Atom Smashers
  */
 public class IntakeSubsystem extends SubsystemBase {
     private final DcMotorEx intakeMotor;
     private final ServoEx intakeServo;
 
     /**
-     * Creates a new ElbowSubsystem.
-     * @param hardwareMap The hardware map of the robot
+     * Constructs an IntakeSubsystem.
+     *
+     * @param hardwareMap The global hardwareMap.
      */
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
@@ -28,49 +30,40 @@ public class IntakeSubsystem extends SubsystemBase {
         configureIntake();
     }
 
+    /** Configures the intake motor. */
     private void configureIntake() {
         intakeMotor.setDirection(INTAKE_MOTOR_DIRECTION);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    /**
-     * Lower the intake by setting the servo to the down position.
-     */
+
+    /** Sets the intake position to the 'down' position. */
     public void downPosition() {
         intakeServo.turnToAngle(INTAKE_DOWN_POSITION);
     }
 
-    /**
-     * Half raise the intake by setting the servo to the medium position.
-     */
+    /** Sets the intake position to the 'driving' position. */
     public void mediumPosition() {
         intakeServo.turnToAngle(INTAKE_DRIVING_POSITION);
     }
 
-    /**
-     * Raise the intake by setting the servo to the high position.
-     */
-//    public void upPosition() {
-//        intakeServo.turnToAngle(INTAKE_UP_POSITION);
-//    }
+    /** Sets the intake position to the 'up' position. */
+    @Deprecated
+    public void upPosition() {
+        intakeServo.turnToAngle(INTAKE_UP_POSITION);
+    }
 
-    /**
-     * Start intaking by moving the motor.
-     */
+    /** Starts intaking. */
     public void intake() {
         intakeMotor.setPower(INTAKE_SPEED);
     }
 
-    /**
-     * Start outtaking by moving the motor backwards.
-     */
+    /** Start outtaking. */
     public void outtake() {
         intakeMotor.setPower(OUTTAKE_SPEED);
     }
 
-    /**
-     * Stop intaking.
-     */
+    /** Stops the intake motor. */
     public void stop() {
         intakeMotor.setPower(0);
     }

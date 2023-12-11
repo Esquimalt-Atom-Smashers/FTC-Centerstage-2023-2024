@@ -8,13 +8,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Constants;
 
 import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
 
 /**
  * A subsystem that represents the motor that controls the elbow of the arm.
+ *
+ * @author Esquimalt Atom Smashers
  */
 public class ElbowSubsystem extends SubsystemBase {
     private final DcMotorEx elbowMotor;
@@ -24,11 +25,13 @@ public class ElbowSubsystem extends SubsystemBase {
     public static double target;
 //    private double lastPower;
 
+    /** The state the arm is in: (manual, moving-to-target, or at-target) */
     private PIDSubsystemState state;
 
     /**
-     * Creates a new ElbowSubsystem. Initializes the {@link DcMotorEx} using the provided {@link HardwareMap}. Initializes a PID controller.
-     * @param hardwareMap The hardware map of the robot
+     * Constructs an ElbowSubsystem.
+     *
+     * @param hardwareMap The global hardwareMap.
      */
     public ElbowSubsystem(HardwareMap hardwareMap) {
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
@@ -39,79 +42,68 @@ public class ElbowSubsystem extends SubsystemBase {
         state = PIDSubsystemState.MANUAL;
     }
 
-    /**
-     * Resets the encoder on the elbow motor.
-     */
+    /** Resets the encoder on the elbow motor. */
     public void resetEncoder() {
         elbowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbowMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    /**
-     * Sets the target to intake position, used for picking up pixels.
-     */
+    /** Sets the intake to its default 'intake' position. */
+    @Deprecated
     public void intakePosition() {
         setTarget(INTAKE_POSITION);
     }
 
-//    /**
-//     * Sets the target to driving position, used when driving.
-//     */
-//    public void drivingPosition() {
-//        setTarget(DRIVING_POSITION);
-//    }
-//
-//    /**
-//     * Sets the target to level position.
-//     */
-//    public void levelPosition() {
-//        setTarget(LEVEL_POSITION);
-//    }
-//
-//    /**
-//     * Sets the target to test position, used for testing where position are.
-//     */
-//    public void testPosition() {
-//        setTarget(TEST_POSITION);
-//    }
-//
-//    /**
-//     * Sets the target to tilt position, used to push the pixels against the intake to angle better for the board.
-//     */
-//    public void tiltPosition() {
-//        setTarget(TILT_POSITION);
-//    }
-//
-//    /**
-//     * Sets the target to low scoring position, used for scoring from the first set line and down.
-//     */
-//    public void lowScoringPosition() {
-//        setTarget(LOW_SCORING_POSITION);
-//    }
-//
-//    /**
-//     * Sets the target to medium scoring position, used for scoring from around the second set line to the first.
-//     */
-//    public void mediumScoringPosition() {
-//        setTarget(MEDIUM_SCORING_POSITION);
-//    }
-//
-//    /**
-//     * Sets the target to high scoring position, used for scoring on the highest level.
-//     */
-//    public void highScoringPosition() {
-//        setTarget(HIGH_SCORING_POSITION);
-//    }
+    /** Sets the intake to its 'driving' position. */
+    @Deprecated
+    public void drivingPosition() {
+        setTarget(DRIVING_POSITION);
+    }
 
-    /**
-     * Stop the arm from moving.
-     */
+    /** Sets the intake to its 'level' position. */
+    @Deprecated
+    public void levelPosition() {
+        setTarget(LEVEL_POSITION);
+    }
+
+    /** Sets the intake to its 'test' position. */
+    @Deprecated
+    public void testPosition() {
+        setTarget(TEST_POSITION);
+    }
+
+    /** Sets the intake to its 'tilt' position. */
+    @Deprecated
+    public void tiltPosition() {
+        setTarget(TILT_POSITION);
+    }
+
+    /** Sets the intake to its 'low-scoring' position. */
+    @Deprecated
+    public void lowScoringPosition() {
+        setTarget(LOW_SCORING_POSITION);
+    }
+
+    /** Sets the intake to its 'medium-scoring' position. */
+    @Deprecated
+    public void mediumScoringPosition() {
+        setTarget(MEDIUM_SCORING_POSITION);
+    }
+
+    /** Sets the intake to its 'high-scoring' position. */
+    @Deprecated
+    public void highScoringPosition() {
+        setTarget(HIGH_SCORING_POSITION);
+    }
+
+    /** Stops the elbow motor. */
     public void stop() {
         elbowMotor.setPower(0);
     }
 
     /**
-     * Raise the arm manually.
+     * Raises the arm manually.
+     *
      * @param multiplier A multiplier for the speed of the motor
      */
     public void raiseManually(double multiplier) {
@@ -120,7 +112,8 @@ public class ElbowSubsystem extends SubsystemBase {
     }
 
     /**
-     * Lower the arm manually
+     * Lowers the arm manually
+     *
      * @param multiplier A multiplier for the speed of the motor
      */
     public void lowerManually(double multiplier) {
@@ -130,6 +123,7 @@ public class ElbowSubsystem extends SubsystemBase {
 
     /**
      * Set the target for the PID controller. This will make the robot start moving the arm automatically.
+     *
      * @param targetPosition The target position in pulses
      */
     public void setTarget(double targetPosition) {
@@ -138,14 +132,15 @@ public class ElbowSubsystem extends SubsystemBase {
     }
 
     /**
-     * Print data to the provided telemtery. Assumes the telemetry will be updated elsewhere.
+     * Print data to the provided telemetry. Assumes the telemetry will be updated elsewhere.
+     *
      * @param telemetry The telemetry to print to
      */
     public void printData(Telemetry telemetry) {
         telemetry.addLine("--- Elbow Subsystem ---");
-        telemetry.addData("Position", elbowMotor.getCurrentPosition());
-        telemetry.addData("Target", target);
-        telemetry.addData("State", state);
+        telemetry.addData("Position:", elbowMotor.getCurrentPosition());
+        telemetry.addData("Target:", target);
+        telemetry.addData("State:", state);
     }
 
     /**

@@ -9,13 +9,16 @@ import static org.firstinspires.ftc.teamcode.Constants.DroneConstants.*;
 
 /**
  * A subsystem that represents the servo on the arm that releases the paper drone.
+ *
+ * @author Esquimalt Atom Smashers
  */
 public class DroneSubsystem extends SubsystemBase {
     private final ServoEx droneServo;
 
     /**
-     * Creates a new DroneSubsystem. Initializes the {@link ServoEx} using the provided {@link HardwareMap}.
-     * @param hardwareMap The hardware map of the robot
+     * Constructs a DroneSubsystem.
+     *
+     * @param hardwareMap The global hardwareMap.
      */
     public DroneSubsystem(HardwareMap hardwareMap) {
         droneServo = new SimpleServo(hardwareMap, DRONE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
