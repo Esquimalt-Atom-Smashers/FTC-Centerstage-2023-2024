@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.commands.CommandManager;
 import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
@@ -42,6 +43,8 @@ public class Robot {
 
     private final boolean manualMode;
 
+    private final CommandManager commandManager;
+
     enum DriveState {
         DRIVER_CONTROLLED,
         SNAPPING,
@@ -50,7 +53,14 @@ public class Robot {
         STEPPING_LEFT,
         STEPPING_RIGHT
     }
-    enum ScoringState {
+
+    // Not sure what the best way to do this is
+    // Commands in CommandManager need to set the scoring state
+    // There is a method setScoringState, but we still need to pass a scoring state in
+    // Could just have methods for each state that set it to that
+    // (like shootingDrone() just sets the scoring state to SHOOTING_DRONE)
+    // I'll just leave this as public for now
+    public enum ScoringState {
         STARTING,
         INTAKE,
         LOADING_PIXELS,
@@ -85,6 +95,8 @@ public class Robot {
         droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap);
 
+        commandManager = new CommandManager(this);
+
         if (!manualMode) initCommands();
     }
 
@@ -97,23 +109,15 @@ public class Robot {
      */
     private void initCommands() {
         // Default commands for individual subsystems:
-        // CameraSubsystem
 
         // ClawSubsystem
-        clawSubsystem.setDefaultCommand(new RunCommand(() -> {
-            if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) clawSubsystem.closeClaw();
-            if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) clawSubsystem.openClaw();
-        }, clawSubsystem));
+        clawSubsystem.setDefaultCommand(commandManager.getDefaultClawCommand());
 
         Trigger clawTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && scoringState == ScoringState.DRIVING);
-        clawTrigger.whenActive(new SequentialCommandGroup(
-                new InstantCommand(clawSubsystem::openClaw, clawSubsystem),
-                new WaitCommand(250),
-                new MoveSlideCommand(linearSlideSubsystem, Constants.LinearSlideConstants.IN_POSITION)
-        ));
+        clawTrigger.whenActive(commandManager.getOpenClawCommand());
 
         // DriveSubsystem
-        driveSubsystem.setDefaultCommand(new RunCommand(() -> driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX()), driveSubsystem));
+        driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
 
 //        Trigger autoDriveTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
 //        autoDriveTrigger.toggleWhenActive(new AutoDriveCommand(driveSubsystem, 1000), new AutoDriveCommand(driveSubsystem, -1000));
@@ -290,25 +294,6 @@ public class Robot {
         driveSubsystem.printData(opMode.telemetry);
         linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
-
-        // Instruction controls (driver):
-        // Left trigger adds a left align
-        // Right trigger adds a right align
-        // Both triggers add a center align
-        // Left bumper adds a step left
-        // Right bumper adds a step right
-        // A enters the instructions
-        // B cancels the instructions
-//        if (isPressed(driverGamepad.left_trigger) && isPressed(driverGamepad.right_trigger))
-//            instructionExecutor.addInstruction(this::alignCenter);
-//        else if (isPressed(driverGamepad.left_trigger))
-//            instructionExecutor.addInstruction(this::alignLeft);
-//        else if (isPressed(driverGamepad.right_trigger))
-//            instructionExecutor.addInstruction(this::alignRight);
-//        if (driverGamepad.left_bumper) instructionExecutor.addInstruction(this::stepLeft);
-//        if (driverGamepad.right_bumper) instructionExecutor.addInstruction(this::stepRight);
-//        if (driverGamepad.a) instructionExecutor.executeInstructions();
-//        if (driverGamepad.b) instructionExecutor.clearInstructions();
     }
 
     /**
@@ -405,33 +390,45 @@ public class Robot {
 
     }
 
-//    public void runPIDControllers() {
-//        if (!usingPIDControllers) return;
-//        elbowSubsystem.runPID();
-//        linearSlideSubsystem.runPID();
-//    }
-//
-//    private void alignLeft() {
-//
-//    }
-//
-//    private void alignCenter() {
-//
-//    }
-//
-//    private void alignRight() {
-//
-//    }
-//
-//    private void stepLeft() {
-//        driveSubsystem.halfStepLeft();
-//        driveState = DriveState.STEPPING_LEFT;
-//    }
-//
-//    private void stepRight() {
-//        driveSubsystem.halfStepRight();
-//        driveState = DriveState.STEPPING_RIGHT;
-//    }
+    public void setScoringState(ScoringState newState) {
+        scoringState = newState;
+    }
+
+    public GamepadEx getOperatorGamepad() {
+        return operatorGamepad;
+    }
+
+    public GamepadEx getDriverGamepad() {
+        return driverGamepad;
+    }
+
+    public ClawSubsystem getClawSubsystem() {
+        return clawSubsystem;
+    }
+
+    public DriveSubsystem getDriveSubsystem() {
+        return driveSubsystem;
+    }
+
+    public DroneSubsystem getDroneSubsystem() {
+        return droneSubsystem;
+    }
+
+    public ElbowSubsystem getElbowSubsystem() {
+        return elbowSubsystem;
+    }
+
+    public IntakeSubsystem getIntakeSubsystem() {
+        return intakeSubsystem;
+    }
+
+    public LinearSlideSubsystem getLinearSlideSubsystem() {
+        return linearSlideSubsystem;
+    }
+
+    public WinchSubsystem getWinchSubsystem() {
+        return winchSubsystem;
+    }
 
     /**
      * Checks if a input from the controller is outside the dead zone
