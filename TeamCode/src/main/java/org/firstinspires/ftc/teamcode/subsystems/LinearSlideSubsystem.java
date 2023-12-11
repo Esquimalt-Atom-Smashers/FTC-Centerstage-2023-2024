@@ -8,12 +8,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.Robot;
 
 import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
-
-import java.util.Arrays;
 
 /**
  * A subsystem that represents the motor and PID controller that controls the slide.
@@ -21,11 +18,11 @@ import java.util.Arrays;
 public class LinearSlideSubsystem extends SubsystemBase {
     private final DcMotorEx slideMotor;
 
-    private PIDController controller;
-    public static double target;
+    private final PIDController controller;
+    private double target;
 
-    private double lastPower;
-    private double lastLastPower;
+//    private double lastPower;
+//    private double lastLastPower;
 
     private PIDSubsystemState state;
 
@@ -76,7 +73,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
     /**
      * Stops the slide motor.
      */
-    public void stop() {
+    public void stopMotor() {
         slideMotor.setPower(0);
     }
 
@@ -119,11 +116,11 @@ public class LinearSlideSubsystem extends SubsystemBase {
             slideMotor.setPower(power);
             // If the power isn't much, we are about as close to the target as we are going to get,
             // so we don't update anymore
-            lastPower = power;
+//            lastPower = power;
             if (Math.abs(power) <= POWER_TOLERANCE) {
                 state = PIDSubsystemState.AT_TARGET;
-                lastLastPower = power;
-                stop();
+//                lastLastPower = power;
+                stopMotor();
             }
         }
     }
@@ -143,38 +140,27 @@ public class LinearSlideSubsystem extends SubsystemBase {
         telemetry.addData("Is over current?", slideMotor.isOverCurrent());
     }
 
-    /**
-     * Checks if the motor is at the target position.
-     * @return Whether the motor is at the target
-     */
+    /** @return true if the motor is at the target, false otherwise. */
     public boolean isAtTarget() {
         return state == PIDSubsystemState.AT_TARGET;
     }
 
-    /**
-     * @return Returns the low scoring position
-     */
+    /** @return the preset low scoring position */
     public int getLowScoringPosition() {
         return LOW_SCORING_POSITION;
     }
 
-    /**
-     * @return Returns the medium scoring position
-     */
+    /** @return the preset medium scoring position */
     public int getMediumScoringPosition() {
         return MEDIUM_SCORING_POSITION;
     }
 
-    /**
-     * @return Returns the high scoring position
-     */
+    /** @return the preset high scoring position */
     public int getHighScoringPosition() {
         return HIGH_SCORING_POSITION;
     }
 
-    /**
-     * @return Returns the minimum position
-     */
+    /** @return the minimum position of the slide */
     public int getInPosition() {
         return IN_POSITION;
     }

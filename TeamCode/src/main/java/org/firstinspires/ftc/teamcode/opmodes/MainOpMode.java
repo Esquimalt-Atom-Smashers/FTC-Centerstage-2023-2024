@@ -7,14 +7,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
-
+/**
+ * OpMode used after autonomous.
+ */
 @TeleOp(name="Main", group = "Real")
 public class MainOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Robot robot = new Robot(this);
+        Robot robot = new Robot(this, false, false);
 
         // Perform actions that happen before the Robot starts
 

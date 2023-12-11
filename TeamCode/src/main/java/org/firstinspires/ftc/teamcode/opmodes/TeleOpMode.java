@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
+/**
+ * OpMode that isn't used after autonomous.
+ */
 @TeleOp(name = "Tele OpMode", group = "Real")
 public class TeleOpMode extends LinearOpMode {
 

@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
+
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
 
 /**
@@ -48,56 +49,8 @@ public class ElbowSubsystem extends SubsystemBase {
         elbowMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    /** Sets the intake to its default 'intake' position. */
-    @Deprecated
-    public void intakePosition() {
-        setTarget(INTAKE_POSITION);
-    }
-
-    /** Sets the intake to its 'driving' position. */
-    @Deprecated
-    public void drivingPosition() {
-        setTarget(DRIVING_POSITION);
-    }
-
-    /** Sets the intake to its 'level' position. */
-    @Deprecated
-    public void levelPosition() {
-        setTarget(LEVEL_POSITION);
-    }
-
-    /** Sets the intake to its 'test' position. */
-    @Deprecated
-    public void testPosition() {
-        setTarget(TEST_POSITION);
-    }
-
-    /** Sets the intake to its 'tilt' position. */
-    @Deprecated
-    public void tiltPosition() {
-        setTarget(TILT_POSITION);
-    }
-
-    /** Sets the intake to its 'low-scoring' position. */
-    @Deprecated
-    public void lowScoringPosition() {
-        setTarget(LOW_SCORING_POSITION);
-    }
-
-    /** Sets the intake to its 'medium-scoring' position. */
-    @Deprecated
-    public void mediumScoringPosition() {
-        setTarget(MEDIUM_SCORING_POSITION);
-    }
-
-    /** Sets the intake to its 'high-scoring' position. */
-    @Deprecated
-    public void highScoringPosition() {
-        setTarget(HIGH_SCORING_POSITION);
-    }
-
     /** Stops the elbow motor. */
-    public void stop() {
+    public void stopMotor() {
         elbowMotor.setPower(0);
     }
 
@@ -167,5 +120,37 @@ public class ElbowSubsystem extends SubsystemBase {
     /** @return true if the motor is at the target, false otherwise. */
     public boolean isAtTarget() {
         return state == PIDSubsystemState.AT_TARGET;
+    }
+
+    /** @return the preset low scoring position */
+    public int getLowScoringPosition() {
+        return LOW_SCORING_POSITION;
+    }
+
+    /** @return the preset medium scoring position */
+    public int getMediumScoringPosition() {
+        return MEDIUM_SCORING_POSITION;
+    }
+
+    /** @return the preset high scoring position */
+    public int getHighScoringPosition() {
+        return HIGH_SCORING_POSITION;
+    }
+
+    public int getDroneLaunchPosition() {
+        return DRONE_LAUNCH_POSITION;
+    }
+
+    public int getLevelPosition() {
+        return LEVEL_POSITION;
+    }
+
+    public int getDrivingPosition() {
+        return DRIVING_POSITION;
+    }
+
+    /** @return the minimum position of the elbow */
+    public int getIntakePosition() {
+        return INTAKE_POSITION;
     }
 }

@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -12,14 +12,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
-import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.commands.CommandManager;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -50,15 +45,14 @@ public class AutonomousController {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
 
+    private final Robot robot;
+    private final CommandManager commandManager;
+    private final TrajectoryManager trajectoryManager;
+
     // Our starting function
     private Pose2d startPosition;
 
-    // Subsystems used by the autonomous
     private final SampleMecanumDrive drive;
-    private final ClawSubsystem claw;
-    private final IntakeSubsystem intake;
-    private final ElbowSubsystem elbow;
-    private final LinearSlideSubsystem slide;
 
     // Camera things
     private OpenCVPipeline pipeline;
@@ -68,29 +62,21 @@ public class AutonomousController {
     private boolean isBlueAlliance;
     private boolean isUpstage;
     private boolean isPlacingYellow;
-    private boolean isSetUp;
 
     // Operators used to easily convert positions and angles between red and blue
     private float positionMultiplier;
     private float rotationalOffset;
 
-    // Our state for out state machine
+    // Our state for our state machine
     private State currentState = State.IDLE;
 
     // The position of the spike mark
     private SpikeMark spikeMarkPosition;
 
-    // Commands run in autonomous
-    private SequentialCommandGroup setUpCommand;
-    private SequentialCommandGroup placePurplePixel;
-    private SequentialCommandGroup armToPlacePosition;
-    private SequentialCommandGroup placeYellowPixel;
-
     private WaitCommand currentCommand;
 
     /**
      * Creates a new AutonomousController, initializing the subsystems using the HardwareMap from the provided LinearOpMode.
-     * Also sets settings and initializes the commands using the provided condition
      *
      * @param opMode The LinearOpMode that created the controller.
      * @param isBlueAlliance If we are on the blue alliance.
@@ -100,24 +86,21 @@ public class AutonomousController {
     public AutonomousController(LinearOpMode opMode, boolean isBlueAlliance, boolean isUpstage, boolean isPlacingYellow) {
         hardwareMap = opMode.hardwareMap;
         telemetry = opMode.telemetry;
-        drive = new SampleMecanumDrive(hardwareMap);
-        claw = new ClawSubsystem(hardwareMap);
-        intake = new IntakeSubsystem(hardwareMap);
-        elbow = new ElbowSubsystem(hardwareMap);
-        elbow.resetEncoder();
-        slide = new LinearSlideSubsystem(hardwareMap);
-        slide.resetEncoder();
         setSettings(isBlueAlliance, isUpstage, isPlacingYellow);
-        updateStatus("Not Ready (Starting OpenCVPipeline)");
+
+        drive = new SampleMecanumDrive(hardwareMap);
+        robot = new Robot(opMode, true, true);
+        commandManager = new CommandManager(robot);
+        trajectoryManager = new TrajectoryManager(this);
+
         startOpenCV();
-        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)\nDo not press stop!");
-        updateStatus("Ready");
     }
 
     /**
-     * Creates a webcam and asynchronously opens an open cv pipeline.
+     * Creates a webcam and asynchronously opens an open cv pipeline. Waits until the camera is ready
      */
     private void startOpenCV(){
+        updateStatus("Not Ready (Starting OpenCVPipeline)...");
         pipeline = new OpenCVPipeline();
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME), cameraMonitorViewId);
@@ -135,6 +118,8 @@ public class AutonomousController {
             {
             }
         });
+        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)...\nDo not press stop!");
+        updateStatus("Ready");
     }
 
     /**
@@ -152,54 +137,15 @@ public class AutonomousController {
         positionMultiplier = isBlueAlliance ? 1 : -1;
         rotationalOffset = isBlueAlliance ? 0 : 180;
         startPosition = new Pose2d(isUpstage ? 11.5 : -35.5, 62 * positionMultiplier, Math.toRadians(isBlue ? 270 : 90));
-        isSetUp = true;
-
-        initializeCommands();
-    }
-
-    /**
-     * Initializes the commands that move the elbow, slide and claw during autonomous.
-     */
-    private void initializeCommands() {
-        if (!isSetUp) return;
-        setUpCommand = new SequentialCommandGroup(
-                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
-                new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
-                new InstantCommand(claw::closeClawSingle, claw),
-                new InstantCommand(intake::mediumPosition, intake),
-                new WaitCommand(500),
-                new MoveElbowCommand(elbow, Constants.ElbowConstants.DRIVING_POSITION)
-        );
-        placePurplePixel = new SequentialCommandGroup(
-                new InstantCommand(intake::downPosition, intake),
-                new WaitCommand(250),
-                new InstantCommand(intake::intake, intake),
-                new WaitCommand(250),
-                new InstantCommand(intake::stop, intake),
-                new InstantCommand(intake::mediumPosition, intake)
-        );
-        armToPlacePosition = new SequentialCommandGroup(
-                new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION),
-                new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION)
-        );
-        placeYellowPixel = new SequentialCommandGroup(
-                new InstantCommand(claw::openClaw, claw),
-                new WaitCommand(750),
-                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION)
-        );
     }
 
     /**
      * Starts the state machine by starting the first command and setting the state to picking up pixels.
      */
     public void start() {
-        if (!isSetUp) {
-            currentState = State.IDLE;
-            return;
-        }
         currentState = State.PICKING_UP_PIXELS;
         drive.setPoseEstimate(startPosition);
-        currentCommand = scheduleCommand(setUpCommand);
+        currentCommand = scheduleCommand(commandManager.getAutoSetupCommand());
     }
 
     /**
@@ -214,14 +160,14 @@ public class AutonomousController {
                     spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
                     webcam.closeCameraDevice();
                     currentState = State.MOVING_TO_SPIKE_MARKS;
-                    drive.followTrajectorySequenceAsync(driveToSpikeMarks());
+                    drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToSpikeMarksTrajectory());
                 }
                 break;
             // Carrying the pixels, moving to the center of the spike marks
             case MOVING_TO_SPIKE_MARKS:
                 if (canContinue()) {
                     currentState = State.PLACING_PURPLE;
-                    currentCommand = scheduleCommand(placePurplePixel);
+                    currentCommand = scheduleCommand(commandManager.getAutoPlacePurpleCommand());
                 }
                 break;
             // Placing the purple pixel on the spike mark using the intake
@@ -230,8 +176,8 @@ public class AutonomousController {
                     // TODO: Make a way to always turn the correct direction at the end of auto
                     if (isUpstage && isPlacingYellow) {
                         currentState = State.MOVING_FROM_SPIKE_MARKS;
-                        currentCommand = scheduleCommand(armToPlacePosition);
-                        drive.followTrajectorySequenceAsync(driveFromSpikeMarks());
+                        currentCommand = scheduleCommand(commandManager.getAutoMoveArmCommand());
+                        drive.followTrajectorySequenceAsync(trajectoryManager.getDriveFromSpikeMarksTrajectory());
                     }
                     else currentState = State.IDLE;
                 }
@@ -240,21 +186,21 @@ public class AutonomousController {
             case MOVING_FROM_SPIKE_MARKS:
                 if (canContinue()) {
                     currentState = State.MOVING_TO_BACKDROP;
-                    drive.followTrajectorySequenceAsync(driveToBackdrop());
+                    drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToBackdropTrajectory());
                 }
                 break;
             // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
                 if (canContinue()) {
                     currentState = State.PLACING_YELLOW;
-                    currentCommand = scheduleCommand(placeYellowPixel);
+                    currentCommand = scheduleCommand(commandManager.getAutoPlaceYellowCommand());
                 }
                 break;
             // Placing the yellow pixel on the backstage
             case PLACING_YELLOW:
                 if (canContinue()) {
                     currentState = State.HIDING;
-                    drive.followTrajectorySequenceAsync(driveToCorner());
+                    drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToCornerTrajectory());
                 }
                 break;
             // Moving to the corner to take up the least amount of room
@@ -283,85 +229,10 @@ public class AutonomousController {
      * @param command The command to be scheduled.
      * @return The wait command at the end of the sequential command.
      */
-    private WaitCommand scheduleCommand(SequentialCommandGroup command) {
+    private WaitCommand scheduleCommand(Command command) {
         WaitCommand waitCommand = new WaitCommand(1);
-        command.addCommands(waitCommand);
-        command.schedule();
+        new SequentialCommandGroup(command, waitCommand).schedule();
         return waitCommand;
-    }
-
-    /**
-     * Constructs and returns the trajectory sequence used to drive to the correct spike mark.
-     *
-     * @return The built trajectory sequence.
-     */
-    private TrajectorySequence driveToSpikeMarks() {
-        if (spikeMarkPosition == SpikeMark.LEFT)
-            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(24)
-                    .turn(Math.toRadians(90))
-                    .strafeRight(5)
-                    .back(2)
-                    .build();
-        else if (spikeMarkPosition == SpikeMark.MIDDLE)
-            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(25)
-                    .strafeLeft(8)
-                    .build();
-        else /*if (spikeMarkPosition == SpikeMark.RIGHT)*/
-            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(24)
-                    .turn(Math.toRadians(-90))
-                    .strafeLeft(5)
-                    .back(2)
-                    .build();
-    }
-
-    /**
-     * Constructs and returns the trajectory sequence used to drive away from the spike marks after placing the purple pixel.
-     *
-     * @return The built trajectory sequence.
-     */
-    private TrajectorySequence driveFromSpikeMarks() {
-        if (spikeMarkPosition == SpikeMark.LEFT)
-            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .strafeLeft(30)
-                    .build();
-        else if (spikeMarkPosition == SpikeMark.MIDDLE)
-            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .strafeRight(6)
-                    .back(11)
-                    .build();
-        else /*if (spikeMarkPosition == SpikeMark.RIGHT)*/
-            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .strafeRight(30)
-                    .build();
-    }
-
-    /**
-     * Constructs and returns the trajectory sequence used to drive to the backdrop.
-     *
-     * @return The built trajectory sequence.
-     */
-    private TrajectorySequence driveToBackdrop() {
-        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(46, 35 * positionMultiplier, Math.toRadians(0)))
-                .strafeRight(spikeMarkPosition == SpikeMark.LEFT ? -6 : spikeMarkPosition == SpikeMark.MIDDLE ? 0.1 : 9)
-                .build();
-    }
-
-    /**
-     * Constructs and returns the trajectory sequence used to drive to the corner.
-     *
-     * @return The built trajectory sequence.
-     */
-    private TrajectorySequence driveToCorner() {
-        // TODO: Check the math in this trajectory
-        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                .back(3)
-                .turn(Math.toRadians(isBlueAlliance ? -90 : 90))
-                .lineTo(new Vector2d(49, 60 * positionMultiplier))
-                .build();
     }
 
     private boolean canContinue() {
@@ -371,6 +242,22 @@ public class AutonomousController {
     private void updateStatus(String text) {
         telemetry.addData("Status", text);
         telemetry.update();
+    }
+
+    public SampleMecanumDrive getDriveBase() {
+        return drive;
+    }
+
+    public SpikeMark getSpikeMarkPosition() {
+        return spikeMarkPosition;
+    }
+
+    public float getPositionMultiplier() {
+        return positionMultiplier;
+    }
+
+    public boolean isBlueAlliance() {
+        return isBlueAlliance;
     }
 
 //    private void lineUpWithAprilTag(){

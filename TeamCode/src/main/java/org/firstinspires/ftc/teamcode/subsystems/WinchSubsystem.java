@@ -26,5 +26,5 @@ public class WinchSubsystem extends SubsystemBase {
     }
 
     // Stop the motor
-    public void stop() { winchMotor.setPower(0); }
+    public void stopMotor() { winchMotor.setPower(0); }
 }

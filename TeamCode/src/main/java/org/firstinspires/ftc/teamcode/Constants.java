@@ -80,7 +80,6 @@ public class Constants {
         public static final double START_POSITION = 0, RELEASE_ANGLE = 180;
     }
 
-    @Config
     public static class ElbowConstants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
 
@@ -89,18 +88,19 @@ public class Constants {
         // PID values for the PID controller
         public static final double P = 0.0019, I = 0, D = 0;
 
-        // 0 intake
-        // 1000 driving
-        // 4750 level
-        // 23000 straight up / climbing
-        // TODO: Change these to ints (and others of the same type)
-        public static final int INTAKE_POSITION = 500, DRIVING_POSITION = 2000, LEVEL_POSITION = 4750, DRONE_LAUNCH_POSITION = 11000, VERTICAL_POSITION = 23000;
-        public static final int TILT_POSITION = 3350;
-        public static final int TEST_POSITION = 15000;
+        public static final int INTAKE_POSITION = 500;
+        public static final int DRIVING_POSITION = 2000;
+
+        public static final int LOW_SCORING_POSITION = 8400;
+        public static final int MEDIUM_SCORING_POSITION = 10400;
+        public static final int HIGH_SCORING_POSITION = 12400;
+
+        public static final int LEVEL_POSITION = 4750;
+        public static final int DRONE_LAUNCH_POSITION = 11000;
+//        public static final int TEST_POSITION = 15000;
 
         // Drone position is ~14000
 
-        public static int LOW_SCORING_POSITION = 8400, MEDIUM_SCORING_POSITION = 10400, HIGH_SCORING_POSITION = 12400;
 
         public static final double POWER_TOLERANCE = 0.1;
     }
@@ -122,7 +122,6 @@ public class Constants {
         public static final double OUTTAKE_SPEED = 0.5;
     }
 
-    @Config
     public static class LinearSlideConstants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
@@ -138,9 +137,9 @@ public class Constants {
         public static final int MAX_POSITION = 3000;
 
         public static final int IN_POSITION = MIN_POSITION;
-        public static final int OUT_POSITION = 2000;
-        public static int TILT_POSITION = 275;
-        public static int LOW_SCORING_POSITION = 1300, MEDIUM_SCORING_POSITION = 1870, HIGH_SCORING_POSITION = 2800;
+        public static final int LOW_SCORING_POSITION = 1300;
+        public static final int MEDIUM_SCORING_POSITION = 1870;
+        public static final int HIGH_SCORING_POSITION = 2800;
 
         public static final double POWER_TOLERANCE = 0.08;
     }
