@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.opencv.core.Scalar;
@@ -36,7 +35,13 @@ public class Constants {
         public static final double SUPER_CLOSE_POSITION = 60;
     }
 
-    @Config
+    public static class DistanceSensorConstants {
+        public static final String LEFT_DISTANCE_SENSOR_NAME = "leftDistanceSensor";
+        public static final String RIGHT_DISTANCE_SENSOR_NAME = "rightDistanceSensor";
+
+        public static double DISTANCE_THRESHOLD = -1;
+    }
+
     public static class DriveConstants {
 
         public static final String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";

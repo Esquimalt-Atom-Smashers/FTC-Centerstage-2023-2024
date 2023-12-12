@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.commands.CommandManager;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.DistanceSensorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DroneSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
@@ -32,6 +33,8 @@ public class Robot {
 
     /** The claw of the robot */
     private final ClawSubsystem clawSubsystem;
+    /** The distance sensors of the robot */
+    private final DistanceSensorSubsystem distanceSensorSubsystem;
     /** The drive base of the robot */
     private final DriveSubsystem driveSubsystem;
     /** The drone holder and launcher of the robot */
@@ -87,6 +90,7 @@ public class Robot {
 
         // Initialize the subsystems
         clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
+        distanceSensorSubsystem = new DistanceSensorSubsystem(opMode.hardwareMap, opMode.telemetry);
         driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
         droneSubsystem = new DroneSubsystem(opMode.hardwareMap, opMode.telemetry);
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
@@ -179,6 +183,7 @@ public class Robot {
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
+        distanceSensorSubsystem.printData();
         opMode.telemetry.update();
     }
 
@@ -292,6 +297,10 @@ public class Robot {
 
     public ClawSubsystem getClawSubsystem() {
         return clawSubsystem;
+    }
+
+    public DistanceSensorSubsystem getDistanceSensorSubsystem() {
+        return distanceSensorSubsystem;
     }
 
     public DriveSubsystem getDriveSubsystem() {
