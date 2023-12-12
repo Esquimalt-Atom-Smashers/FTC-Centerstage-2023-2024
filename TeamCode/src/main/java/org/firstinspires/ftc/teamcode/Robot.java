@@ -48,12 +48,6 @@ public class Robot {
         STEPPING_RIGHT
     }
 
-    // Not sure what the best way to do this is
-    // Commands in CommandManager need to set the scoring state
-    // There is a method setScoringState, but we still need to pass a scoring state in
-    // Could just have methods for each state that set it to that
-    // (like shootingDrone() just sets the scoring state to SHOOTING_DRONE)
-    // I'll just leave this as public for now
     public enum ScoringState {
         STARTING,
         INTAKE,
@@ -68,6 +62,7 @@ public class Robot {
 
     /**
      * Initializes all gamepads, subsystems, and if necessary, initializes the commands through {@link #bindCommands()}
+     *
      * @param opMode The opMode that created the Robot
      * @param manualMode Whether we are using commands or not, default is false
      * @param resetEncoders Whether we reset the encoders on the slide, elbow and drive subsystems
@@ -196,41 +191,41 @@ public class Robot {
     /**
      * Drives the robot using the gamepad inputs, only used in manual mode
      */
-    private void driveLoop() {
-        switch (driveState) {
-            case DRIVER_CONTROLLED:
-                driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
-                if (driverGamepad.getButton(GamepadKeys.Button.A)) {
-//                    driveSubsystem.autoSnap();
-//                    driveState = DriveState.SNAPPING;
-                }
-                break;
-            case SNAPPING:
-                if (driveSubsystem.isFinishedSnapping()) {
-                    driveState = DriveState.DETECTING_TAG;
-                }
-                break;
-            case DETECTING_TAG:
-                break;
-            case CENTERING_TAG:
-//                if (driveSubsystem.isCentered()) {
-//                    instructionExecutor.getNextInstruction();
+//    private void driveLoop() {
+//        switch (driveState) {
+//            case DRIVER_CONTROLLED:
+//                driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
+//                if (driverGamepad.getButton(GamepadKeys.Button.A)) {
+////                    driveSubsystem.autoSnap();
+////                    driveState = DriveState.SNAPPING;
 //                }
-                break;
-            case STEPPING_LEFT:
-                if (driveSubsystem.isFinishedSteppingLeft()) {
-                    driveState = DriveState.DRIVER_CONTROLLED;
-                }
-                break;
-            case STEPPING_RIGHT:
-                if (driveSubsystem.isFinishedSteppingRight()) {
-                    driveState = DriveState.DRIVER_CONTROLLED;
-                }
-                break;
-            default:
-                driveState = DriveState.DRIVER_CONTROLLED;
-        }
-    }
+//                break;
+//            case SNAPPING:
+//                if (driveSubsystem.isFinishedSnapping()) {
+//                    driveState = DriveState.DETECTING_TAG;
+//                }
+//                break;
+//            case DETECTING_TAG:
+//                break;
+//            case CENTERING_TAG:
+////                if (driveSubsystem.isCentered()) {
+////                    instructionExecutor.getNextInstruction();
+////                }
+//                break;
+//            case STEPPING_LEFT:
+//                if (driveSubsystem.isFinishedSteppingLeft()) {
+//                    driveState = DriveState.DRIVER_CONTROLLED;
+//                }
+//                break;
+//            case STEPPING_RIGHT:
+//                if (driveSubsystem.isFinishedSteppingRight()) {
+//                    driveState = DriveState.DRIVER_CONTROLLED;
+//                }
+//                break;
+//            default:
+//                driveState = DriveState.DRIVER_CONTROLLED;
+//        }
+//    }
 
 
     /**
@@ -238,7 +233,9 @@ public class Robot {
      */
     public void runManually() {
 
-        driveLoop();
+//        driveLoop();
+
+        driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
 
         // Elbow Subsystem (operator)
         // X -> Raise, Y -> Lower, Moving the left joystick from bottom to top increases the speed

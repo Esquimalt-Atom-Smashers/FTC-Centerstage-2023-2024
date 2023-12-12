@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -24,8 +23,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  * A controller that controls the drive base and arm during autonomous.
  */
 public class AutonomousController {
-
-    enum State {
+    enum AutonomousState {
         PICKING_UP_PIXELS,
         MOVING_TO_SPIKE_MARKS,
         MOVING_FROM_SPIKE_MARKS,
@@ -68,7 +66,7 @@ public class AutonomousController {
     private float rotationalOffset;
 
     // Our state for our state machine
-    private State currentState = State.IDLE;
+    private AutonomousState currentState = AutonomousState.IDLE;
 
     // The position of the spike mark
     private SpikeMark spikeMarkPosition;
@@ -143,7 +141,7 @@ public class AutonomousController {
      * Starts the state machine by starting the first command and setting the state to picking up pixels.
      */
     public void start() {
-        currentState = State.PICKING_UP_PIXELS;
+        currentState = AutonomousState.PICKING_UP_PIXELS;
         drive.setPoseEstimate(startPosition);
         currentCommand = scheduleCommand(commandManager.getAutoSetupCommand());
     }
@@ -159,54 +157,56 @@ public class AutonomousController {
                     int gameElementPosition = pipeline.findGameElement(isBlueAlliance);
                     spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
                     webcam.closeCameraDevice();
-                    currentState = State.MOVING_TO_SPIKE_MARKS;
+                    currentState = AutonomousState.MOVING_TO_SPIKE_MARKS;
                     drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToSpikeMarksTrajectory());
                 }
                 break;
             // Carrying the pixels, moving to the center of the spike marks
             case MOVING_TO_SPIKE_MARKS:
                 if (canContinue()) {
-                    currentState = State.PLACING_PURPLE;
+                    currentState = AutonomousState.PLACING_PURPLE;
                     currentCommand = scheduleCommand(commandManager.getAutoPlacePurpleCommand());
                 }
                 break;
             // Placing the purple pixel on the spike mark using the intake
             case PLACING_PURPLE:
                 if (canContinue()) {
-                    // TODO: Make a way to always turn the correct direction at the end of auto
                     if (isUpstage && isPlacingYellow) {
-                        currentState = State.MOVING_FROM_SPIKE_MARKS;
+                        currentState = AutonomousState.MOVING_FROM_SPIKE_MARKS;
                         currentCommand = scheduleCommand(commandManager.getAutoMoveArmCommand());
                         drive.followTrajectorySequenceAsync(trajectoryManager.getDriveFromSpikeMarksTrajectory());
                     }
-                    else currentState = State.IDLE;
+                    else {
+                        currentState = AutonomousState.HIDING;
+                        drive.followTrajectorySequenceAsync(trajectoryManager.getFinalTrajectory());
+                    }
                 }
                 break;
             // Moving out of the way of the pixel and game element
             case MOVING_FROM_SPIKE_MARKS:
                 if (canContinue()) {
-                    currentState = State.MOVING_TO_BACKDROP;
+                    currentState = AutonomousState.MOVING_TO_BACKDROP;
                     drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToBackdropTrajectory());
                 }
                 break;
             // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
                 if (canContinue()) {
-                    currentState = State.PLACING_YELLOW;
+                    currentState = AutonomousState.PLACING_YELLOW;
                     currentCommand = scheduleCommand(commandManager.getAutoPlaceYellowCommand());
                 }
                 break;
             // Placing the yellow pixel on the backstage
             case PLACING_YELLOW:
                 if (canContinue()) {
-                    currentState = State.HIDING;
-                    drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToCornerTrajectory());
+                    currentState = AutonomousState.HIDING;
+                    drive.followTrajectorySequenceAsync(trajectoryManager.getFinalTrajectory());
                 }
                 break;
             // Moving to the corner to take up the least amount of room
             case HIDING:
                 if (canContinue()) {
-                    currentState = State.IDLE;
+                    currentState = AutonomousState.IDLE;
                     // We are done, idle
                 }
                 break;
@@ -258,6 +258,14 @@ public class AutonomousController {
 
     public boolean isBlueAlliance() {
         return isBlueAlliance;
+    }
+
+    public boolean isPlacingYellow() {
+        return isPlacingYellow;
+    }
+
+    public boolean isUpstage() {
+        return isUpstage;
     }
 
 //    private void lineUpWithAprilTag(){

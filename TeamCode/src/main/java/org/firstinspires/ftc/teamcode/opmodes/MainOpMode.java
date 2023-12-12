@@ -18,8 +18,6 @@ public class MainOpMode extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Robot robot = new Robot(this, false, false);
 
-        // Perform actions that happen before the Robot starts
-
         robot.start();
 
         waitForStart();

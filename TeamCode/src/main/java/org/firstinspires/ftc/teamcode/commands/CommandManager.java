@@ -42,7 +42,7 @@ public class CommandManager {
     private final Command lowScoringPositionCommand;
     /** Command that moves the arm to home position */
     private final Command homePostionCommand;
-    /** Command run at the start of teleop */
+    /** Command run at the start of driver controlled */
     private final Command setupCommand;
     /** Command run at the start of autonomous */
     private final Command autoSetupCommand;
@@ -80,8 +80,8 @@ public class CommandManager {
         droneCancelCommand = new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.DRIVING));
 
         defaultElbowCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().lowerManually(1);
-            else if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().raiseManually(1);
+            if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().raiseManually(1);
+            else if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().lowerManually(1);
             else robot.getElbowSubsystem().stopMotor();
         }, robot.getElbowSubsystem());
 
@@ -268,7 +268,4 @@ public class CommandManager {
     public Command getAutoPlaceYellowCommand() {
         return autoPlaceYellowCommand;
     }
-
-
-
 }

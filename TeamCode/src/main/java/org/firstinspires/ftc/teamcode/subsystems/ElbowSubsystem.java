@@ -137,14 +137,17 @@ public class ElbowSubsystem extends SubsystemBase {
         return HIGH_SCORING_POSITION;
     }
 
+    /** @return the drone launching position of the elbow */
     public int getDroneLaunchPosition() {
         return DRONE_LAUNCH_POSITION;
     }
 
+    /** @return the level position of the elbow */
     public int getLevelPosition() {
         return LEVEL_POSITION;
     }
 
+    /** @return the driving position of the elbow */
     public int getDrivingPosition() {
         return DRIVING_POSITION;
     }

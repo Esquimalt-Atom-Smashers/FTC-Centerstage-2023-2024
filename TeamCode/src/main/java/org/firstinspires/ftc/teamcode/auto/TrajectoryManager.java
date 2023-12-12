@@ -82,11 +82,17 @@ public class TrajectoryManager {
      *
      * @return The built trajectory sequence.
      */
-    public TrajectorySequence getDriveToCornerTrajectory() {
-        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                .back(3)
-                .turn(Math.toRadians(autonomousController.isBlueAlliance() ? -90 : 90))
-                .lineTo(new Vector2d(49, 60 * autonomousController.getPositionMultiplier()))
-                .build();
+    public TrajectorySequence getFinalTrajectory() {
+        double finalHeading = autonomousController.isBlueAlliance() ? -90 : 90;
+        if (autonomousController.isPlacingYellow() && autonomousController.isUpstage())
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .back(3)
+                    .turn(Math.toRadians(finalHeading))
+                    .lineTo(new Vector2d(49, 60 * autonomousController.getPositionMultiplier()))
+                    .build();
+        else
+            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .lineToLinearHeading(new Pose2d(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(finalHeading)))
+                    .build();
     }
 }

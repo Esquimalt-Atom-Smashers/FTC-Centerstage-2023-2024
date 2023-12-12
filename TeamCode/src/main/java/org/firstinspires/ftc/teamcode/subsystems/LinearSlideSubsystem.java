@@ -81,17 +81,19 @@ public class LinearSlideSubsystem extends SubsystemBase {
      * Checks whether we are at the max extension.
      * @return If we are at the maximum position
      */
-//    public boolean isMaxExtension() {
-//        return slideMotor.getCurrentPosition() >= MAX_POSITION;
-//    }
+    @Deprecated
+    public boolean isMaxExtension() {
+        return slideMotor.getCurrentPosition() >= MAX_POSITION;
+    }
 
     /**
      * Checks whether we are at the max retraction.
      * @return If we are at the minimum position
      */
-//    public boolean isMaxRetraction() {
-//        return slideMotor.getCurrentPosition() <= MIN_POSITION;
-//    }
+    @Deprecated
+    public boolean isMaxRetraction() {
+        return slideMotor.getCurrentPosition() <= MIN_POSITION;
+    }
 
     /**
      * Sets the target position and sets the mode to use PIDs.
