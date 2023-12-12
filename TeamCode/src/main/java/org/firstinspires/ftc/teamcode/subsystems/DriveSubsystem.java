@@ -17,9 +17,11 @@ import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 import java.util.Arrays;
 
 /**
- * A subsystem representing the wheels and gyro of the robot. Uses four {@link DcMotorEx} for the wheels and a {@link BNO055IMU} for the gyro
+ * A subsystem that represents the drive base of the robot. Uses four motors and a gyro to drive.
+ *
+ * @author Esquimalt Atom Smashers
  */
-public class DriveSubsystem extends SubsystemBase {
+public class DriveSubsystem extends CustomSubsystemBase {
     /** The DC motors on the robot. */
     private final DcMotorEx frontLeftMotor;
     private final DcMotorEx frontRightMotor;
@@ -30,17 +32,19 @@ public class DriveSubsystem extends SubsystemBase {
     /** The built-in IMU(gyro) on the control hub. */
     private final BNO055IMU imu;
 
-    private double snapTarget;
+//    private double snapTarget;
 
-    public static double forwardTarget;
-    private boolean atForwardTarget;
+//    public static double forwardTarget;
+//    private boolean atForwardTarget;
 
     /**
-     * Create a new DriveSubsystem. Initializes the four {@link DcMotorEx} and adds them to an array. Also sets their direction
-     * correctly, sets their zero power behaviour to brake, resets their encoders. Initializes the gyro.
+     * Constructs a new DriveSubsystem.
+     *
      * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public DriveSubsystem(HardwareMap hardwareMap) {
+    public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
         // Initialize the motors
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, FRONT_LEFT_MOTOR_NAME);
         frontRightMotor = hardwareMap.get(DcMotorEx.class, FRONT_RIGHT_MOTOR_NAME);
@@ -54,6 +58,7 @@ public class DriveSubsystem extends SubsystemBase {
         configureIMU();
     }
 
+    /** Configure the motors by setting their directions and zero power behaviors. */
     private void configureMotors() {
         // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);
@@ -66,6 +71,7 @@ public class DriveSubsystem extends SubsystemBase {
         resetEncoder();
     }
 
+    /** Configure the gyro */
     private void configureIMU() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
@@ -74,6 +80,7 @@ public class DriveSubsystem extends SubsystemBase {
         imu.initialize(parameters);
     }
 
+    /** Reset the encoders on the drive motors */
     public void resetEncoder() {
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -85,8 +92,8 @@ public class DriveSubsystem extends SubsystemBase {
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn
-     * @param fieldCentric If we want this drive to be field centric. Default is true
-     * @param scaled If we want the inputs to be scaled. Default is true
+     * @param fieldCentric If we want this drive to be field centric
+     * @param scaled If we want the inputs to be scaled
      */
     public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
@@ -115,6 +122,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     /**
      * Drives the robot using joystick input. Uses the default values for field centric and scaling.
+     *
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn
@@ -123,39 +131,55 @@ public class DriveSubsystem extends SubsystemBase {
         drive(forward, strafe, turn, FIELD_CENTRIC, SCALED);
     }
 
-    public boolean forward() {
-        return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
-    }
+//    public boolean forward() {
+//        return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
+//    }
 
-    public boolean isFinishedSnapping() {
-        // Checks if we are within the tolerance to auto snap
-        return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
-    }
+//    public boolean isFinishedSnapping() {
+////         Checks if we are within the tolerance to auto snap
+//        return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
+//    }
 
-    public boolean isFinishedSteppingLeft() {
-        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-    }
+//    public boolean isFinishedSteppingLeft() {
+//        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+//                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+//                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+//                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
+//    }
 
-    public boolean isFinishedSteppingRight() {
-        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-    }
+//    public boolean isFinishedSteppingRight() {
+//        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+//                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+//                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
+//                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
+//    }
 
-    // Stop all of the motors
+    /** Stop all of the drive motors */
     public void stopMotors() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
     }
 
+    /**
+     * Sets the mode of all the drive motors to the specified run mode.
+     *
+     * @param runMode The new run mode for the motors
+     */
+    private void setMotorMode(DcMotor.RunMode runMode) {
+        Arrays.stream(motors).forEach(motor -> motor.setMode(runMode));
+    }
+
+    /** @return The heading of the robot */
+    private double getHeading() {
+        return imu.getAngularOrientation().firstAngle;
+    }
+
+    /** @return The normalized angle in degrees */
     public int getNormalizedAngle() {
         return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
-    public void printData(Telemetry telemetry) {
+    /** Prints data from the motors to the telemetry */
+    public void printData() {
         telemetry.addLine("--- Drive base ---");
         telemetry.addData("Position", frontLeftMotor.getCurrentPosition());
         telemetry.addData("Power", frontLeftMotor.getPower());
@@ -164,12 +188,9 @@ public class DriveSubsystem extends SubsystemBase {
         telemetry.addData("Is over current?", frontLeftMotor.isOverCurrent());
     }
 
-    private void setMotorMode(DcMotor.RunMode runMode) {
-        Arrays.stream(motors).forEach(motor -> motor.setMode(runMode));
-    }
-
     /**
      * Takes a joystick input and clips it.
+     *
      * @param input The input to scale
      * @param isScaled If we want to scale the input
      * @return The input clipped between -1 and 1
@@ -186,11 +207,15 @@ public class DriveSubsystem extends SubsystemBase {
         }
     }
 
+    /**
+     * Checks if a value is close enough to the target.
+     *
+     * @param input Input value
+     * @param target Target value
+     * @param tolerance How far away we can be
+     * @return Whether the input value is within tolerance away from target
+     */
     private boolean isWithinTolerance(double input, double target, double tolerance) {
         return Math.abs(input - target) <= tolerance;
-    }
-
-    private double getHeading() {
-        return imu.getAngularOrientation().firstAngle;
     }
 }

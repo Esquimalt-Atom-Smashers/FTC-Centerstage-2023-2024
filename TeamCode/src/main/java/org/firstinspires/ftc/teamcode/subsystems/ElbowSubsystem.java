@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
  *
  * @author Esquimalt Atom Smashers
  */
-public class ElbowSubsystem extends SubsystemBase {
+public class ElbowSubsystem extends CustomSubsystemBase {
     private final DcMotorEx elbowMotor;
 
     private final PIDController controller;
@@ -32,9 +32,11 @@ public class ElbowSubsystem extends SubsystemBase {
     /**
      * Constructs an ElbowSubsystem.
      *
-     * @param hardwareMap The global hardwareMap.
+     * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public ElbowSubsystem(HardwareMap hardwareMap) {
+    public ElbowSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
         elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -84,12 +86,8 @@ public class ElbowSubsystem extends SubsystemBase {
         state = PIDSubsystemState.MOVING_TO_TARGET;
     }
 
-    /**
-     * Print data to the provided telemetry. Assumes the telemetry will be updated elsewhere.
-     *
-     * @param telemetry The telemetry to print to
-     */
-    public void printData(Telemetry telemetry) {
+    /** Print data from the elbow motor. */
+    public void printData() {
         telemetry.addLine("--- Elbow Subsystem ---");
         telemetry.addData("Position:", elbowMotor.getCurrentPosition());
         telemetry.addData("Target:", target);

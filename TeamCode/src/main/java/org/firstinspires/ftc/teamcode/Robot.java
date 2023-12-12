@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.commands.CommandManager;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
@@ -17,27 +16,41 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
+/**
+ * Represents all of the subsystems that make up the robot
+ *
+ * @author Esquimalt Atom Smashers
+ */
 public class Robot {
-    // OpMode
+    /** The op mode that created the robot */
     private final OpMode opMode;
 
-    // Gamepads
+    /** The gamepad used by the driver to drive the robot around */
     private final GamepadEx driverGamepad;
+    /** The gamepad used by the operator to control the arm and claw */
     private final GamepadEx operatorGamepad;
 
-    //Define subsystems here.
-    private final DriveSubsystem driveSubsystem;
-    private final IntakeSubsystem intakeSubsystem;
-    private final ElbowSubsystem elbowSubsystem;
+    /** The claw of the robot */
     private final ClawSubsystem clawSubsystem;
-    private final LinearSlideSubsystem linearSlideSubsystem;
-    private final CameraSubsystem cameraSubsystem;
+    /** The drive base of the robot */
+    private final DriveSubsystem driveSubsystem;
+    /** The drone holder and launcher of the robot */
     private final DroneSubsystem droneSubsystem;
+    /** The elbow of the robot */
+    private final ElbowSubsystem elbowSubsystem;
+    /** The intake of the robot */
+    private final IntakeSubsystem intakeSubsystem;
+    /** The linear slide of the robot */
+    private final LinearSlideSubsystem linearSlideSubsystem;
+    /** The winch of the robot */
     private final WinchSubsystem winchSubsystem;
 
     private final boolean manualMode;
 
     private final CommandManager commandManager;
+
+    private DriveState driveState = DriveState.DRIVER_CONTROLLED;
+    private ScoringState scoringState = ScoringState.STARTING;
 
     enum DriveState {
         DRIVER_CONTROLLED,
@@ -57,9 +70,6 @@ public class Robot {
         SHOOTING_DRONE
     }
 
-    private DriveState driveState = DriveState.DRIVER_CONTROLLED;
-    private ScoringState scoringState = ScoringState.STARTING;
-
     /**
      * Initializes all gamepads, subsystems, and if necessary, initializes the commands through {@link #bindCommands()}
      *
@@ -76,14 +86,13 @@ public class Robot {
         operatorGamepad = new GamepadEx(opMode.gamepad2);
 
         // Initialize the subsystems
-        driveSubsystem = new DriveSubsystem(opMode.hardwareMap);
-        intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap);
-        elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap);
-        clawSubsystem = new ClawSubsystem(opMode.hardwareMap);
-        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap);
-        cameraSubsystem = new CameraSubsystem(opMode.hardwareMap);
-        droneSubsystem = new DroneSubsystem(opMode.hardwareMap);
-        winchSubsystem = new WinchSubsystem(opMode.hardwareMap);
+        clawSubsystem = new ClawSubsystem(opMode.hardwareMap, opMode.telemetry);
+        driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
+        droneSubsystem = new DroneSubsystem(opMode.hardwareMap, opMode.telemetry);
+        elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
+        intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
+        linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
+        winchSubsystem = new WinchSubsystem(opMode.hardwareMap, opMode.telemetry);
 
         commandManager = new CommandManager(this);
 
@@ -91,16 +100,8 @@ public class Robot {
         if (resetEncoders) resetEncoders();
     }
 
-    public Robot(OpMode opMode) {
-        this(opMode, false, true);
-    }
-
-    /**
-     * Binds the ftclib commands that control the robot.
-     */
+    /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
-        // Default commands for individual subsystems:
-
         // ClawSubsystem
         clawSubsystem.setDefaultCommand(commandManager.getDefaultClawCommand());
 
@@ -157,15 +158,14 @@ public class Robot {
         homePositionTrigger.whenActive(commandManager.getHomePostionCommand());
     }
 
+    /** Resets the encoders on the subsystems that use them. */
     public void resetEncoders() {
         linearSlideSubsystem.resetEncoder();
         elbowSubsystem.resetEncoder();
         driveSubsystem.resetEncoder();
     }
 
-    /**
-     * Schedule any commands that run at the start of teleop mode
-     */
+    /** Schedule any commands that run at the start of teleop mode. */
     public void start() {
         commandManager.getSetupCommand().schedule();
     }
@@ -179,12 +179,6 @@ public class Robot {
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
-        // Print data from subsystems
-//        opMode.telemetry.addData("Scoring state", scoringState);
-//        opMode.telemetry.addData("Driving state", driveState);
-//        elbowSubsystem.printData(opMode.telemetry);
-        driveSubsystem.printData(opMode.telemetry);
-        linearSlideSubsystem.printData(opMode.telemetry);
         opMode.telemetry.update();
     }
 
@@ -242,7 +236,7 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually((operatorGamepad.getLeftY() + 1) / 2);
         else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually((operatorGamepad.getLeftY() + 1) / 2);
         else elbowSubsystem.stopMotor();
-        elbowSubsystem.printData(opMode.telemetry);
+        elbowSubsystem.printData();
 
         // Intake Subsystem (operator)
         // Left -> Intake, Right -> Outtake, Up -> Move intake up, Down -> Move intake down
@@ -257,14 +251,14 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) linearSlideSubsystem.extendManually((operatorGamepad.getLeftY() + 1) / 2);
         else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) linearSlideSubsystem.retractManually((operatorGamepad.getLeftY() + 1) / 2);
         else linearSlideSubsystem.stopMotor();
-        linearSlideSubsystem.printData(opMode.telemetry);
+        linearSlideSubsystem.printData();
 
         // Claw Subsystem (operator)
         // A -> Open, B -> Close
         if (operatorGamepad.getButton(GamepadKeys.Button.A)) clawSubsystem.openClaw();
         if (operatorGamepad.getButton(GamepadKeys.Button.START)) clawSubsystem.closeClawSingle();
         if (operatorGamepad.getButton(GamepadKeys.Button.B)) clawSubsystem.closeClaw();
-        clawSubsystem.printPosition(opMode.telemetry);
+        clawSubsystem.printData();
 
         // Drone subsystem (driver)
         // Right bumper -> Release, Left bumper -> Go to start position
@@ -279,7 +273,7 @@ public class Robot {
 
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) linearSlideSubsystem.resetEncoder();
 
-        linearSlideSubsystem.printData(opMode.telemetry);
+        linearSlideSubsystem.printData();
         opMode.telemetry.update();
 
     }

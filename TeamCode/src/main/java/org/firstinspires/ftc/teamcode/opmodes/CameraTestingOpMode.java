@@ -21,7 +21,7 @@ public class CameraTestingOpMode extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
 
-        CameraSubsystem cameraSubsystem = new CameraSubsystem(hardwareMap);
+        CameraSubsystem cameraSubsystem = new CameraSubsystem(hardwareMap, telemetry);
 
 //        exposureControl = cameraSubsystem.getVisionPortal().getCameraControl(ExposureControl.class);
 //        exposureControl.setMode(ExposureControl.Mode.Manual);
@@ -29,7 +29,7 @@ public class CameraTestingOpMode extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
-            cameraSubsystem.detectAndPrintAprilTags(telemetry);
+            cameraSubsystem.detectAndPrintAprilTags();
             telemetry.update();
         }
     }

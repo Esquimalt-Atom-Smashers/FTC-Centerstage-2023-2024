@@ -9,21 +9,25 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * A subsystem that represents the servo and motor that control the intake.
  *
  * @author Esquimalt Atom Smashers
  */
-public class IntakeSubsystem extends SubsystemBase {
+public class IntakeSubsystem extends CustomSubsystemBase {
     private final DcMotorEx intakeMotor;
     private final ServoEx intakeServo;
 
     /**
      * Constructs an IntakeSubsystem.
      *
-     * @param hardwareMap The global hardwareMap.
+     * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public IntakeSubsystem(HardwareMap hardwareMap) {
+    public IntakeSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
         intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
 
         intakeMotor = hardwareMap.get(DcMotorEx.class, INTAKE_MOTOR_NAME);
@@ -66,5 +70,10 @@ public class IntakeSubsystem extends SubsystemBase {
     /** Stops the intake motor. */
     public void stopMotor() {
         intakeMotor.setPower(0);
+    }
+
+    /** Prints data from the subsystem */
+    public void printData() {
+
     }
 }

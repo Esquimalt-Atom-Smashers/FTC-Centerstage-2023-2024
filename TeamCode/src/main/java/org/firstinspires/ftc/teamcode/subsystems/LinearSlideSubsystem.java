@@ -13,9 +13,11 @@ import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
 
 /**
- * A subsystem that represents the motor and PID controller that controls the slide.
+ * A subsystem that represents the motor that controls the slide.
+ *
+ * @author Esquimalt Atom Smashers
  */
-public class LinearSlideSubsystem extends SubsystemBase {
+public class LinearSlideSubsystem extends CustomSubsystemBase {
     private final DcMotorEx slideMotor;
 
     private final PIDController controller;
@@ -27,10 +29,13 @@ public class LinearSlideSubsystem extends SubsystemBase {
     private PIDSubsystemState state;
 
     /**
-     * Creates a new LinearSlideSubsystem.
+     * Constructs a new LinearSlideSubsystem.
+     *
      * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public LinearSlideSubsystem(HardwareMap hardwareMap) {
+    public LinearSlideSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
         configureSlide();
 
@@ -39,14 +44,13 @@ public class LinearSlideSubsystem extends SubsystemBase {
         state = PIDSubsystemState.MANUAL;
     }
 
+    /** Configure the slide motor by setting the direction and zero power behavior */
     private void configureSlide() {
         slideMotor.setDirection(SLIDE_MOTOR_DIRECTION);
         slideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    /**
-     * Reset the encoders on the slide motor.
-     */
+    /** Reset the encoders on the slide motor. */
     public void resetEncoder() {
         slideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -54,6 +58,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
 
     /**
      * Extend the slide manually.
+     *
      * @param multiplier Speed multiplier
      */
     public void extendManually(double multiplier) {
@@ -63,6 +68,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
 
     /**
      * Retract the slide manually.
+     *
      * @param multiplier Speed multiplier
      */
     public void retractManually(double multiplier) {
@@ -70,15 +76,14 @@ public class LinearSlideSubsystem extends SubsystemBase {
         slideMotor.setPower(RETRACT_POWER * multiplier);
     }
 
-    /**
-     * Stops the slide motor.
-     */
+    /** Stops the slide motor. */
     public void stopMotor() {
         slideMotor.setPower(0);
     }
 
     /**
      * Checks whether we are at the max extension.
+     *
      * @return If we are at the maximum position
      */
     @Deprecated
@@ -88,6 +93,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
 
     /**
      * Checks whether we are at the max retraction.
+     *
      * @return If we are at the minimum position
      */
     @Deprecated
@@ -97,6 +103,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
 
     /**
      * Sets the target position and sets the mode to use PIDs.
+     *
      * @param targetPosition The new target position
      */
     public void setTarget(double targetPosition) {
@@ -105,10 +112,7 @@ public class LinearSlideSubsystem extends SubsystemBase {
         target = targetPosition;
     }
 
-    /**
-     * Runs the PID controllers if we are moving to a target.
-     * If we are close enough to the target, get out of PID mode.
-     */
+    /** Runs the PID controllers if we are moving to a target. If we are close enough to the target, get out of PID mode. */
     public void runPID() {
         if (state == PIDSubsystemState.MOVING_TO_TARGET) {
             // Calculate how much we need to move the motor by
@@ -127,11 +131,8 @@ public class LinearSlideSubsystem extends SubsystemBase {
         }
     }
 
-    /**
-     * Prints data to the provided telemetry.
-     * @param telemetry The telemetry to print to
-     */
-    public void printData(Telemetry telemetry) {
+    /** Prints data from the slide motor. */
+    public void printData() {
         telemetry.addLine("--- Slide ---");
         telemetry.addData("State", state);
         telemetry.addData("Position", slideMotor.getCurrentPosition());

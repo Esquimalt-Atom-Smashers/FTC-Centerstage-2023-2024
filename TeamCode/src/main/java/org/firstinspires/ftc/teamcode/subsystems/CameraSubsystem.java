@@ -15,24 +15,28 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 
 /**
- * A subsystem that represents the camera of the robot. Contains an {@link AprilTagProcessor} to detect april tags.
+ * A subsystem that represents the camera of the robot. Uses an april tag processor to detect april tags.
+ *
+ * @author Esquimalt Atom Smashers
  */
-public class CameraSubsystem extends SubsystemBase {
+public class CameraSubsystem extends CustomSubsystemBase {
 
     private final AprilTagProcessor.Builder aprilTagProcessorBuilder;
     private final AprilTagProcessor aprilTagProcessor;
     private final VisionPortal visionPortal;
     private List<AprilTagDetection> detections;
-    private int minExposure = 20;
-    private ExposureControl exposureControl;
+//    private int minExposure = 20;
+//    private ExposureControl exposureControl;
 
 
     /**
-     * Creates a new CameraSubsystem. Initializes the {@link AprilTagProcessor} using the {@link AprilTagProcessor.Builder}.
-     * Also initializes the {@link VisionPortal} using the webcam connected to the robot.
+     * Constructs a new CameraSubsystem.
+     *
      * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public CameraSubsystem(HardwareMap hardwareMap) {
+    public CameraSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
         // Create a new Builder
         aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
 
@@ -47,18 +51,13 @@ public class CameraSubsystem extends SubsystemBase {
         visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, CAMERA_NAME), aprilTagProcessor);
     }
 
-    /**
-     * Get the april tag detections from the camera.
-     */
+    /** Get the april tag detections from the camera. */
     public void detectAprilTags() {
         detections = aprilTagProcessor.getDetections();
     }
 
-    /**
-     * First detect any april tags and save them, then iterate over them and print out information about each one using the provided telemetry
-     * @param telemetry The telemetry the information will be printed to
-     */
-    public void detectAndPrintAprilTags(Telemetry telemetry) {
+    /** First detect any april tags and save them, then iterate over them and print out information about each one. */
+    public void detectAndPrintAprilTags() {
         detectAprilTags();
         for (AprilTagDetection aprilTagDetection : detections) {
             if (aprilTagDetection.metadata != null) {
@@ -74,7 +73,8 @@ public class CameraSubsystem extends SubsystemBase {
     }
 
     /**
-     * Gets the distance the robot is from the april tag with the specified ID
+     * Gets the distance the robot is from the april tag with the specified ID.
+     *
      * @param tagID The ID of the tag we are looking for
      * @return The distance in inches that the robot is from the april tag, or -1 if the camera can't find the april tag
      */
@@ -89,7 +89,8 @@ public class CameraSubsystem extends SubsystemBase {
     }
 
     /**
-     * Gets the distance the robot is from the specified april tag
+     * Gets the distance the robot is from the specified april tag.
+     *
      * @param aprilTag The april tag we are looking at
      * @return The distance in inches that the robot is from the april tag
      */
@@ -116,7 +117,8 @@ public class CameraSubsystem extends SubsystemBase {
     }
 
     /**
-     * Gets the number of inches the robot is laterally away from the april tag with the specified ID
+     * Gets the number of inches the robot is laterally away from the april tag with the specified ID.
+     *
      * @param tagID The ID of the tag we are looking for
      * @return The lateral distance from the robot to the tag, or -1 if the camera can't find the april tag
      */
@@ -131,7 +133,8 @@ public class CameraSubsystem extends SubsystemBase {
     }
 
     /**
-     * Gets the number of inches the robot is laterally away from the specified april tag
+     * Gets the number of inches the robot is laterally away from the specified april tag.
+     *
      * @param aprilTag The april tag we are looking at
      * @return The lateral distance from the robot to the tag
      */
