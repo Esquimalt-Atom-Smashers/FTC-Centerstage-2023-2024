@@ -28,13 +28,14 @@ public class IntakeSubsystem extends CustomSubsystemBase {
      */
     public IntakeSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
+
         intakeServo = new SimpleServo(hardwareMap, INTAKE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
 
         intakeMotor = hardwareMap.get(DcMotorEx.class, INTAKE_MOTOR_NAME);
         configureIntake();
     }
 
-    /** Configures the intake motor. */
+    /** Configure the intake motor by setting the direction and zero power behavior */
     private void configureIntake() {
         intakeMotor.setDirection(INTAKE_MOTOR_DIRECTION);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -74,6 +75,7 @@ public class IntakeSubsystem extends CustomSubsystemBase {
 
     /** Prints data from the subsystem */
     public void printData() {
-
+        telemetry.addLine("--- Intake ---");
+        telemetry.addData("Servo pos", intakeServo.getPosition());
     }
 }

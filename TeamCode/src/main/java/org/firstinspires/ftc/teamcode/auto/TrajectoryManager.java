@@ -22,22 +22,46 @@ public class TrajectoryManager {
      *
      * @return The built trajectory sequence.
      */
-    public TrajectorySequence getDriveToSpikeMarksTrajectory() {
+    public TrajectorySequence driveToSpikeMarksTrajectory() {
+        return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                .forward(24)
+                .waitSeconds(.5)
+                .build();
+//        if (spikeMarkPosition == AutonomousController.SpikeMark.LEFT)
+//            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+//                    .forward(24)
+//                    .turn(Math.toRadians(90))
+//                    .strafeRight(5)
+//                    .back(2)
+//                    .build();
+//        else if (spikeMarkPosition == AutonomousController.SpikeMark.MIDDLE)
+//            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+//                    .forward(25)
+//                    .strafeLeft(8)
+//                    .build();
+//        else
+//            return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+//                    .forward(24)
+//                    .turn(Math.toRadians(-90))
+//                    .strafeLeft(5)
+//                    .back(2)
+//                    .build();
+    }
+
+    public TrajectorySequence driveToCorrectSpikeMarkTrajectory() {
         if (spikeMarkPosition == AutonomousController.SpikeMark.LEFT)
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(24)
                     .turn(Math.toRadians(90))
                     .strafeRight(5)
                     .back(2)
                     .build();
         else if (spikeMarkPosition == AutonomousController.SpikeMark.MIDDLE)
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(25)
+                    .forward(1)
                     .strafeLeft(8)
                     .build();
         else
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(24)
                     .turn(Math.toRadians(-90))
                     .strafeLeft(5)
                     .back(2)
@@ -49,7 +73,7 @@ public class TrajectoryManager {
      *
      * @return The built trajectory sequence.
      */
-    public TrajectorySequence getDriveFromSpikeMarksTrajectory() {
+    public TrajectorySequence driveFromSpikeMarksTrajectory() {
         if (spikeMarkPosition == AutonomousController.SpikeMark.LEFT)
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                     .strafeLeft(30)
@@ -70,7 +94,7 @@ public class TrajectoryManager {
      *
      * @return The built trajectory sequence.
      */
-    public TrajectorySequence getDriveToBackdropTrajectory() {
+    public TrajectorySequence driveToBackdropTrajectory() {
         return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(new Pose2d(46, 35 * autonomousController.getPositionMultiplier(), Math.toRadians(0)))
                 .strafeRight(spikeMarkPosition == AutonomousController.SpikeMark.LEFT ? -6 : spikeMarkPosition == AutonomousController.SpikeMark.MIDDLE ? 0.1 : 9)
@@ -82,7 +106,7 @@ public class TrajectoryManager {
      *
      * @return The built trajectory sequence.
      */
-    public TrajectorySequence getFinalTrajectory() {
+    public TrajectorySequence finalTrajectory() {
         double finalHeading = autonomousController.isBlueAlliance() ? -90 : 90;
         if (autonomousController.isPlacingYellow() && autonomousController.isUpstage())
             return drive.trajectorySequenceBuilder(drive.getPoseEstimate())

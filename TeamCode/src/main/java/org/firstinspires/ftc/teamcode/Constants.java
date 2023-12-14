@@ -30,15 +30,23 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        public static final double OPEN_POSITION = 0;
-        public static final double CLOSE_POSITION = 50;
-        public static final double SUPER_CLOSE_POSITION = 60;
+
+//        public static final double OPEN_POSITION = 0;
+//        public static final double CLOSE_POSITION = 50;
+
+        // TODO: Find new value
+        public static final double OPEN_POSITION = 270 - 30;
+        // TODO: Find new value
+        public static final double CLOSE_POSITION = 270 - 15;
+        // 270 is almost closed, so the piece on the servo is rotated
+        // so going to 270 will be very bad
     }
 
     public static class DistanceSensorConstants {
         public static final String LEFT_DISTANCE_SENSOR_NAME = "leftDistanceSensor";
         public static final String RIGHT_DISTANCE_SENSOR_NAME = "rightDistanceSensor";
 
+        // TODO: Find value
         public static double DISTANCE_THRESHOLD = -1;
     }
 
@@ -82,31 +90,44 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        public static final double START_POSITION = 0, RELEASE_ANGLE = 180;
+        // TODO: Find new value
+        public static final double START_POSITION = 0;
+        // TODO: Find new value
+        public static final double RELEASE_ANGLE = 180;
     }
 
     public static class ElbowConstants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
+        public static final DcMotorSimple.Direction ELBOW_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
         public static final double MANUAL_MOTOR_SPEED = 0.8;
 
         // PID values for the PID controller
+        // TODO: Find new values
         public static final double P = 0.0019, I = 0, D = 0;
 
+        // TODO: Find new value
         public static final int INTAKE_POSITION = 500;
+        // TODO: Find new value
         public static final int DRIVING_POSITION = 2000;
 
+        // TODO: Find new value
         public static final int LOW_SCORING_POSITION = 8400;
+        // TODO: Find new value
         public static final int MEDIUM_SCORING_POSITION = 10400;
+        // TODO: Find new value
         public static final int HIGH_SCORING_POSITION = 12400;
 
+        // TODO: Find new value
         public static final int LEVEL_POSITION = 4750;
+        // TODO: Find new value
         public static final int DRONE_LAUNCH_POSITION = 11000;
+
 //        public static final int TEST_POSITION = 15000;
 
         // Drone position is ~14000
 
-
+        // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.1;
     }
 
@@ -119,9 +140,20 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        public static final double INTAKE_DOWN_POSITION = 270 - 175; // This is around 270 - 175 because the up position is actually around 270
+//        // This is around 270 - 175 because the up position is actually around 270
+//        public static final double INTAKE_DOWN_POSITION = 270 - 175;
+//        public static final double INTAKE_DRIVING_POSITION = 270 - 120;
+//        // This is 270 - 45 because the up position is actually around 270
+//        public static final double INTAKE_UP_POSITION = 270 - 45;
+
+
+        // Down position is 270, 0 is back into the robot, ~90 degrees is straight up
+        // TODO: Find new value
+        public static final double INTAKE_DOWN_POSITION = 270 - 180;
+        // TODO: Find new value
         public static final double INTAKE_DRIVING_POSITION = 270 - 120;
-        public static final double INTAKE_UP_POSITION = 270 - 45; // This is 270 - 45 because the up position is actually around 270
+        // TODO: Find new value
+        public static final double INTAKE_UP_POSITION = 270 - 30; // This is 270 - 45 because the up position is actually around 270
 
         public static final double INTAKE_SPEED = -0.5;
         public static final double OUTTAKE_SPEED = 0.5;
@@ -135,17 +167,25 @@ public class Constants {
         public static double RETRACT_POWER = -.5;
 
         // PID values for the PID controller
+        // TODO: Find new values
         public static final double P = 0.013, I = 0, D = 0.0003;
 
         // Min and max values for the arm, don't change them
+        // TODO: Find new value
         public static final int MIN_POSITION = 40;
+        // TODO: Find new value
         public static final int MAX_POSITION = 3000;
 
+        // TODO: Find new value
         public static final int IN_POSITION = MIN_POSITION;
+        // TODO: Find new value
         public static final int LOW_SCORING_POSITION = 1300;
+        // TODO: Find new value
         public static final int MEDIUM_SCORING_POSITION = 1870;
+        // TODO: Find new value
         public static final int HIGH_SCORING_POSITION = 2800;
 
+        // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.08;
     }
 

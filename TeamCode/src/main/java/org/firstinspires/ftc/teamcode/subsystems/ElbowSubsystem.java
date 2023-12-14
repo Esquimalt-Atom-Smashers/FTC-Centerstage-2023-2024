@@ -37,12 +37,19 @@ public class ElbowSubsystem extends CustomSubsystemBase {
      */
     public ElbowSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
+
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
-        elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        configureMotor();
 
         controller = new PIDController(P, I, D);
 
         state = PIDSubsystemState.MANUAL;
+    }
+
+    /** Configure the elbow motor by setting the direction and zero power behavior */
+    private void configureMotor() {
+        elbowMotor.setDirection(ELBOW_MOTOR_DIRECTION);
+        elbowMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /** Resets the encoder on the elbow motor. */
@@ -86,14 +93,6 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         state = PIDSubsystemState.MOVING_TO_TARGET;
     }
 
-    /** Print data from the elbow motor. */
-    public void printData() {
-        telemetry.addLine("--- Elbow Subsystem ---");
-        telemetry.addData("Position:", elbowMotor.getCurrentPosition());
-        telemetry.addData("Target:", target);
-        telemetry.addData("State:", state);
-    }
-
     /**
      * Use the PID controller to calculate how fast we should set the motor to. If the motor is moving slow enough,
      * we are close enough and stop moving further.
@@ -118,6 +117,14 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     /** @return true if the motor is at the target, false otherwise. */
     public boolean isAtTarget() {
         return state == PIDSubsystemState.AT_TARGET;
+    }
+
+    /** Print data from the elbow motor. */
+    public void printData() {
+        telemetry.addLine("--- Elbow Subsystem ---");
+        telemetry.addData("Position:", elbowMotor.getCurrentPosition());
+        telemetry.addData("Target:", target);
+        telemetry.addData("State:", state);
     }
 
     /** @return the preset low scoring position */

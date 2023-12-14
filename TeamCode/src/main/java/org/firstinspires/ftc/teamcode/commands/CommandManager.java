@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 
 public class CommandManager {
     /** Default command for ClawSubsystem */
@@ -155,29 +156,54 @@ public class CommandManager {
                 new InstantCommand(robot.getDroneSubsystem()::startPosition, robot.getDroneSubsystem())
         );
 
+//        autoSetupCommand = new SequentialCommandGroup(
+//                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
+//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
+//                new InstantCommand(robot.getClawSubsystem()::closeClawSingle, robot.getClawSubsystem()),
+//                new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem()),
+//                new WaitCommand(500),
+//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
+//        );
+        //TODO: Redo command
         autoSetupCommand = new SequentialCommandGroup(
+                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+                new InstantCommand(robot.getClawSubsystem()::closeClaw, robot.getClawSubsystem()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
-                new InstantCommand(robot.getClawSubsystem()::closeClawSingle, robot.getClawSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem()),
-                new WaitCommand(500),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         );
 
+
+//        autoPlacePurpleCommand = new SequentialCommandGroup(
+//                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+//                new WaitCommand(250),
+//                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
+//                new WaitCommand(250),
+//                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
+//                new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem())
+//        );
+        //TODO: Redo command
         autoPlacePurpleCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+                new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem()),
                 new WaitCommand(250),
-                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
-                new WaitCommand(250),
-                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem())
+                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem())
         );
 
+//        autoMoveArmCommand = new SequentialCommandGroup(
+//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition()),
+//                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getLowScoringPosition())
+//        );
+        //TODO: Redo command
         autoMoveArmCommand = new SequentialCommandGroup(
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getLowScoringPosition())
         );
 
+//        autoPlaceYellowCommand = new SequentialCommandGroup(
+//                new InstantCommand(robot.getClawSubsystem()::openClaw, robot.getClawSubsystem()),
+//                new WaitCommand(750),
+//                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
+//        );
+        //TODO: Redo command
         autoPlaceYellowCommand = new SequentialCommandGroup(
                 new InstantCommand(robot.getClawSubsystem()::openClaw, robot.getClawSubsystem()),
                 new WaitCommand(750),

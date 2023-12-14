@@ -45,12 +45,11 @@ public class DriveSubsystem extends CustomSubsystemBase {
      */
     public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
-        // Initialize the motors
+
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, FRONT_LEFT_MOTOR_NAME);
         frontRightMotor = hardwareMap.get(DcMotorEx.class, FRONT_RIGHT_MOTOR_NAME);
         rearLeftMotor = hardwareMap.get(DcMotorEx.class, REAR_LEFT_MOTOR_NAME);
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
-
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
         configureMotors();
 
@@ -58,7 +57,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
         configureIMU();
     }
 
-    /** Configure the motors by setting their directions and zero power behaviors. */
+    /** Configure the drive motors by setting their directions and zero power behaviors. */
     private void configureMotors() {
         // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);

@@ -36,6 +36,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
      */
     public LinearSlideSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
+
         slideMotor = hardwareMap.get(DcMotorEx.class, SLIDE_MOTOR_NAME);
         configureSlide();
 
@@ -134,13 +135,13 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     /** Prints data from the slide motor. */
     public void printData() {
         telemetry.addLine("--- Slide ---");
-        telemetry.addData("State", state);
         telemetry.addData("Position", slideMotor.getCurrentPosition());
         telemetry.addData("Target", target);
-        telemetry.addData("Power", slideMotor.getPower());
-        telemetry.addData("Velocity", slideMotor.getVelocity());
-        telemetry.addData("Current (amps)", slideMotor.getCurrent(CurrentUnit.AMPS));
-        telemetry.addData("Is over current?", slideMotor.isOverCurrent());
+        telemetry.addData("State", state);
+//        telemetry.addData("Power", slideMotor.getPower());
+//        telemetry.addData("Velocity", slideMotor.getVelocity());
+//        telemetry.addData("Current (amps)", slideMotor.getCurrent(CurrentUnit.AMPS));
+//        telemetry.addData("Is over current?", slideMotor.isOverCurrent());
     }
 
     /** @return true if the motor is at the target, false otherwise. */

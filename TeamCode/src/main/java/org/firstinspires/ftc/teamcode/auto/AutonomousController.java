@@ -26,6 +26,7 @@ public class AutonomousController {
     enum AutonomousState {
         PICKING_UP_PIXELS,
         MOVING_TO_SPIKE_MARKS,
+        MOVING_TO_CORRECT_SPIKE_MARK,
         MOVING_FROM_SPIKE_MARKS,
         PLACING_PURPLE,
         MOVING_TO_BACKDROP,
@@ -40,37 +41,46 @@ public class AutonomousController {
         MIDDLE
     }
 
+    /** The hardware map of the robot */
     private final HardwareMap hardwareMap;
+    /** The telemetry on the driver station */
     private final Telemetry telemetry;
 
+    /** The collection of subsystems that make up the robot */
     private final Robot robot;
+    /** Used to get commands used in auto */
     private final CommandManager commandManager;
+    /** Used to build the trajectories used in auto */
     private final TrajectoryManager trajectoryManager;
 
-    // Our starting function
+    /** Starting position */
     private Pose2d startPosition;
 
+    /** Drive base of the robot */
     private final SampleMecanumDrive drive;
 
     // Camera things
-    private OpenCVPipeline pipeline;
-    private OpenCvWebcam webcam;
+//    private OpenCVPipeline pipeline;
+//    private OpenCvWebcam webcam;
 
-    // Settings for controlling what we do
+    /** Whether we are on the blue alliance */
     private boolean isBlueAlliance;
+    /** Whether we are upstage (closer to the backdrop) or downstage */
     private boolean isUpstage;
+    /** Whether we are going to place a yellow pixel on the backdrop */
     private boolean isPlacingYellow;
 
     // Operators used to easily convert positions and angles between red and blue
     private float positionMultiplier;
     private float rotationalOffset;
 
-    // Our state for our state machine
+    /** The current state of the controller */
     private AutonomousState currentState = AutonomousState.IDLE;
 
-    // The position of the spike mark
-    private SpikeMark spikeMarkPosition;
+    /** Where the game element is and where we need to place the pixels */
+    public SpikeMark spikeMarkPosition;
 
+    /** The current command we are running */
     private WaitCommand currentCommand;
 
     /**
@@ -91,34 +101,34 @@ public class AutonomousController {
         commandManager = new CommandManager(robot);
         trajectoryManager = new TrajectoryManager(this);
 
-        startOpenCV();
+//        startOpenCV();
     }
 
-    /**
+    /*
      * Creates a webcam and asynchronously opens an open cv pipeline. Waits until the camera is ready
      */
-    private void startOpenCV(){
-        updateStatus("Not Ready (Starting OpenCVPipeline)...");
-        pipeline = new OpenCVPipeline();
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME), cameraMonitorViewId);
-        webcam.setPipeline(pipeline);
-        webcam.setMillisecondsPermissionTimeout(5000);
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
-            }
-            @Override
-            public void onError(int errorCode)
-            {
-            }
-        });
-        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)...\nDo not press stop!");
-        updateStatus("Ready");
-    }
+//    private void startOpenCV(){
+//        updateStatus("Not Ready (Starting OpenCVPipeline)...");
+//        pipeline = new OpenCVPipeline();
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME), cameraMonitorViewId);
+//        webcam.setPipeline(pipeline);
+//        webcam.setMillisecondsPermissionTimeout(5000);
+//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+//        {
+//            @Override
+//            public void onOpened()
+//            {
+//                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
+//            }
+//            @Override
+//            public void onError(int errorCode)
+//            {
+//            }
+//        });
+//        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)...\nDo not press stop!");
+//        updateStatus("Ready");
+//    }
 
     /**
      * Sets the settings for the AutonomousController, controlling where we start and if we want to place a yellow pixel on the backdrop
@@ -137,35 +147,44 @@ public class AutonomousController {
         startPosition = new Pose2d(isUpstage ? 11.5 : -35.5, 62 * positionMultiplier, Math.toRadians(isBlue ? 270 : 90));
     }
 
-    /**
-     * Starts the state machine by starting the first command and setting the state to picking up pixels.
-     */
+    /** Starts the state machine by starting the first command and setting the state to picking up pixels. */
     public void start() {
         currentState = AutonomousState.PICKING_UP_PIXELS;
         drive.setPoseEstimate(startPosition);
-        currentCommand = scheduleCommand(commandManager.getAutoSetupCommand());
+        scheduleCommand(commandManager.getAutoSetupCommand());
     }
 
-    /**
-     * Runs the state machine. Switches states if needed, runs commands, updates the drive, and updating the telemetry
-     */
+    /** Runs the state machine. Switches states if needed, runs commands, and updates the drive and telemetry. */
     public void run() {
         switch (currentState) {
-            // Picking up the pixel from the ground as well as waiting for the camera to be ready
+            // Picking up the pixel from the ground
             case PICKING_UP_PIXELS:
-                if (canContinue() && pipeline.cameraReady) {
-                    int gameElementPosition = pipeline.findGameElement(isBlueAlliance);
-                    spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
-                    webcam.closeCameraDevice();
+                if (canContinue()) {
+//                    int gameElementPosition = pipeline.findGameElement(isBlueAlliance);
+//                    spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
+//                    webcam.closeCameraDevice();
+                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToSpikeMarksTrajectory());
                     currentState = AutonomousState.MOVING_TO_SPIKE_MARKS;
-                    drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToSpikeMarksTrajectory());
                 }
                 break;
             // Carrying the pixels, moving to the center of the spike marks
             case MOVING_TO_SPIKE_MARKS:
                 if (canContinue()) {
+//                    currentState = AutonomousState.PLACING_PURPLE;
+//                    currentCommand = scheduleCommand(commandManager.getAutoPlacePurpleCommand());
+                    // Find where the correct spike mark is
+                    if (robot.getDistanceSensorSubsystem().isRightBlocked()) spikeMarkPosition = SpikeMark.RIGHT;
+                    else if (robot.getDistanceSensorSubsystem().isLeftBlocked()) spikeMarkPosition = SpikeMark.LEFT;
+                    else spikeMarkPosition = SpikeMark.MIDDLE;
+                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToCorrectSpikeMarkTrajectory());
+                    currentState = AutonomousState.MOVING_TO_CORRECT_SPIKE_MARK;
+                }
+                break;
+            case MOVING_TO_CORRECT_SPIKE_MARK:
+                if (canContinue()) {
+//                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToCorrectSpikeMarkTrajectory());
+                    scheduleCommand(commandManager.getAutoPlacePurpleCommand());
                     currentState = AutonomousState.PLACING_PURPLE;
-                    currentCommand = scheduleCommand(commandManager.getAutoPlacePurpleCommand());
                 }
                 break;
             // Placing the purple pixel on the spike mark using the intake
@@ -173,12 +192,12 @@ public class AutonomousController {
                 if (canContinue()) {
                     if (isUpstage && isPlacingYellow) {
                         currentState = AutonomousState.MOVING_FROM_SPIKE_MARKS;
-                        currentCommand = scheduleCommand(commandManager.getAutoMoveArmCommand());
-                        drive.followTrajectorySequenceAsync(trajectoryManager.getDriveFromSpikeMarksTrajectory());
+                        scheduleCommand(commandManager.getAutoMoveArmCommand());
+                        drive.followTrajectorySequenceAsync(trajectoryManager.driveFromSpikeMarksTrajectory());
                     }
                     else {
                         currentState = AutonomousState.HIDING;
-                        drive.followTrajectorySequenceAsync(trajectoryManager.getFinalTrajectory());
+                        drive.followTrajectorySequenceAsync(trajectoryManager.finalTrajectory());
                     }
                 }
                 break;
@@ -186,21 +205,21 @@ public class AutonomousController {
             case MOVING_FROM_SPIKE_MARKS:
                 if (canContinue()) {
                     currentState = AutonomousState.MOVING_TO_BACKDROP;
-                    drive.followTrajectorySequenceAsync(trajectoryManager.getDriveToBackdropTrajectory());
+                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToBackdropTrajectory());
                 }
                 break;
             // Moving to the correct spot to place the yellow pixel
             case MOVING_TO_BACKDROP:
                 if (canContinue()) {
                     currentState = AutonomousState.PLACING_YELLOW;
-                    currentCommand = scheduleCommand(commandManager.getAutoPlaceYellowCommand());
+                    scheduleCommand(commandManager.getAutoPlaceYellowCommand());
                 }
                 break;
             // Placing the yellow pixel on the backstage
             case PLACING_YELLOW:
                 if (canContinue()) {
                     currentState = AutonomousState.HIDING;
-                    drive.followTrajectorySequenceAsync(trajectoryManager.getFinalTrajectory());
+                    drive.followTrajectorySequenceAsync(trajectoryManager.finalTrajectory());
                 }
                 break;
             // Moving to the corner to take up the least amount of room
@@ -223,22 +242,27 @@ public class AutonomousController {
     }
 
     /**
-     * Schedules a command to be run. Adds a 1 ms wait commands to the end of the provided command and returns it so you can see when it is done.
+     * Schedules a command to be run. Adds a 1 ms wait commands to the end of the provided command and sets current command to it.
      * (Calling isFinished on a SequentialCommandGroup doesn't seem to work properly)
      *
      * @param command The command to be scheduled.
-     * @return The wait command at the end of the sequential command.
      */
-    private WaitCommand scheduleCommand(Command command) {
+    private void scheduleCommand(Command command) {
         WaitCommand waitCommand = new WaitCommand(1);
         new SequentialCommandGroup(command, waitCommand).schedule();
-        return waitCommand;
+        currentCommand = waitCommand;
     }
 
+    /**
+     * Checks our current command and trajectory to see if we are done moving.
+     *
+     * @return true if the current command has finished and the drive base isn't busy, false otherwise
+     */
     private boolean canContinue() {
         return currentCommand.isFinished() && !drive.isBusy();
     }
 
+    @Deprecated
     private void updateStatus(String text) {
         telemetry.addData("Status", text);
         telemetry.update();

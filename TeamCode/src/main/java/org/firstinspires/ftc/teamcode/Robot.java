@@ -7,7 +7,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.commands.CommandManager;
-import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DistanceSensorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
@@ -241,7 +240,6 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually((operatorGamepad.getLeftY() + 1) / 2);
         else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually((operatorGamepad.getLeftY() + 1) / 2);
         else elbowSubsystem.stopMotor();
-        elbowSubsystem.printData();
 
         // Intake Subsystem (operator)
         // Left -> Intake, Right -> Outtake, Up -> Move intake up, Down -> Move intake down
@@ -256,14 +254,11 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) linearSlideSubsystem.extendManually((operatorGamepad.getLeftY() + 1) / 2);
         else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) linearSlideSubsystem.retractManually((operatorGamepad.getLeftY() + 1) / 2);
         else linearSlideSubsystem.stopMotor();
-        linearSlideSubsystem.printData();
 
         // Claw Subsystem (operator)
         // A -> Open, B -> Close
         if (operatorGamepad.getButton(GamepadKeys.Button.A)) clawSubsystem.openClaw();
-        if (operatorGamepad.getButton(GamepadKeys.Button.START)) clawSubsystem.closeClawSingle();
         if (operatorGamepad.getButton(GamepadKeys.Button.B)) clawSubsystem.closeClaw();
-        clawSubsystem.printData();
 
         // Drone subsystem (driver)
         // Right bumper -> Release, Left bumper -> Go to start position
@@ -278,9 +273,12 @@ public class Robot {
 
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) linearSlideSubsystem.resetEncoder();
 
+        distanceSensorSubsystem.printData();
+        elbowSubsystem.printData();
         linearSlideSubsystem.printData();
+        clawSubsystem.printData();
+        intakeSubsystem.printData();
         opMode.telemetry.update();
-
     }
 
     public void setScoringState(ScoringState newState) {

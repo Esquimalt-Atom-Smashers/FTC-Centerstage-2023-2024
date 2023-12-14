@@ -25,6 +25,7 @@ public class ClawSubsystem extends CustomSubsystemBase {
      */
     public ClawSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
+
         clawServo = new SimpleServo(hardwareMap, CLAW_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
@@ -36,11 +37,6 @@ public class ClawSubsystem extends CustomSubsystemBase {
     /** Turns the claw to a position which closes it. */
     public void closeClaw() {
         clawServo.turnToAngle(CLOSE_POSITION);
-    }
-
-    /** Turns the claw to a position which holds a single pixel. */
-    public void closeClawSingle() {
-        clawServo.turnToAngle(SUPER_CLOSE_POSITION);
     }
 
     /** Prints data from the subsystem. */

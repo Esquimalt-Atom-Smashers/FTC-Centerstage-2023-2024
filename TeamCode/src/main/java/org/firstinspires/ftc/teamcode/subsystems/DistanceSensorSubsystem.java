@@ -27,7 +27,7 @@ public class DistanceSensorSubsystem extends CustomSubsystemBase {
         super(hardwareMap, telemetry);
 
         leftDistanceSensor = hardwareMap.get(DistanceSensor.class, LEFT_DISTANCE_SENSOR_NAME);
-        rightDistanceSensor = hardwareMap.get(DistanceSensor.class, LEFT_DISTANCE_SENSOR_NAME);
+        rightDistanceSensor = hardwareMap.get(DistanceSensor.class, RIGHT_DISTANCE_SENSOR_NAME);
     }
 
     /** @return If the left sensor is blocked by something. */
@@ -42,7 +42,10 @@ public class DistanceSensorSubsystem extends CustomSubsystemBase {
 
     /** Prints data from the distance sensors. */
     public void printData() {
-        telemetry.addData("Right blocked", isRightBlocked());
-        telemetry.addData("Left blocked", isLeftBlocked());
+        telemetry.addLine("--- Distance ---");
+        telemetry.addData("Left", leftDistanceSensor.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Right", rightDistanceSensor.getDistance(DistanceUnit.INCH));
+//        telemetry.addData("Right blocked", isRightBlocked());
+//        telemetry.addData("Left blocked", isLeftBlocked());
     }
 }

@@ -25,8 +25,13 @@ public class WinchSubsystem extends CustomSubsystemBase {
      */
     public WinchSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
-        winchMotor = hardwareMap.get(DcMotorEx.class, WINCH_MOTOR_NAME);
 
+        winchMotor = hardwareMap.get(DcMotorEx.class, WINCH_MOTOR_NAME);
+        configureMotor();
+    }
+
+    /** Configure the winch motor by setting the direction and zero power behavior */
+    private void configureMotor() {
         winchMotor.setDirection(WINCH_MOTOR_DIRECTION);
         winchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         winchMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

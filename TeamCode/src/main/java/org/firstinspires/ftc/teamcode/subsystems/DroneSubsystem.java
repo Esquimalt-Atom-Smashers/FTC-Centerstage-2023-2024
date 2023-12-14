@@ -25,6 +25,7 @@ public class DroneSubsystem extends CustomSubsystemBase {
      */
     public DroneSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
+
         droneServo = new SimpleServo(hardwareMap, DRONE_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
     }
 
@@ -40,6 +41,6 @@ public class DroneSubsystem extends CustomSubsystemBase {
 
     /** Prints data from the subsystem */
     public void printData() {
-
+        telemetry.addLine("--- Drone ---");
     }
 }
