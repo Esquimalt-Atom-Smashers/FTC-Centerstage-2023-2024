@@ -235,6 +235,7 @@ public class Robot {
 
         driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
 
+        // TODO: Change these to use a single joystick
         // Elbow Subsystem (operator)
         // X -> Raise, Y -> Lower, Moving the left joystick from bottom to top increases the speed
         if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually((operatorGamepad.getLeftY() + 1) / 2);
@@ -249,11 +250,14 @@ public class Robot {
         else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) intakeSubsystem.outtake();
         else intakeSubsystem.stopMotor();
 
+        // TODO: Change these to use a single joystick
         // Linear Slide Subsystem (operator)
         // Right bumper -> Extend, Left bumper -> Retract, Moving the left joystick from bottom to top increases the speed
         if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) linearSlideSubsystem.extendManually((operatorGamepad.getLeftY() + 1) / 2);
         else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) linearSlideSubsystem.retractManually((operatorGamepad.getLeftY() + 1) / 2);
         else linearSlideSubsystem.stopMotor();
+
+
 
         // Claw Subsystem (operator)
         // A -> Open, B -> Close

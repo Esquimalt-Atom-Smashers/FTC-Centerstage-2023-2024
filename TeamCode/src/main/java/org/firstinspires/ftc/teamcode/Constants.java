@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.opencv.core.Scalar;
@@ -24,21 +25,17 @@ public class Constants {
         public static final Scalar UPPER = new Scalar(255, 255, 255);
     }
 
+    //TODO: Un-final these constants
+    @Config
     public static class ClawConstants {
         public static final String CLAW_SERVO_NAME = "clawServo";
 
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-
-//        public static final double OPEN_POSITION = 0;
-//        public static final double CLOSE_POSITION = 50;
-
-        // TODO: Find new value
-        public static final double OPEN_POSITION = 270 - 30;
-        // TODO: Find new value
-        public static final double CLOSE_POSITION = 270 - 15;
-        // 270 is almost closed, so the piece on the servo is rotated
+        public static  double OPEN_POSITION = 180;
+        public static  double CLOSE_POSITION = 240;
+        // 270 is more than closed, so the piece on the servo is rotated
         // so going to 270 will be very bad
     }
 
@@ -96,6 +93,7 @@ public class Constants {
         public static final double RELEASE_ANGLE = 180;
     }
 
+    @Config
     public static class ElbowConstants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
         public static final DcMotorSimple.Direction ELBOW_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
@@ -104,24 +102,24 @@ public class Constants {
 
         // PID values for the PID controller
         // TODO: Find new values
-        public static final double P = 0.0019, I = 0, D = 0;
+        public static  double P = 0.0019, I = 0, D = 0;
 
         // TODO: Find new value
-        public static final int INTAKE_POSITION = 500;
+        public static  int INTAKE_POSITION = 500;
         // TODO: Find new value
-        public static final int DRIVING_POSITION = 2000;
+        public static  int DRIVING_POSITION = 2000;
 
         // TODO: Find new value
-        public static final int LOW_SCORING_POSITION = 8400;
+        public static  int LOW_SCORING_POSITION = 8400;
         // TODO: Find new value
-        public static final int MEDIUM_SCORING_POSITION = 10400;
+        public static  int MEDIUM_SCORING_POSITION = 10400;
         // TODO: Find new value
-        public static final int HIGH_SCORING_POSITION = 12400;
+        public static  int HIGH_SCORING_POSITION = 12400;
 
         // TODO: Find new value
-        public static final int LEVEL_POSITION = 4750;
+        public static  int LEVEL_POSITION = 4750;
         // TODO: Find new value
-        public static final int DRONE_LAUNCH_POSITION = 11000;
+        public static  int DRONE_LAUNCH_POSITION = 11000;
 
 //        public static final int TEST_POSITION = 15000;
 
@@ -131,6 +129,7 @@ public class Constants {
         public static final double POWER_TOLERANCE = 0.1;
     }
 
+    @Config
     public static class IntakeConstants {
         public static final String INTAKE_SERVO_NAME = "intakeServo";
         public static final String INTAKE_MOTOR_NAME = "intakeMotor";
@@ -149,41 +148,42 @@ public class Constants {
 
         // Down position is 270, 0 is back into the robot, ~90 degrees is straight up
         // TODO: Find new value
-        public static final double INTAKE_DOWN_POSITION = 270 - 180;
+        public static  double INTAKE_DOWN_POSITION = 270 - 180;
         // TODO: Find new value
-        public static final double INTAKE_DRIVING_POSITION = 270 - 120;
+        public static  double INTAKE_DRIVING_POSITION = 270 - 120;
         // TODO: Find new value
-        public static final double INTAKE_UP_POSITION = 270 - 30; // This is 270 - 45 because the up position is actually around 270
+        public static  double INTAKE_UP_POSITION = 270 - 30; // This is 270 - 45 because the up position is actually around 270
 
-        public static final double INTAKE_SPEED = -0.5;
-        public static final double OUTTAKE_SPEED = 0.5;
+        public static final double INTAKE_SPEED = -1;
+        public static final double OUTTAKE_SPEED = 1;
     }
 
+    @Config
     public static class LinearSlideConstants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        public static double EXTEND_POWER = .5;
-        public static double RETRACT_POWER = -.5;
+        public static double EXTEND_POWER = .8;
+        public static double RETRACT_POWER = -.8;
 
         // PID values for the PID controller
         // TODO: Find new values
-        public static final double P = 0.013, I = 0, D = 0.0003;
+        public static  double P = 0.013, I = 0, D = 0.0003;
 
         // Min and max values for the arm, don't change them
         // TODO: Find new value
-        public static final int MIN_POSITION = 40;
+        public static  int MIN_POSITION = 40;
         // TODO: Find new value
-        public static final int MAX_POSITION = 3000;
+        public static  int MAX_POSITION = 3000;
 
         // TODO: Find new value
-        public static final int IN_POSITION = MIN_POSITION;
+        public static  int IN_POSITION = MIN_POSITION;
         // TODO: Find new value
-        public static final int LOW_SCORING_POSITION = 1300;
+        public static  int LOW_SCORING_POSITION = 1300;
         // TODO: Find new value
-        public static final int MEDIUM_SCORING_POSITION = 1870;
+        public static  int MEDIUM_SCORING_POSITION = 1870;
         // TODO: Find new value
-        public static final int HIGH_SCORING_POSITION = 2800;
+        public static  int HIGH_SCORING_POSITION = 2800;
 
         // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.08;

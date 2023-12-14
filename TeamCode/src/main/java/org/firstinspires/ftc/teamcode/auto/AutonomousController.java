@@ -172,10 +172,12 @@ public class AutonomousController {
                 if (canContinue()) {
 //                    currentState = AutonomousState.PLACING_PURPLE;
 //                    currentCommand = scheduleCommand(commandManager.getAutoPlacePurpleCommand());
+
                     // Find where the correct spike mark is
                     if (robot.getDistanceSensorSubsystem().isRightBlocked()) spikeMarkPosition = SpikeMark.RIGHT;
                     else if (robot.getDistanceSensorSubsystem().isLeftBlocked()) spikeMarkPosition = SpikeMark.LEFT;
                     else spikeMarkPosition = SpikeMark.MIDDLE;
+
                     drive.followTrajectorySequenceAsync(trajectoryManager.driveToCorrectSpikeMarkTrajectory());
                     currentState = AutonomousState.MOVING_TO_CORRECT_SPIKE_MARK;
                 }
