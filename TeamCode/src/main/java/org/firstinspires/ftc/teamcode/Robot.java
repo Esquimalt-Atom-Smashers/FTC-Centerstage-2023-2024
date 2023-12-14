@@ -230,17 +230,19 @@ public class Robot {
      * Controls the elbow, intake, slide, claw, drone and drive subsystem manually, without any commands running or PID controllers.
      */
     public void runManually() {
-
-//        driveLoop();
-
         driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX());
 
-        // TODO: Change these to use a single joystick
+        if (driverGamepad.getButton(GamepadKeys.Button.BACK)) driveSubsystem.resetGyro();
+
         // Elbow Subsystem (operator)
-        // X -> Raise, Y -> Lower, Moving the left joystick from bottom to top increases the speed
-        if (operatorGamepad.getButton(GamepadKeys.Button.X)) elbowSubsystem.raiseManually((operatorGamepad.getLeftY() + 1) / 2);
-        else if (operatorGamepad.getButton(GamepadKeys.Button.Y)) elbowSubsystem.lowerManually((operatorGamepad.getLeftY() + 1) / 2);
+        // Move left joystick up to move the arm up, down to move down
+        if (isPressed(operatorGamepad.getLeftY())) elbowSubsystem.raiseManually(operatorGamepad.getLeftY());
         else elbowSubsystem.stopMotor();
+
+        // Linear Slide Subsystem (operator)
+        // Move right joystick up to move slide out, down to move in
+        if (isPressed(operatorGamepad.getRightY())) linearSlideSubsystem.extendManually(operatorGamepad.getRightY());
+        else linearSlideSubsystem.stopMotor();
 
         // Intake Subsystem (operator)
         // Left -> Intake, Right -> Outtake, Up -> Move intake up, Down -> Move intake down
@@ -249,15 +251,6 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT)) intakeSubsystem.intake();
         else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) intakeSubsystem.outtake();
         else intakeSubsystem.stopMotor();
-
-        // TODO: Change these to use a single joystick
-        // Linear Slide Subsystem (operator)
-        // Right bumper -> Extend, Left bumper -> Retract, Moving the left joystick from bottom to top increases the speed
-        if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) linearSlideSubsystem.extendManually((operatorGamepad.getLeftY() + 1) / 2);
-        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) linearSlideSubsystem.retractManually((operatorGamepad.getLeftY() + 1) / 2);
-        else linearSlideSubsystem.stopMotor();
-
-
 
         // Claw Subsystem (operator)
         // A -> Open, B -> Close
@@ -275,12 +268,12 @@ public class Robot {
         else if (driverGamepad.getButton(GamepadKeys.Button.B)) winchSubsystem.unwinch();
         else winchSubsystem.stopMotor();
 
-        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) linearSlideSubsystem.resetEncoder();
+        if (operatorGamepad.getButton(GamepadKeys.Button.BACK)) resetEncoders();
 
         distanceSensorSubsystem.printData();
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();
-        clawSubsystem.printData();
+//        clawSubsystem.printData();
         intakeSubsystem.printData();
         opMode.telemetry.update();
     }

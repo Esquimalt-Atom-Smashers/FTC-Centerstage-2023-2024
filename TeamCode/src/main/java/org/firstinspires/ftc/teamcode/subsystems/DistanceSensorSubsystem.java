@@ -43,8 +43,8 @@ public class DistanceSensorSubsystem extends CustomSubsystemBase {
     /** Prints data from the distance sensors. */
     public void printData() {
         telemetry.addLine("--- Distance ---");
-        telemetry.addData("Left", leftDistanceSensor.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Right", rightDistanceSensor.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Left (in)", leftDistanceSensor.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Right (in)", rightDistanceSensor.getDistance(DistanceUnit.INCH));
 //        telemetry.addData("Right blocked", isRightBlocked());
 //        telemetry.addData("Left blocked", isLeftBlocked());
     }

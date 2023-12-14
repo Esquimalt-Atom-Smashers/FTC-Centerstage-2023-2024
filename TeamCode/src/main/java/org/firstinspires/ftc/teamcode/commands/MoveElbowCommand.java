@@ -16,7 +16,7 @@ public class MoveElbowCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        elbowSubsystem.setTarget(target);
+        elbowSubsystem.setTarget(target, 5.0);
     }
 
     @Override

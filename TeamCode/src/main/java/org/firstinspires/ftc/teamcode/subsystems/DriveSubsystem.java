@@ -31,6 +31,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     /** The built-in IMU(gyro) on the control hub. */
     private final BNO055IMU imu;
+    private double offset;
 
 //    private double snapTarget;
 
@@ -77,6 +78,10 @@ public class DriveSubsystem extends CustomSubsystemBase {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         imu.initialize(parameters);
+    }
+
+    public void resetGyro() {
+        offset = getRawHeading();
     }
 
     /** Reset the encoders on the drive motors */
@@ -169,6 +174,10 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     /** @return The heading of the robot */
     private double getHeading() {
+        return getRawHeading() - offset;
+    }
+
+    private double getRawHeading() {
         return imu.getAngularOrientation().firstAngle;
     }
 

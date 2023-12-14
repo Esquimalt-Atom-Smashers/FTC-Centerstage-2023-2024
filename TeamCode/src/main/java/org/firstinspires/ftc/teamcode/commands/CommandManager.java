@@ -86,9 +86,10 @@ public class CommandManager {
             else robot.getElbowSubsystem().stopMotor();
         }, robot.getElbowSubsystem());
 
+        // TODO: Check this after
         defaultSlideCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().retractManually(1);
-            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().extendManually(1);
+            if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().extendManually(1);
+            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().retractManually(1);
             else robot.getLinearSlideSubsystem().stopMotor();
         }, robot.getLinearSlideSubsystem());
 
@@ -101,8 +102,10 @@ public class CommandManager {
         intakeModeCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.INTAKE)),
                 new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
-                new InstantCommand(robot.getClawSubsystem()::openClaw, robot.getClawSubsystem()),
+                new InstantCommand(robot.getClawSubsystem()::closeClaw, robot.getClawSubsystem()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
+                // TODO: Can this go straight to intake position? Is that safe to drive on?
+                // If so, we can remove the
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition()),
                 new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem())
         );
@@ -119,8 +122,7 @@ public class CommandManager {
                 // Move the arm down to pick up the pixels
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
                 // Close the claw and wait 500ms for the claw to finish gripping on the pixels
-                new InstantCommand(robot.getClawSubsystem()::closeClaw, robot.getClawSubsystem()),
-                new WaitCommand(500),
+                // TODO: Check if we still need to move the intake up and down
                 // Stop the intake and move it up
                 new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
                 new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem()),

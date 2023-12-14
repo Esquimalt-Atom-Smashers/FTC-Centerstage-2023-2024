@@ -25,7 +25,6 @@ public class Constants {
         public static final Scalar UPPER = new Scalar(255, 255, 255);
     }
 
-    //TODO: Un-final these constants
     @Config
     public static class ClawConstants {
         public static final String CLAW_SERVO_NAME = "clawServo";
@@ -33,10 +32,11 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
+        // TODO: Re-final these constants
+        // As the angle increases, the hinge closes
+        // 270 degrees is inside the box
         public static  double OPEN_POSITION = 180;
         public static  double CLOSE_POSITION = 240;
-        // 270 is more than closed, so the piece on the servo is rotated
-        // so going to 270 will be very bad
     }
 
     public static class DistanceSensorConstants {
@@ -139,20 +139,11 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-//        // This is around 270 - 175 because the up position is actually around 270
-//        public static final double INTAKE_DOWN_POSITION = 270 - 175;
-//        public static final double INTAKE_DRIVING_POSITION = 270 - 120;
-//        // This is 270 - 45 because the up position is actually around 270
-//        public static final double INTAKE_UP_POSITION = 270 - 45;
-
-
-        // Down position is 270, 0 is back into the robot, ~90 degrees is straight up
-        // TODO: Find new value
-        public static  double INTAKE_DOWN_POSITION = 270 - 180;
-        // TODO: Find new value
-        public static  double INTAKE_DRIVING_POSITION = 270 - 120;
-        // TODO: Find new value
-        public static  double INTAKE_UP_POSITION = 270 - 30; // This is 270 - 45 because the up position is actually around 270
+        // TODO: Re-final these
+        // As the angle increases, the intake moves down, with ~150 being level
+        public static  double INTAKE_DOWN_POSITION = 190;
+        public static  double INTAKE_DRIVING_POSITION = 140;
+        public static  double INTAKE_UP_POSITION = 90;
 
         public static final double INTAKE_SPEED = -1;
         public static final double OUTTAKE_SPEED = 1;
@@ -163,8 +154,9 @@ public class Constants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        public static double EXTEND_POWER = .8;
-        public static double RETRACT_POWER = -.8;
+        // The motor is reversed so we can have positive values higher up, meaning these have to be negative
+        public static double EXTEND_POWER = -.8;
+        public static double RETRACT_POWER = .8;
 
         // PID values for the PID controller
         // TODO: Find new values
@@ -173,8 +165,7 @@ public class Constants {
         // Min and max values for the arm, don't change them
         // TODO: Find new value
         public static  int MIN_POSITION = 40;
-        // TODO: Find new value
-        public static  int MAX_POSITION = 3000;
+        public static  int MAX_POSITION = 2800;
 
         // TODO: Find new value
         public static  int IN_POSITION = MIN_POSITION;

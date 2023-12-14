@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -27,6 +28,9 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
 //    private double lastLastPower;
 
     private PIDSubsystemState state;
+
+    private ElapsedTime timer;
+    private double timeout;
 
     /**
      * Constructs a new LinearSlideSubsystem.
@@ -107,13 +111,15 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
      *
      * @param targetPosition The new target position
      */
-    public void setTarget(double targetPosition) {
+    public void setTarget(double targetPosition, double timeout) {
         state = PIDSubsystemState.MOVING_TO_TARGET;
         if (targetPosition < MIN_POSITION || targetPosition > MAX_POSITION) return;
         target = targetPosition;
+        if (timer == null) timer = new ElapsedTime();
+        else timer.reset();
+        this.timeout = timeout;
     }
 
-    // TODO: Add a timeout
     /** Runs the PID controllers if we are moving to a target. If we are close enough to the target, get out of PID mode. */
     public void runPID() {
         if (state == PIDSubsystemState.MOVING_TO_TARGET) {
@@ -124,8 +130,9 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
             slideMotor.setPower(power);
             // If the power isn't much, we are about as close to the target as we are going to get,
             // so we don't update anymore
+            // Or, if the timer is over the timeout, we also stop
 //            lastPower = power;
-            if (Math.abs(power) <= POWER_TOLERANCE) {
+            if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
                 state = PIDSubsystemState.AT_TARGET;
 //                lastLastPower = power;
                 stopMotor();
@@ -136,9 +143,9 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     /** Prints data from the slide motor. */
     public void printData() {
         telemetry.addLine("--- Slide ---");
-        telemetry.addData("Position", slideMotor.getCurrentPosition());
-        telemetry.addData("Target", target);
-        telemetry.addData("State", state);
+        telemetry.addData("Slide Position", slideMotor.getCurrentPosition());
+//        telemetry.addData("Target", target);
+//        telemetry.addData("State", state);
 //        telemetry.addData("Power", slideMotor.getPower());
 //        telemetry.addData("Velocity", slideMotor.getVelocity());
 //        telemetry.addData("Current (amps)", slideMotor.getCurrent(CurrentUnit.AMPS));

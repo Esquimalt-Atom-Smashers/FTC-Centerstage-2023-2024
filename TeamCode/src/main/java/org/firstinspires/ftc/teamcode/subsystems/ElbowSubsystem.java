@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -25,6 +26,9 @@ public class ElbowSubsystem extends CustomSubsystemBase {
 
     public static double target;
 //    private double lastPower;
+
+    private ElapsedTime timer;
+    private double timeout;
 
     /** The state the arm is in: (manual, moving-to-target, or at-target) */
     private PIDSubsystemState state;
@@ -88,9 +92,12 @@ public class ElbowSubsystem extends CustomSubsystemBase {
      *
      * @param targetPosition The target position in pulses
      */
-    public void setTarget(double targetPosition) {
+    public void setTarget(double targetPosition, double timeout) {
         target = targetPosition;
         state = PIDSubsystemState.MOVING_TO_TARGET;
+        if (timer == null) timer = new ElapsedTime();
+        else timer.reset();
+        this.timeout = timeout;
     }
 
     /**
@@ -108,7 +115,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
 //            lastPower = power;
             elbowMotor.setPower(power);
             // If the power we are setting is basically none, we are close enough to the target
-            if (Math.abs(power) <= POWER_TOLERANCE) {
+            if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
                 state = PIDSubsystemState.AT_TARGET;
             }
         }
@@ -122,9 +129,9 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     /** Print data from the elbow motor. */
     public void printData() {
         telemetry.addLine("--- Elbow Subsystem ---");
-        telemetry.addData("Position:", elbowMotor.getCurrentPosition());
-        telemetry.addData("Target:", target);
-        telemetry.addData("State:", state);
+        telemetry.addData("Elbow Position", elbowMotor.getCurrentPosition());
+//        telemetry.addData("Target", target);
+//        telemetry.addData("State", state);
     }
 
     /** @return the preset low scoring position */

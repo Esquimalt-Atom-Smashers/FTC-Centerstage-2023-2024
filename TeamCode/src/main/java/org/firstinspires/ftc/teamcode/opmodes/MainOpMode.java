@@ -15,10 +15,8 @@ public class MainOpMode extends LinearOpMode {
 
     /* TODO:
         Configure PID values (elbow + slide)
-        Get distance value (elbow + slide)
+        Get distance values (elbow + slide)
         Check distance sensor logic
-        Find servo values for intake
-        Implement timeout for PID (elbow + slide)
         Configure road runner again
     */
 
