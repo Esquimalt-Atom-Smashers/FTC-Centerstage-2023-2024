@@ -53,7 +53,6 @@ public class IntakeSubsystem extends CustomSubsystemBase {
     }
 
     /** Sets the intake position to the 'up' position. */
-    @Deprecated
     public void upPosition() {
         intakeServo.turnToAngle(INTAKE_UP_POSITION);
     }

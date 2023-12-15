@@ -80,6 +80,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
         imu.initialize(parameters);
     }
 
+    /** Reset the gyro by setting the offset to the current heading */
     public void resetGyro() {
         offset = getRawHeading();
     }

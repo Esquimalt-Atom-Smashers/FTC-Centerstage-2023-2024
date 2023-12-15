@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,13 +20,15 @@ import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
  *
  * @author Esquimalt Atom Smashers
  */
+@Config
 public class ElbowSubsystem extends CustomSubsystemBase {
     private final DcMotorEx elbowMotor;
 
     private final PIDController controller;
 
+    // TODO: Hide this
     public static double target;
-//    private double lastPower;
+    private double lastPower;
 
     private ElapsedTime timer;
     private double timeout;
@@ -112,7 +115,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
             controller.setPID(P, I, D);
             int elbowPosition = elbowMotor.getCurrentPosition();
             double power = controller.calculate(elbowPosition, target);
-//            lastPower = power;
+            lastPower = power;
             elbowMotor.setPower(power);
             // If the power we are setting is basically none, we are close enough to the target
             if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
@@ -130,6 +133,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     public void printData() {
         telemetry.addLine("--- Elbow Subsystem ---");
         telemetry.addData("Elbow Position", elbowMotor.getCurrentPosition());
+        telemetry.addData("Elbow last power", lastPower);
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
     }

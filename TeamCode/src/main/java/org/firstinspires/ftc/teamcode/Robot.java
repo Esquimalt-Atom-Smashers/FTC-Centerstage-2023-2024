@@ -225,6 +225,10 @@ public class Robot {
 //        }
 //    }
 
+    public void startManual() {
+        droneSubsystem.startPosition();
+    }
+
 
     /**
      * Controls the elbow, intake, slide, claw, drone and drive subsystem manually, without any commands running or PID controllers.
@@ -245,11 +249,13 @@ public class Robot {
         else linearSlideSubsystem.stopMotor();
 
         // Intake Subsystem (operator)
-        // Left -> Intake, Right -> Outtake, Up -> Move intake up, Down -> Move intake down
-        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) intakeSubsystem.mediumPosition();
+        // Up -> Up, Right -> Medium, Down -> Down, left trigger -> intake, right trigger -> outtake
+        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP)) intakeSubsystem.upPosition();
+        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) intakeSubsystem.mediumPosition();
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN)) intakeSubsystem.downPosition();
-        if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT)) intakeSubsystem.intake();
-        else if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) intakeSubsystem.outtake();
+
+        if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) intakeSubsystem.intake();
+        else if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER))) intakeSubsystem.outtake();
         else intakeSubsystem.stopMotor();
 
         // Claw Subsystem (operator)
@@ -270,9 +276,9 @@ public class Robot {
 
         if (operatorGamepad.getButton(GamepadKeys.Button.BACK)) resetEncoders();
 
-        distanceSensorSubsystem.printData();
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();
+        distanceSensorSubsystem.printData();
 //        clawSubsystem.printData();
         intakeSubsystem.printData();
         opMode.telemetry.update();

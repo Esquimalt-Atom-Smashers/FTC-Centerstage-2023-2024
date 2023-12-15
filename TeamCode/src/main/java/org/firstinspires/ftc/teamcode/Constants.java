@@ -101,29 +101,22 @@ public class Constants {
         public static final double MANUAL_MOTOR_SPEED = 0.8;
 
         // PID values for the PID controller
-        // TODO: Find new values
-        public static  double P = 0.0019, I = 0, D = 0;
+        public static  double P = 0.002, I = 0, D = 0;
 
-        // TODO: Find new value
-        public static  int INTAKE_POSITION = 500;
-        // TODO: Find new value
-        public static  int DRIVING_POSITION = 2000;
+        public static  int INTAKE_POSITION = 100;
+        public static  int DRIVING_POSITION = 1100;
 
-        // TODO: Find new value
-        public static  int LOW_SCORING_POSITION = 8400;
+        public static  int LOW_SCORING_POSITION = 7400;
+
+        public static  int LEVEL_POSITION = 3500;
+        public static  int DRONE_LAUNCH_POSITION = 9000;
+
+//        public static final int TEST_POSITION = 15000;
+
         // TODO: Find new value
         public static  int MEDIUM_SCORING_POSITION = 10400;
         // TODO: Find new value
         public static  int HIGH_SCORING_POSITION = 12400;
-
-        // TODO: Find new value
-        public static  int LEVEL_POSITION = 4750;
-        // TODO: Find new value
-        public static  int DRONE_LAUNCH_POSITION = 11000;
-
-//        public static final int TEST_POSITION = 15000;
-
-        // Drone position is ~14000
 
         // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.1;
@@ -145,8 +138,8 @@ public class Constants {
         public static  double INTAKE_DRIVING_POSITION = 140;
         public static  double INTAKE_UP_POSITION = 90;
 
-        public static final double INTAKE_SPEED = -1;
-        public static final double OUTTAKE_SPEED = 1;
+        public static  double INTAKE_SPEED = -1;
+        public static  double OUTTAKE_SPEED = 1;
     }
 
     @Config
@@ -159,8 +152,7 @@ public class Constants {
         public static double RETRACT_POWER = .8;
 
         // PID values for the PID controller
-        // TODO: Find new values
-        public static  double P = 0.013, I = 0, D = 0.0003;
+        public static  double P = 0.003, I = 0, D = 0;
 
         // Min and max values for the arm, don't change them
         // TODO: Find new value
@@ -169,15 +161,14 @@ public class Constants {
 
         // TODO: Find new value
         public static  int IN_POSITION = MIN_POSITION;
-        // TODO: Find new value
-        public static  int LOW_SCORING_POSITION = 1300;
+        public static  int LOW_SCORING_POSITION = 2600;
         // TODO: Find new value
         public static  int MEDIUM_SCORING_POSITION = 1870;
         // TODO: Find new value
         public static  int HIGH_SCORING_POSITION = 2800;
 
         // TODO: Find new value
-        public static final double POWER_TOLERANCE = 0.08;
+        public static final double POWER_TOLERANCE = 0.25;
     }
 
     public static class WinchConstants {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,13 +19,15 @@ import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
  *
  * @author Esquimalt Atom Smashers
  */
+@Config
 public class LinearSlideSubsystem extends CustomSubsystemBase {
     private final DcMotorEx slideMotor;
 
     private final PIDController controller;
-    private double target;
+    // TODO: Hide this
+    public static double target;
 
-//    private double lastPower;
+    private double lastPower;
 //    private double lastLastPower;
 
     private PIDSubsystemState state;
@@ -131,7 +134,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
             // If the power isn't much, we are about as close to the target as we are going to get,
             // so we don't update anymore
             // Or, if the timer is over the timeout, we also stop
-//            lastPower = power;
+            lastPower = power;
             if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
                 state = PIDSubsystemState.AT_TARGET;
 //                lastLastPower = power;
@@ -144,6 +147,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     public void printData() {
         telemetry.addLine("--- Slide ---");
         telemetry.addData("Slide Position", slideMotor.getCurrentPosition());
+        telemetry.addData("Slide last power", lastPower);
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
 //        telemetry.addData("Power", slideMotor.getPower());

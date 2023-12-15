@@ -105,7 +105,8 @@ public class CommandManager {
                 new InstantCommand(robot.getClawSubsystem()::closeClaw, robot.getClawSubsystem()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
                 // TODO: Can this go straight to intake position? Is that safe to drive on?
-                // If so, we can remove the
+                // If so, we can remove the movement in pickup pixels
+                // I don't think we can
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition()),
                 new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem())
         );
@@ -121,7 +122,6 @@ public class CommandManager {
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.LOADING_PIXELS)),
                 // Move the arm down to pick up the pixels
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
-                // Close the claw and wait 500ms for the claw to finish gripping on the pixels
                 // TODO: Check if we still need to move the intake up and down
                 // Stop the intake and move it up
                 new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
