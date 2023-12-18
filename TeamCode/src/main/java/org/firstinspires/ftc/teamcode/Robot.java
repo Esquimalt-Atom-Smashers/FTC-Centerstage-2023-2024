@@ -330,6 +330,7 @@ public class Robot {
 
     /**
      * Checks if a input from the controller is outside the dead zone
+     *
      * @param controllerInput the input from the controller, for example gamepad.left_bumper or gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)
      * @return whether the input from the controller has passed the dead zone
      */

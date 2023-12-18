@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 
@@ -16,6 +17,10 @@ public class MoveElbowCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        if (target == -1) {
+            cancel();
+            return;
+        }
         elbowSubsystem.setTarget(target, 5.0);
     }
 

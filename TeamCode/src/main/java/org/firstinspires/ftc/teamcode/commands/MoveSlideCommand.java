@@ -16,6 +16,10 @@ public class MoveSlideCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        if (target == -1) {
+            cancel();
+            return;
+        }
         linearSlideSubsystem.setTarget(target, 5.0);
     }
 

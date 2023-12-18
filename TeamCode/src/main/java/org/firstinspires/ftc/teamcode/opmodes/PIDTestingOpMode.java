@@ -30,8 +30,8 @@ public class PIDTestingOpMode extends LinearOpMode {
 
         Trigger secondTrigger = new Trigger(() -> gamepad1.dpad_down);
         secondTrigger.whenActive(new SequentialCommandGroup(
-                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getLowScoringPosition() / 2.0),
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition() / 2.0)
+                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
+                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         ));
 
         while (opModeIsActive() && !isStopRequested()) {

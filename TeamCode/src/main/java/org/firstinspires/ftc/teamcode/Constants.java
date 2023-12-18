@@ -101,7 +101,7 @@ public class Constants {
         public static final double MANUAL_MOTOR_SPEED = 0.8;
 
         // PID values for the PID controller
-        public static  double P = 0.002, I = 0, D = 0;
+        public static  double P = 0.0025, I = 0, D = 0;
 
         public static  int INTAKE_POSITION = 100;
         public static  int DRIVING_POSITION = 1100;
@@ -163,9 +163,9 @@ public class Constants {
         public static  int IN_POSITION = MIN_POSITION;
         public static  int LOW_SCORING_POSITION = 2600;
         // TODO: Find new value
-        public static  int MEDIUM_SCORING_POSITION = 1870;
+        public static  int MEDIUM_SCORING_POSITION = -1;//1870;
         // TODO: Find new value
-        public static  int HIGH_SCORING_POSITION = 2800;
+        public static  int HIGH_SCORING_POSITION = -1;//2800;
 
         // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.25;
