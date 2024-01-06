@@ -19,7 +19,7 @@ public class PIDTestingOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Robot robot = new Robot(this, true, false);
+        Robot robot = new Robot(this, true, false, false);
 
         waitForStart();
         Trigger moveTrigger = new Trigger(() -> gamepad1.dpad_up);

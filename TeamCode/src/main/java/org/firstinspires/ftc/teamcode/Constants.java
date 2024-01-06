@@ -26,8 +26,8 @@ public class Constants {
     }
 
     @Config
-    public static class ClawConstants {
-        public static final String CLAW_SERVO_NAME = "clawServo";
+    public static class BoxConstants {
+        public static final String BOX_SERVO_NAME = "boxServo";
 
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
@@ -37,6 +37,9 @@ public class Constants {
         // 270 degrees is inside the box
         public static  double OPEN_POSITION = 180;
         public static  double CLOSE_POSITION = 240;
+
+        public static final String RIGHT_LED_CHANNEL = "rightLED";
+        public static final String LEFT_LED_CHANNEL = "leftLED";
     }
 
     public static class DistanceSensorConstants {
@@ -44,7 +47,7 @@ public class Constants {
         public static final String RIGHT_DISTANCE_SENSOR_NAME = "rightDistanceSensor";
 
         // TODO: Find value
-        public static double DISTANCE_THRESHOLD = -1;
+        public static double DISTANCE_THRESHOLD = 10;
     }
 
     public static class DriveConstants {
@@ -62,12 +65,13 @@ public class Constants {
         public static final boolean FIELD_CENTRIC = true;
         public static final boolean SCALED = false;
         public static final double INPUT_MULTIPLIER = 1f;
+        /** @noinspection SpellCheckingInspection*/
         public static final double DEADZONE = 0.1;
 
         public static final String IMU_NAME = "imu";
 
 
-        public static final double AUTO_DRIVE_SPEED = 0.5;
+/*        public static final double AUTO_DRIVE_SPEED = 0.5;
         public static final double AUTO_STRAFE_SPEED = -1;
         public static final double TURN_SPEED = -1;
 
@@ -78,7 +82,7 @@ public class Constants {
         public static final double AUTO_STEP_POWER = 0;
         public static final double AUTO_STEP_TOLERANCE = 50;
 
-        public static final int HALF_STEP_VALUE = -1;
+        public static final int HALF_STEP_VALUE = -1;*/
     }
 
     public static class DroneConstants {
@@ -109,7 +113,7 @@ public class Constants {
         public static  int LOW_SCORING_POSITION = 7400;
 
         public static  int LEVEL_POSITION = 3500;
-        public static  int DRONE_LAUNCH_POSITION = 9000;
+        public static  int DRONE_LAUNCH_POSITION = 6000;
 
 //        public static final int TEST_POSITION = 15000;
 
@@ -132,7 +136,7 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        // TODO: Re-final these
+        // Re-final these
         // As the angle increases, the intake moves down, with ~150 being level
         public static  double INTAKE_DOWN_POSITION = 190;
         public static  double INTAKE_DRIVING_POSITION = 140;
@@ -155,7 +159,7 @@ public class Constants {
         public static  double P = 0.003, I = 0, D = 0;
 
         // Min and max values for the arm, don't change them
-        // TODO: Find new value
+        // Find new value
         public static  int MIN_POSITION = 40;
         public static  int MAX_POSITION = 2800;
 
@@ -174,9 +178,11 @@ public class Constants {
     public static class WinchConstants {
         public static final String WINCH_MOTOR_NAME = "winchMotor";
 
-        public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
+        public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        public static final double WINCH_SPEED = .7;
-        public static final double UNWINCH_SPEED = -.7;
+        // TODO: At 0.3 for testing purposes, take up to full speed for actual
+        public static final double WINCH_SPEED = .3;
+        /** @noinspection SpellCheckingInspection*/
+        public static final double UNWINCH_SPEED = -.3;
     }
 }

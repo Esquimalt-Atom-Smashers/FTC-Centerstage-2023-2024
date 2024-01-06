@@ -97,7 +97,7 @@ public class AutonomousController {
         setSettings(isBlueAlliance, isUpstage, isPlacingYellow);
 
         drive = new SampleMecanumDrive(hardwareMap);
-        robot = new Robot(opMode, true, true);
+        robot = new Robot(opMode, true, true, true);
         commandManager = new CommandManager(robot);
         trajectoryManager = new TrajectoryManager(this);
 

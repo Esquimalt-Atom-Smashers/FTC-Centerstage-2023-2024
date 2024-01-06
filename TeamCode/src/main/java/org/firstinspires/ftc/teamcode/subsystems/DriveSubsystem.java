@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 import java.util.Arrays;
+//import java.util.function.DoubleSupplier;
 
 /**
  * A subsystem that represents the drive base of the robot. Uses four motors and a gyro to drive.
@@ -32,6 +33,8 @@ public class DriveSubsystem extends CustomSubsystemBase {
     /** The built-in IMU(gyro) on the control hub. */
     private final BNO055IMU imu;
     private double offset;
+
+    //private double maxSpeedSupplier;
 
 //    private double snapTarget;
 
@@ -53,6 +56,8 @@ public class DriveSubsystem extends CustomSubsystemBase {
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
         configureMotors();
+
+        //maxSpeedSupplier = 1.0;
 
         imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
         configureIMU();
@@ -100,20 +105,22 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * @param fieldCentric If we want this drive to be field centric
      * @param scaled If we want the inputs to be scaled
      */
-    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled) {
+    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled, double maxSpeedSupplier) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
         turn = Math.abs(turn) >= DEADZONE ? turn : 0;
+        maxSpeedSupplier = setMaxSpeedSupplier(maxSpeedSupplier);
+
         if (fieldCentric) {
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
             double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
 
-            frontLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, scaled));
-            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, scaled));
-            rearLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, scaled));
-            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, scaled));
+            frontLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, scaled) * maxSpeedSupplier);
+            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, scaled) * maxSpeedSupplier);
+            rearLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, scaled) * maxSpeedSupplier);
+            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, scaled) * maxSpeedSupplier);
         }
         else {
             // Robot centric drive
@@ -130,10 +137,10 @@ public class DriveSubsystem extends CustomSubsystemBase {
      *
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
-     * @param turn The amount to turn
+     * @param turn The amount to turn left and right
      */
-    public void drive(double forward, double strafe, double turn) {
-        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED);
+    public void drive(double forward, double strafe, double turn, double maxSpeedMultiplier) {
+        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED, maxSpeedMultiplier);
     }
 
 //    public boolean forward() {
@@ -159,6 +166,10 @@ public class DriveSubsystem extends CustomSubsystemBase {
 //                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
 //    }
 
+    public double setMaxSpeedSupplier (double maxSpeed) {
+        return Range.clip(maxSpeed, 0, 1);
+    }
+
     /** Stop all of the drive motors */
     public void stopMotors() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
@@ -174,7 +185,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
     }
 
     /** @return The heading of the robot */
-    private double getHeading() {
+    public double getHeading() {
         return getRawHeading() - offset;
     }
 

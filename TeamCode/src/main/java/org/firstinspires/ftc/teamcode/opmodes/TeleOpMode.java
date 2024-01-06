@@ -16,7 +16,7 @@ public class TeleOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Robot robot = new Robot(this, false, true);
+        Robot robot = new Robot(this, false, true, true);
 
         robot.start();
 

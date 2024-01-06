@@ -16,7 +16,7 @@ public class ManualOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Robot robot = new Robot(this, true, false);
+        Robot robot = new Robot(this, true, false, true);
 
         waitForStart();
         robot.startManual();

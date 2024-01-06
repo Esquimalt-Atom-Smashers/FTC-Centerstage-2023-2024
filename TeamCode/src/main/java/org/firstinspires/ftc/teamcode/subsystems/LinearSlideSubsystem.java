@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.SubsystemBase;
+//import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+//import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
@@ -140,6 +140,8 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
 //                lastLastPower = power;
                 stopMotor();
             }
+        } else {
+            stopMotor();
         }
     }
 
