@@ -51,6 +51,7 @@ public class WinchSubsystem extends CustomSubsystemBase {
     public void stopMotor() { winchMotor.setPower(0); }
 
     /** Prints data from the subsystem */
+    @Override
     public void printData() {
 
     }

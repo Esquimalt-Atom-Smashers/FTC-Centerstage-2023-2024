@@ -38,8 +38,10 @@ public class Constants {
         public static  double OPEN_POSITION = 180;
         public static  double CLOSE_POSITION = 240;
 
-        public static final String RIGHT_LED_CHANNEL = "rightLED";
-        public static final String LEFT_LED_CHANNEL = "leftLED";
+        public static final String RED_RIGHT_LED_NAME = "redRight";
+        public static final String GREEN_RIGHT_LED_NAME = "greenRight";
+        public static final String RED_LEFT_LED_NAME = "redLeft";
+        public static final String GREEN_LEFT_LED_NAME = "greenLeft";
     }
 
     public static class DistanceSensorConstants {
@@ -64,6 +66,7 @@ public class Constants {
 
         public static final boolean FIELD_CENTRIC = true;
         public static final boolean SCALED = false;
+        @Deprecated
         public static final double INPUT_MULTIPLIER = 1f;
         /** @noinspection SpellCheckingInspection*/
         public static final double DEADZONE = 0.1;
@@ -102,7 +105,7 @@ public class Constants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
         public static final DcMotorSimple.Direction ELBOW_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
-        public static final double MANUAL_MOTOR_SPEED = 0.8;
+        public static final double MANUAL_MOTOR_SPEED_MULTIPLIER = 0.8;
 
         // PID values for the PID controller
         public static  double P = 0.0025, I = 0, D = 0;
@@ -124,6 +127,8 @@ public class Constants {
 
         // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.1;
+
+        public static final String ELBOW_LIMIT_SWITCH_NAME = "elbowLimit";
     }
 
     @Config
@@ -152,8 +157,8 @@ public class Constants {
         public static final DcMotorSimple.Direction SLIDE_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
         // The motor is reversed so we can have positive values higher up, meaning these have to be negative
-        public static double EXTEND_POWER = -.8;
-        public static double RETRACT_POWER = .8;
+        public static double SLIDE_MANUAL_POWER_MULTIPLIER = -.8;
+//        public static double RETRACT_POWER = .8;
 
         // PID values for the PID controller
         public static  double P = 0.003, I = 0, D = 0;
@@ -167,12 +172,14 @@ public class Constants {
         public static  int IN_POSITION = MIN_POSITION;
         public static  int LOW_SCORING_POSITION = 2600;
         // TODO: Find new value
-        public static  int MEDIUM_SCORING_POSITION = -1;//1870;
+        public static  int MEDIUM_SCORING_POSITION = -1; //1870;
         // TODO: Find new value
-        public static  int HIGH_SCORING_POSITION = -1;//2800;
+        public static  int HIGH_SCORING_POSITION = -1; //2800;
 
         // TODO: Find new value
         public static final double POWER_TOLERANCE = 0.25;
+
+        public static final String SLIDE_LIMIT_SWITCH_NAME = "slideLimit";
     }
 
     public static class WinchConstants {
@@ -180,9 +187,8 @@ public class Constants {
 
         public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-        // TODO: At 0.3 for testing purposes, take up to full speed for actual
-        public static final double WINCH_SPEED = .3;
+        public static final double WINCH_SPEED = 1;
         /** @noinspection SpellCheckingInspection*/
-        public static final double UNWINCH_SPEED = -.3;
+        public static final double UNWINCH_SPEED = -.5;
     }
 }

@@ -73,6 +73,7 @@ public class IntakeSubsystem extends CustomSubsystemBase {
     }
 
     /** Prints data from the subsystem */
+    @Override
     public void printData() {
         telemetry.addLine("--- Intake ---");
         telemetry.addData("Servo pos", intakeServo.getPosition());

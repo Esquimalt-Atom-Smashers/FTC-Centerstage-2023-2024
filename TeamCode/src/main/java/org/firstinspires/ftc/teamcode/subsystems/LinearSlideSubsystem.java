@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -35,6 +36,8 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     private ElapsedTime timer;
     private double timeout;
 
+    private final DigitalChannel slideLimitSwitch;
+
     /**
      * Constructs a new LinearSlideSubsystem.
      *
@@ -48,6 +51,9 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         configureSlide();
 
         controller = new PIDController(P, I, D);
+
+        slideLimitSwitch = hardwareMap.get(DigitalChannel.class, SLIDE_LIMIT_SWITCH_NAME);
+        slideLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
 
         state = PIDSubsystemState.MANUAL;
     }
@@ -67,11 +73,15 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     /**
      * Extend the slide manually.
      *
-     * @param multiplier Speed multiplier
+     * @param input Speed input
      */
-    public void extendManually(double multiplier) {
+    public void moveManually(double input) {
         state = PIDSubsystemState.MANUAL;
-        slideMotor.setPower(EXTEND_POWER * multiplier);
+        if (input > 0 && isLimitSwitchPressed()) {
+            stopMotor();
+            return;
+        }
+        slideMotor.setPower(input * SLIDE_MANUAL_POWER_MULTIPLIER);
     }
 
     /**
@@ -79,9 +89,14 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
      *
      * @param multiplier Speed multiplier
      */
+    @Deprecated
     public void retractManually(double multiplier) {
         state = PIDSubsystemState.MANUAL;
-        slideMotor.setPower(RETRACT_POWER * multiplier);
+        if (isLimitSwitchPressed()) {
+            stopMotor();
+            return;
+        }
+//        slideMotor.setPower(RETRACT_POWER * multiplier);
     }
 
     /** Stops the slide motor. */
@@ -126,15 +141,20 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     /** Runs the PID controllers if we are moving to a target. If we are close enough to the target, get out of PID mode. */
     public void runPID() {
         if (state == PIDSubsystemState.MOVING_TO_TARGET) {
+            if (target < slideMotor.getCurrentPosition() && isLimitSwitchPressed()) {
+                stopMotor();
+                state = PIDSubsystemState.AT_TARGET;
+                return;
+            }
             // Calculate how much we need to move the motor by
             controller.setPID(P, I, D);
             int slidePosition = slideMotor.getCurrentPosition();
             double power = controller.calculate(slidePosition, target);
             slideMotor.setPower(power);
+            lastPower = power;
             // If the power isn't much, we are about as close to the target as we are going to get,
             // so we don't update anymore
             // Or, if the timer is over the timeout, we also stop
-            lastPower = power;
             if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
                 state = PIDSubsystemState.AT_TARGET;
 //                lastLastPower = power;
@@ -146,10 +166,12 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     }
 
     /** Prints data from the slide motor. */
+    @Override
     public void printData() {
         telemetry.addLine("--- Slide ---");
         telemetry.addData("Slide Position", slideMotor.getCurrentPosition());
         telemetry.addData("Slide last power", lastPower);
+        telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
 //        telemetry.addData("Power", slideMotor.getPower());
@@ -181,5 +203,9 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     /** @return the minimum position of the slide */
     public int getInPosition() {
         return IN_POSITION;
+    }
+
+    private boolean isLimitSwitchPressed() {
+        return !slideLimitSwitch.getState();
     }
 }

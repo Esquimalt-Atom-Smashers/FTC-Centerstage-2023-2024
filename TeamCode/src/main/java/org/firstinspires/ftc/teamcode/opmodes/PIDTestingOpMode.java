@@ -19,19 +19,19 @@ public class PIDTestingOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Robot robot = new Robot(this, true, false, false);
+        Robot robot = new Robot(this, true, false);
 
         waitForStart();
         Trigger moveTrigger = new Trigger(() -> gamepad1.dpad_up);
         moveTrigger.whenActive(new SequentialCommandGroup(
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition()),
+//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getLowScoringPosition())
         ));
 
         Trigger secondTrigger = new Trigger(() -> gamepad1.dpad_down);
         secondTrigger.whenActive(new SequentialCommandGroup(
-                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
+                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
+//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         ));
 
         while (opModeIsActive() && !isStopRequested()) {

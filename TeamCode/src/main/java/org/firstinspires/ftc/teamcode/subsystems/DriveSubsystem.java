@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -105,11 +106,11 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * @param fieldCentric If we want this drive to be field centric
      * @param scaled If we want the inputs to be scaled
      */
-    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled, double maxSpeedSupplier) {
+    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled, double multiplier) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
         turn = Math.abs(turn) >= DEADZONE ? turn : 0;
-        maxSpeedSupplier = setMaxSpeedSupplier(maxSpeedSupplier);
+        multiplier = Range.clip(multiplier, 0, 1);
 
         if (fieldCentric) {
             // Field centric drive
@@ -117,17 +118,17 @@ public class DriveSubsystem extends CustomSubsystemBase {
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
             double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
 
-            frontLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, scaled) * maxSpeedSupplier);
-            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, scaled) * maxSpeedSupplier);
-            rearLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, scaled) * maxSpeedSupplier);
-            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, scaled) * maxSpeedSupplier);
+            frontLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, multiplier, scaled));
+            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, multiplier, scaled));
+            rearLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, multiplier, scaled));
+            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, multiplier, scaled));
         }
         else {
             // Robot centric drive
-            frontLeftMotor.setPower(scaleInput(forward + strafe + turn, scaled));
-            frontRightMotor.setPower(scaleInput(forward - strafe - turn, scaled));
-            rearLeftMotor.setPower(scaleInput(forward - strafe + turn, scaled));
-            rearRightMotor.setPower(scaleInput(forward + strafe - turn, scaled));
+            frontLeftMotor.setPower(scaleInput(forward + strafe + turn, multiplier, scaled));
+            frontRightMotor.setPower(scaleInput(forward - strafe - turn, multiplier, scaled));
+            rearLeftMotor.setPower(scaleInput(forward - strafe + turn, multiplier, scaled));
+            rearRightMotor.setPower(scaleInput(forward + strafe - turn, multiplier, scaled));
         }
 
     }
@@ -139,8 +140,12 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * @param strafe The amount to move left and right
      * @param turn The amount to turn left and right
      */
-    public void drive(double forward, double strafe, double turn, double maxSpeedMultiplier) {
-        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED, maxSpeedMultiplier);
+    public void drive(double forward, double strafe, double turn, double speedMultiplier) {
+        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED, speedMultiplier);
+    }
+
+    public void drive(GamepadEx gamepad, double speedMultiplier) {
+        drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
 //    public boolean forward() {
@@ -199,6 +204,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
     }
 
     /** Prints data from the motors to the telemetry */
+    @Override
     public void printData() {
         telemetry.addLine("--- Drive base ---");
         telemetry.addData("Position", frontLeftMotor.getCurrentPosition());
@@ -215,15 +221,15 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * @param isScaled If we want to scale the input
      * @return The input clipped between -1 and 1
      */
-    private double scaleInput(double input, boolean isScaled) {
+    private double scaleInput(double input, double multiplier, boolean isScaled) {
         if (isScaled) {
             // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
             // Current formula just cubes the input and multiplies it by the multiplier
-            return  Range.clip(Math.pow(input, 3) * INPUT_MULTIPLIER, -1, 1);
+            return Range.clip(Math.pow(input, 3) * multiplier, -1, 1);
         }
         else {
             // Otherwise, we just multiply the input by the multiplier
-            return Range.clip(input * INPUT_MULTIPLIER, -1, 1);
+            return Range.clip(input * multiplier, -1, 1);
         }
     }
 

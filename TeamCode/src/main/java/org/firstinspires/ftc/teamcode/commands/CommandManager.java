@@ -15,13 +15,13 @@ public class CommandManager {
     /** Default command for ClawSubsystem */
     private final Command defaultBoxReleaseCommand;
     /** Command that opens the box release*/
-    private final Command openBoxReleaseCommand;
+    private final Command openBoxCommand;
     /** Command that opens the box release */
-    private final Command closeBoxReleaseCommand;
+    private final Command closeBoxCommand;
     /** Default command for DriveSubsystem */
     private final Command defaultDriveCommand;
-    /** Command for DriveSubsystem */
-    private final Command driveCommand;
+//    /** Command for DriveSubsystem */
+//    private final Command driveCommand;
     private final Command snapRightCommand;
     private final Command snapLeftCommand;
     private final Command snapUpCommand;
@@ -81,22 +81,22 @@ public class CommandManager {
             }
         }, robot.getBoxReleaseSubsystem());
 
-        openBoxReleaseCommand = new SequentialCommandGroup(
+        openBoxCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.getBoxReleaseSubsystem().openBox(), robot.getBoxReleaseSubsystem())
                 //new WaitCommand(250),
                //new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
         );
 
-        closeBoxReleaseCommand = new SequentialCommandGroup(
+        closeBoxCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.getBoxReleaseSubsystem().closeBox(), robot.getBoxReleaseSubsystem())
                 //new WaitCommand(250),
                 //new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
         );
 
-        defaultDriveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1.0), robot.getDriveSubsystem());
+        defaultDriveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad(), robot.isPressed(robot.getDriverGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1.0), robot.getDriveSubsystem());
 
         // Slow drive at 0.3
-        driveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 0.3), robot.getDriveSubsystem());
+//        driveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 0.3), robot.getDriveSubsystem());
 
         // Snap right
         snapRightCommand = new SequentialCommandGroup(
@@ -124,15 +124,17 @@ public class CommandManager {
         droneCancelCommand = new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.DRIVING));
 
         defaultElbowCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().raiseManually(1);
-            else if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().lowerManually(1);
+            if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().moveManually(1);
+            else if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().moveManually(-1);
+//            else if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().lowerManually(1);
             else robot.getElbowSubsystem().stopMotor();
         }, robot.getElbowSubsystem());
 
         // TODO: Check this after
         defaultSlideCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().extendManually(1);
-            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().retractManually(1);
+            if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().moveManually(1);
+//            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().retractManually(1);
+            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().moveManually(-1);
             else robot.getLinearSlideSubsystem().stopMotor();
         }, robot.getLinearSlideSubsystem());
 
@@ -142,6 +144,9 @@ public class CommandManager {
             else robot.getWinchSubsystem().stopMotor();
         }, robot.getWinchSubsystem());
 
+        // TODO: Which is the best way to do intake?
+        //      Could have an intake command that just intakes while held
+        //      Could have a button to start intaking and another to stop
         intakeModeCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.INTAKE)),
                 new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
@@ -265,21 +270,21 @@ public class CommandManager {
         return defaultBoxReleaseCommand;
     }
 
-    public Command getOpenBoxReleaseCommand() {
-        return openBoxReleaseCommand;
+    public Command getOpenBoxCommand() {
+        return openBoxCommand;
     }
 
-    public Command getCloseBoxReleaseCommand() {
-        return closeBoxReleaseCommand;
+    public Command getCloseBoxCommand() {
+        return closeBoxCommand;
     }
 
     public Command getDefaultDriveCommand() {
         return defaultDriveCommand;
     }
 
-    public Command driveCommand() {
-        return driveCommand;
-    }
+//    public Command getDriveCommand() {
+//        return driveCommand;
+//    }
 
     public Command getSnapRightCommand() {
         return snapRightCommand;

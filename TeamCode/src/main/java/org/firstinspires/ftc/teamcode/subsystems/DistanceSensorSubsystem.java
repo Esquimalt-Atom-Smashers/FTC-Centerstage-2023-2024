@@ -41,6 +41,7 @@ public class DistanceSensorSubsystem extends CustomSubsystemBase {
     }
 
     /** Prints data from the distance sensors. */
+    @Override
     public void printData() {
         telemetry.addLine("--- Distance ---");
         telemetry.addData("Left (in)", leftDistanceSensor.getDistance(DistanceUnit.INCH));

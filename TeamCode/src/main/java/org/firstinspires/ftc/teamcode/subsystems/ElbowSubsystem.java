@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -33,6 +32,8 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     private ElapsedTime timer;
     private double timeout;
 
+    private final DigitalChannel elbowLimitSwitch;
+
     /** The state the arm is in: (manual, moving-to-target, or at-target) */
     private PIDSubsystemState state;
 
@@ -49,6 +50,9 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         configureMotor();
 
         controller = new PIDController(P, I, D);
+
+        elbowLimitSwitch = hardwareMap.get(DigitalChannel.class, ELBOW_LIMIT_SWITCH_NAME);
+        elbowLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
 
         state = PIDSubsystemState.MANUAL;
     }
@@ -73,11 +77,15 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     /**
      * Raises the arm manually.
      *
-     * @param multiplier A multiplier for the speed of the motor
+     * @param input A input for the speed of the motor
      */
-    public void raiseManually(double multiplier) {
+    public void moveManually(double input) {
         state = PIDSubsystemState.MANUAL;
-        elbowMotor.setPower(MANUAL_MOTOR_SPEED * multiplier);
+        if (input < 0 && isLimitSwitchPressed()) {
+            stopMotor();
+            return;
+        }
+        elbowMotor.setPower(input * MANUAL_MOTOR_SPEED_MULTIPLIER);
     }
 
     /**
@@ -85,9 +93,14 @@ public class ElbowSubsystem extends CustomSubsystemBase {
      *
      * @param multiplier A multiplier for the speed of the motor
      */
+    @Deprecated
     public void lowerManually(double multiplier) {
         state = PIDSubsystemState.MANUAL;
-        elbowMotor.setPower(-MANUAL_MOTOR_SPEED * multiplier);
+        if (isLimitSwitchPressed()) {
+            stopMotor();
+            return;
+        }
+        elbowMotor.setPower(-MANUAL_MOTOR_SPEED_MULTIPLIER * multiplier);
     }
 
     /**
@@ -111,6 +124,11 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         // If we aren't at the target
         if (state == PIDSubsystemState.MOVING_TO_TARGET)
         {
+            if (target < elbowMotor.getCurrentPosition() && isLimitSwitchPressed()) {
+                stopMotor();
+                state = PIDSubsystemState.AT_TARGET;
+                return;
+            }
             // Calculate how much we need to move the motor by
             controller.setPID(P, I, D);
             int elbowPosition = elbowMotor.getCurrentPosition();
@@ -130,10 +148,12 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     }
 
     /** Print data from the elbow motor. */
+    @Override
     public void printData() {
         telemetry.addLine("--- Elbow Subsystem ---");
         telemetry.addData("Elbow Position", elbowMotor.getCurrentPosition());
         telemetry.addData("Elbow last power", lastPower);
+        telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
     }
@@ -171,5 +191,9 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     /** @return the minimum position of the elbow */
     public int getIntakePosition() {
         return INTAKE_POSITION;
+    }
+
+    private boolean isLimitSwitchPressed() {
+        return !elbowLimitSwitch.getState();
     }
 }

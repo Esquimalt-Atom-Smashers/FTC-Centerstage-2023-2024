@@ -13,4 +13,8 @@ public class CustomSubsystemBase extends SubsystemBase {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
     }
+
+    public void printData() {
+
+    }
 }

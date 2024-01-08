@@ -26,8 +26,6 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
     private final LED redLeftLED;
     private final LED greenLeftLED;
 
-    //public boolean boxOpen = false;
-
     /**
      * Constructs a new boxReleaseSubsystem.
      *
@@ -39,42 +37,55 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
 
         boxReleaseServo = new SimpleServo(hardwareMap, BOX_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
 
-        redLeftLED = hardwareMap.led.get("redLeft");
-        greenLeftLED = hardwareMap.led.get("greenLeft");
-        redRightLED = hardwareMap.led.get("redRight");
-        greenRightLED = hardwareMap.led.get("greenRight");
-
+        redLeftLED = hardwareMap.get(LED.class, RED_LEFT_LED_NAME);
+        greenLeftLED = hardwareMap.get(LED.class, GREEN_LEFT_LED_NAME);
+        redRightLED = hardwareMap.get(LED.class, RED_RIGHT_LED_NAME);
+        greenRightLED = hardwareMap.get(LED.class, GREEN_RIGHT_LED_NAME);
     }
 
     /** Turns the servo for the box release to a position which opens it. */
     public void openBox() {
         boxReleaseServo.turnToAngle(OPEN_POSITION);
-        //boxOpen = true;
 
-        // When open, LEDs are red as warning to driver/operator
-        greenLeftLED.enable(false);
-        redLeftLED.enable(true);
-        greenRightLED.enable(false);
-        redRightLED.enable(true);
+        enableRedLights();
     }
 
     /** Turns the box release to a position which closes it. */
     public void closeBox() {
         boxReleaseServo.turnToAngle(CLOSE_POSITION);
-        //boxOpen = false;
 
-        //When closed, LEDs are green to indicate normal operation
+        enableGreenLights();
+    }
+
+    /** Prints data from the subsystem. */
+    @Override
+    public void printData() {
+        telemetry.addLine("--- Box Release ---");
+        telemetry.addData("Angle", boxReleaseServo.getAngle());
+        telemetry.addData("Angle (degrees)", boxReleaseServo.getAngle(AngleUnit.DEGREES));
+        telemetry.addData("Position", boxReleaseServo.getPosition());
+    }
+
+    public void disableLights() {
+        greenRightLED.enable(false);
+        redLeftLED.enable(false);
+        greenLeftLED.enable(false);
+        redRightLED.enable(false);
+    }
+
+    // I hate this
+    // The green are red and the red are green
+    private void enableRedLights() {
         greenLeftLED.enable(true);
         redLeftLED.enable(false);
         greenRightLED.enable(true);
         redRightLED.enable(false);
     }
 
-    /** Prints data from the subsystem. */
-    public void printData() {
-        telemetry.addLine("--- Box Release ---");
-        telemetry.addData("Angle", boxReleaseServo.getAngle());
-        telemetry.addData("Angle (degrees)", boxReleaseServo.getAngle(AngleUnit.DEGREES));
-        telemetry.addData("Position", boxReleaseServo.getPosition());
+    private void enableGreenLights() {
+        greenLeftLED.enable(false);
+        redLeftLED.enable(true);
+        greenRightLED.enable(false);
+        redRightLED.enable(true);
     }
 }
