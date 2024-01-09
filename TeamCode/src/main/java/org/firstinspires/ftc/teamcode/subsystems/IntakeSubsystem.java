@@ -35,6 +35,7 @@ public class IntakeSubsystem extends CustomSubsystemBase {
         configureIntake();
     }
 
+    // TODO: Swap the direction of the motor (there might be some swapping of commands in other files)
     /** Configure the intake motor by setting the direction and zero power behavior */
     private void configureIntake() {
         intakeMotor.setDirection(INTAKE_MOTOR_DIRECTION);

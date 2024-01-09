@@ -71,8 +71,7 @@ public class Robot {
         LOADING_PIXELS,
         DRIVING,
         MANUAL,
-        SHOOTING_DRONE,
-        RELEASING_PIXELS
+        SHOOTING_DRONE
     }
 
     /**
@@ -111,23 +110,16 @@ public class Robot {
     private void bindCommands() {
 
         // --- BoxReleaseSubsystem ---
-        boxReleaseSubsystem.setDefaultCommand(commandManager.getDefaultBoxReleaseCommand());
-
         // Press driver B to open the box
         Trigger openBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.DRIVING);
         openBoxTrigger.whenActive(commandManager.getOpenBoxCommand());
 
-        // TODO: Make closing the box automatic
         // Press driver A to close the box
         Trigger closeBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.A) && scoringState == ScoringState.DRIVING);
         closeBoxTrigger.whenActive(commandManager.getCloseBoxCommand());
 
         // --- DriveSubsystem ---
         driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
-
-        //Slow mode at 30%
-//        Trigger driveTrigger = new Trigger(() -> isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) && scoringState == ScoringState.DRIVING); //isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)))
-//        driveTrigger.whenActive(commandManager.getDriveCommand());
 
         // Press driver left dpad while in driving mode to snap to left side of field
         Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
@@ -168,24 +160,20 @@ public class Robot {
         winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
 
         // --- IntakeSubsystem ---
-        // Hold operator RT to intake
-        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+        // TODO: Change this to a toggle between
+        // Press operator RT to enter intake mode, hold operator dpad up to outtake
+        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState != ScoringState.INTAKE && !CommandScheduler.getInstance().isScheduled(commandManager.getPickupPixelsCommand()));
         intakeTrigger.whenActive(commandManager.getIntakeModeCommand());
 
-        // Hold operator RB to outtake
-        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-        outtakeTrigger.whenActive(commandManager.getOuttakeModeCommand());
+        // Press operator RT to pickup the pixels while the arm is down
+        Trigger pickupPixelsTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState == ScoringState.INTAKE && !CommandScheduler.getInstance().isScheduled(commandManager.getIntakeModeCommand()));
+        pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
 
-        // Home/level position for arm for transit under stage door, press operator left joystick
-        Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) && scoringState == ScoringState.INTAKE);
+        // Press operator RB to exit intake mode as well as canceling the pickup command if it's running (as an emergency stop)
+        Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
         cancelIntakeTrigger.whenActive(commandManager.getIntakeCancelCommand());
 
-        // Press X when in intake mode to pick up pixels
-        //Trigger pickPixelsTrigger = new Trigger(() -> scoringState == ScoringState.INTAKE && operatorGamepad.getButton(GamepadKeys.Button.X));
-        //pickPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
-
-        // --- Complex Commands ---
-        // Commands that use more than one subsystem
+        // --- Complex Commands (commands that use more than one subsystem) ---
         // Press operator left dpad while in driving mode to move the arm to low preset scoring position
         Trigger lowScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
         lowScoringPositionTrigger.whenActive(commandManager.getLowScoringPositionCommand());
@@ -224,6 +212,7 @@ public class Robot {
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
+        opMode.telemetry.addData("Scoring state", scoringState);
         distanceSensorSubsystem.printData();
         opMode.telemetry.update();
     }
@@ -234,6 +223,7 @@ public class Robot {
     public void startManual() {
         droneSubsystem.startPosition();
     }
+
     /**
      * Controls the elbow, intake, slide, box, drone and drive subsystem manually, without any commands running or PID controllers.
      */

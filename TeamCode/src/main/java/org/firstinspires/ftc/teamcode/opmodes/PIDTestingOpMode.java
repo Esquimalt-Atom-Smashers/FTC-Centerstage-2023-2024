@@ -33,6 +33,9 @@ public class PIDTestingOpMode extends LinearOpMode {
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
 //                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         ));
+        robot.getElbowSubsystem().setTarget(robot.getElbowSubsystem().getPosition(), 5.0);
+        robot.getLinearSlideSubsystem().setTarget(robot.getLinearSlideSubsystem().getPosition(), 5.0);
+        CommandScheduler.getInstance().cancelAll();
 
         while (opModeIsActive() && !isStopRequested()) {
 

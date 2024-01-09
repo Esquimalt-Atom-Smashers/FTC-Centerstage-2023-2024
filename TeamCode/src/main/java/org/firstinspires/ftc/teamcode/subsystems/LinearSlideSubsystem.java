@@ -26,7 +26,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
 
     private final PIDController controller;
     // TODO: Hide this
-    public static double target;
+    public static double target = 0;
 
     private double lastPower;
 //    private double lastLastPower;
@@ -79,6 +79,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         state = PIDSubsystemState.MANUAL;
         if (input > 0 && isLimitSwitchPressed()) {
             stopMotor();
+            resetEncoder();
             return;
         }
         slideMotor.setPower(input * SLIDE_MANUAL_POWER_MULTIPLIER);
@@ -94,9 +95,10 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         state = PIDSubsystemState.MANUAL;
         if (isLimitSwitchPressed()) {
             stopMotor();
+            resetEncoder();
             return;
         }
-//        slideMotor.setPower(RETRACT_POWER * multiplier);
+        slideMotor.setPower(SLIDE_MANUAL_POWER_MULTIPLIER * multiplier);
     }
 
     /** Stops the slide motor. */
@@ -143,6 +145,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         if (state == PIDSubsystemState.MOVING_TO_TARGET) {
             if (target < slideMotor.getCurrentPosition() && isLimitSwitchPressed()) {
                 stopMotor();
+                resetEncoder();
                 state = PIDSubsystemState.AT_TARGET;
                 return;
             }
@@ -163,6 +166,10 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         } else {
             stopMotor();
         }
+    }
+
+    public int getPosition() {
+        return slideMotor.getCurrentPosition();
     }
 
     /** Prints data from the slide motor. */

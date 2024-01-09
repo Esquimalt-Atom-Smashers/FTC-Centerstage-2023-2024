@@ -113,7 +113,8 @@ public class Constants {
         public static  int INTAKE_POSITION = 100;
         public static  int DRIVING_POSITION = 1100;
 
-        public static  int LOW_SCORING_POSITION = 7400;
+        // 6000 for testing purposes, real should be 7500-8000
+        public static  int LOW_SCORING_POSITION = 6000;
 
         public static  int LEVEL_POSITION = 3500;
         public static  int DRONE_LAUNCH_POSITION = 6000;
@@ -145,6 +146,8 @@ public class Constants {
         // As the angle increases, the intake moves down, with ~150 being level
         public static  double INTAKE_DOWN_POSITION = 190;
         public static  double INTAKE_DRIVING_POSITION = 140;
+        // TODO: Move this more verticaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaal
+        // Oops, I'm going to leave that in here lol
         public static  double INTAKE_UP_POSITION = 90;
 
         public static  double INTAKE_SPEED = -1;
@@ -170,7 +173,7 @@ public class Constants {
 
         // TODO: Find new value
         public static  int IN_POSITION = MIN_POSITION;
-        public static  int LOW_SCORING_POSITION = 2600;
+        public static  int LOW_SCORING_POSITION = 2000;
         // TODO: Find new value
         public static  int MEDIUM_SCORING_POSITION = -1; //1870;
         // TODO: Find new value

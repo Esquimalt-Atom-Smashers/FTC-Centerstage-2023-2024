@@ -26,7 +26,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     private final PIDController controller;
 
     // TODO: Hide this
-    public static double target;
+    public static double target = 0;
     private double lastPower;
 
     private ElapsedTime timer;
@@ -83,6 +83,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         state = PIDSubsystemState.MANUAL;
         if (input < 0 && isLimitSwitchPressed()) {
             stopMotor();
+            resetEncoder();
             return;
         }
         elbowMotor.setPower(input * MANUAL_MOTOR_SPEED_MULTIPLIER);
@@ -145,6 +146,10 @@ public class ElbowSubsystem extends CustomSubsystemBase {
     /** @return true if the motor is at the target, false otherwise. */
     public boolean isAtTarget() {
         return state == PIDSubsystemState.AT_TARGET;
+    }
+
+    public int getPosition() {
+        return elbowMotor.getCurrentPosition();
     }
 
     /** Print data from the elbow motor. */
