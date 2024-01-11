@@ -148,6 +148,44 @@ public class DriveSubsystem extends CustomSubsystemBase {
         drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
+    public void drive(double inches) {
+        Arrays.stream(motors).forEach(motor ->
+                motor.setTargetPosition(motor.getCurrentPosition() + (int) (toPulses(inches))));
+        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+        drive(AUTO_DRIVE_SPEED, 0, 0, false, false, 1);
+        while (motorsBusy()) {}
+        stopMotors();
+        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void strafe(double inches) {
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + toPulses(inches));
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - toPulses(inches));
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + toPulses(inches));
+        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+        drive(0, AUTO_STRAFE_SPEED, 0, false, false, 1);
+        while (motorsBusy()) {}
+        stopMotors();
+        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void turn(double inches) {
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + toPulses(inches));
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - toPulses(inches));
+        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+        drive(0, 0, AUTO_TURN_SPEED, false, false, 1);
+        while (motorsBusy()) {}
+        stopMotors();
+        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    private boolean motorsBusy() {
+        return frontLeftMotor.isBusy() && frontRightMotor.isBusy() && rearRightMotor.isBusy() && rearLeftMotor.isBusy();
+    }
+
 //    public boolean forward() {
 //        return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
 //    }
@@ -170,10 +208,6 @@ public class DriveSubsystem extends CustomSubsystemBase {
 //                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
 //                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
 //    }
-
-    public double setMaxSpeedSupplier (double maxSpeed) {
-        return Range.clip(maxSpeed, 0, 1);
-    }
 
     /** Stop all of the drive motors */
     public void stopMotors() {

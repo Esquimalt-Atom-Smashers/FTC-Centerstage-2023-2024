@@ -127,6 +127,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         {
             if (target < elbowMotor.getCurrentPosition() && isLimitSwitchPressed()) {
                 stopMotor();
+                resetEncoder();
                 state = PIDSubsystemState.AT_TARGET;
                 return;
             }
@@ -139,6 +140,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
             // If the power we are setting is basically none, we are close enough to the target
             if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
                 state = PIDSubsystemState.AT_TARGET;
+                stopMotor();
             }
         }
     }

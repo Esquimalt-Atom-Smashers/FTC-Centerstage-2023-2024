@@ -12,14 +12,6 @@ import org.firstinspires.ftc.teamcode.Robot;
  */
 @TeleOp(name="Main", group = "Real")
 public class MainOpMode extends LinearOpMode {
-
-    /* TODO:
-        Configure PID values (elbow + slide)
-        Get distance values (elbow + slide)
-        Check distance sensor logic
-        Configure road runner again
-    */
-
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());

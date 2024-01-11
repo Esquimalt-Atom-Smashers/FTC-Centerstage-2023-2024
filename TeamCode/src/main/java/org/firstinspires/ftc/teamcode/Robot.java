@@ -170,8 +170,8 @@ public class Robot {
         pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
 
         // Press operator RB to exit intake mode as well as canceling the pickup command if it's running (as an emergency stop)
-        Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-        cancelIntakeTrigger.whenActive(commandManager.getIntakeCancelCommand());
+//        Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
+//        cancelIntakeTrigger.whenActive(commandManager.getIntakeCancelCommand());
 
         // --- Complex Commands (commands that use more than one subsystem) ---
         // Press operator left dpad while in driving mode to move the arm to low preset scoring position

@@ -5,37 +5,34 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
 @Autonomous(group = "auto")
-@Disabled
 public class TestingAutoOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
-        Pose2d startPose = new Pose2d(11, -59.4, Math.toRadians(90));
-        drive.setPoseEstimate(startPose);
-
-        TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(11, -35), Math.toRadians(90))
-                .turn(Math.toRadians(0))
-                .waitSeconds(.5)
-                .lineToSplineHeading(new Pose2d(47, -35, Math.toRadians(0)))
-                .waitSeconds(.5)
-                .back(0.1)
-                .splineToSplineHeading(new Pose2d(0, -12, Math.toRadians(180)), Math.toRadians(180))
-                // Pick up pixel
-                .splineTo(new Vector2d(-58, -11.5), Math.toRadians(180))
-                .waitSeconds(0.5)
-                .back(1.5)
-                .splineToSplineHeading(new Pose2d(0, -12, Math.toRadians(0)), Math.toRadians(0))
-                        .build();
+        ElapsedTime timer = new ElapsedTime();
+        DriveSubsystem driveSubsystem = new DriveSubsystem(hardwareMap, telemetry);
 
         waitForStart();
-        if (isStopRequested()) return;
-        drive.followTrajectorySequence(trajSeq);
+
+        timer.reset();
+        driveSubsystem.drive(6);
+        while(timer.seconds() <= 2) {}
+        timer.reset();
+        driveSubsystem.strafe(6);
+        while(timer.seconds() <= 2) {}
+        timer.reset();
+        driveSubsystem.drive(-6);
+        while(timer.seconds() <= 2) {}
+        timer.reset();
+        driveSubsystem.strafe(-6);
+        while(timer.seconds() <= 2) {}
+        timer.reset();
+        driveSubsystem.stopMotors();
     }
 }

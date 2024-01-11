@@ -73,19 +73,18 @@ public class Constants {
 
         public static final String IMU_NAME = "imu";
 
+        public static final double AUTO_DRIVE_SPEED = 0.5;
+        public static final double AUTO_STRAFE_SPEED = 0.5;
+        public static final double AUTO_TURN_SPEED = 0.5;
 
-/*        public static final double AUTO_DRIVE_SPEED = 0.5;
-        public static final double AUTO_STRAFE_SPEED = -1;
-        public static final double TURN_SPEED = -1;
-
-        public static final double SNAP_TARGET = 180;
-        public static final double AUTO_SNAP_POWER = 0.8;
-        public static final double AUTO_SNAP_TOLERANCE = 1;
-
-        public static final double AUTO_STEP_POWER = 0;
-        public static final double AUTO_STEP_TOLERANCE = 50;
-
-        public static final int HALF_STEP_VALUE = -1;*/
+        public static final double PULSES_PER_MOTOR_REV = -1;
+        public static final double DRIVE_GEAR_REDUCTION = -1;
+        public static final double WHEEL_DIAMETER_INCHES = -1;
+        public static final double PULSES_PER_INCH =
+                (PULSES_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * Math.PI);
+        public static int toPulses(double inches) {
+            return (int) (inches * PULSES_PER_INCH);
+        }
     }
 
     public static class DroneConstants {

@@ -163,8 +163,6 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
 //                lastLastPower = power;
                 stopMotor();
             }
-        } else {
-            stopMotor();
         }
     }
 
