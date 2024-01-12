@@ -47,7 +47,6 @@ public class Robot {
     private final LinearSlideSubsystem linearSlideSubsystem;
     /** The winch of the robot */
     private final WinchSubsystem winchSubsystem;
-    private final CustomSubsystemBase[] subsystems;
 
     private final boolean manualMode;
 
@@ -98,7 +97,6 @@ public class Robot {
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap, opMode.telemetry);
-        subsystems = new CustomSubsystemBase[]{boxReleaseSubsystem, distanceSensorSubsystem, driveSubsystem, droneSubsystem, elbowSubsystem, intakeSubsystem, linearSlideSubsystem, winchSubsystem};
 
         commandManager = new CommandManager(this);
 
@@ -108,7 +106,6 @@ public class Robot {
 
     /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
-
         // --- BoxReleaseSubsystem ---
         // Press driver B to open the box
         Trigger openBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.DRIVING);
@@ -120,6 +117,9 @@ public class Robot {
 
         // --- DriveSubsystem ---
         driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
+
+        Trigger resetGyroTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.BACK));
+        resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
 
         // Press driver left dpad while in driving mode to snap to left side of field
         Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
@@ -160,13 +160,12 @@ public class Robot {
         winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
 
         // --- IntakeSubsystem ---
-        // TODO: Change this to a toggle between
         // Press operator RT to enter intake mode, hold operator dpad up to outtake
-        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState != ScoringState.INTAKE && !CommandScheduler.getInstance().isScheduled(commandManager.getPickupPixelsCommand()));
+        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState != ScoringState.INTAKE);
         intakeTrigger.whenActive(commandManager.getIntakeModeCommand());
 
         // Press operator RT to pickup the pixels while the arm is down
-        Trigger pickupPixelsTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState == ScoringState.INTAKE && !CommandScheduler.getInstance().isScheduled(commandManager.getIntakeModeCommand()));
+        Trigger pickupPixelsTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && scoringState == ScoringState.INTAKE);
         pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
 
         // Press operator RB to exit intake mode as well as canceling the pickup command if it's running (as an emergency stop)
@@ -186,8 +185,8 @@ public class Robot {
         Trigger highScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT) && scoringState == ScoringState.DRIVING);
         highScoringPositionTrigger.whenActive(commandManager.getHighScoringPositionCommand());
 
-        // Press operator left joystick while in driving mode to move the arm to home position (used while driving)
-        Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) && scoringState == ScoringState.DRIVING);
+        // Press operator down dpad while in driving mode to move the arm to home position (used while driving)
+        Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN) && scoringState == ScoringState.DRIVING);
         homePositionTrigger.whenActive(commandManager.getHomePostionCommand());
     }
 
@@ -248,8 +247,8 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT)) intakeSubsystem.mediumPosition();
         if (operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN)) intakeSubsystem.downPosition();
 
-        if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) intakeSubsystem.intake();
-        else if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER))) intakeSubsystem.outtake();
+        if (operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) intakeSubsystem.outtake();
+        else if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER))) intakeSubsystem.intake();
         else intakeSubsystem.stopMotor();
 
         // Box release Subsystem (driver)

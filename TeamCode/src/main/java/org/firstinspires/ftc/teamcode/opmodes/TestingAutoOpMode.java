@@ -15,24 +15,22 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 public class TestingAutoOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        ElapsedTime timer = new ElapsedTime();
         DriveSubsystem driveSubsystem = new DriveSubsystem(hardwareMap, telemetry);
 
         waitForStart();
 
-        timer.reset();
         driveSubsystem.drive(6);
-        while(timer.seconds() <= 2) {}
-        timer.reset();
+        waitForSeconds(1);
         driveSubsystem.strafe(6);
-        while(timer.seconds() <= 2) {}
-        timer.reset();
+        waitForSeconds(1);
         driveSubsystem.drive(-6);
-        while(timer.seconds() <= 2) {}
-        timer.reset();
+        waitForSeconds(1);
         driveSubsystem.strafe(-6);
-        while(timer.seconds() <= 2) {}
-        timer.reset();
         driveSubsystem.stopMotors();
+    }
+
+    private void waitForSeconds(float seconds) {
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.seconds() <= seconds) {}
     }
 }

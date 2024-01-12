@@ -19,6 +19,7 @@ public class CommandManager {
     private final Command closeBoxCommand;
     /** Default command for DriveSubsystem */
     private final Command defaultDriveCommand;
+    private final Command resetGyroCommand;
 //    /** Command for DriveSubsystem */
 //    private final Command driveCommand;
     private final Command snapRightCommand;
@@ -66,11 +67,10 @@ public class CommandManager {
     private final Command autoPlaceYellowCommand;
 
     public CommandManager(Robot robot) {
-        // TODO: Decide if this should automatically close the box
         openBoxCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.getBoxReleaseSubsystem().openBox(), robot.getBoxReleaseSubsystem()),
-                new WaitCommand(500),
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().openBox(), robot.getBoxReleaseSubsystem())
+                new WaitCommand(1000),
+                new InstantCommand(() -> robot.getBoxReleaseSubsystem().closeBox(), robot.getBoxReleaseSubsystem())
         );
 
         closeBoxCommand = new SequentialCommandGroup(
@@ -78,6 +78,8 @@ public class CommandManager {
         );
 
         defaultDriveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad(), robot.isPressed(robot.getDriverGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1.0), robot.getDriveSubsystem());
+
+        resetGyroCommand = new InstantCommand(() -> robot.getDriveSubsystem().resetGyro());
 
         // Snap right
         snapRightCommand = new SequentialCommandGroup(
@@ -148,7 +150,6 @@ public class CommandManager {
             robot.getIntakeSubsystem().upPosition();
             robot.setScoringState(Robot.ScoringState.DRIVING);
         });
-
 
         pickupPixelsCommand = new SequentialCommandGroup(
                 // Set the scoring state to loading pixels
@@ -254,6 +255,10 @@ public class CommandManager {
         return defaultDriveCommand;
     }
 
+    public Command getResetGyroCommand() {
+        return resetGyroCommand;
+    }
+
 //    public Command getDriveCommand() {
 //        return driveCommand;
 //    }
@@ -349,5 +354,4 @@ public class CommandManager {
     public Command getAutoPlaceYellowCommand() {
         return autoPlaceYellowCommand;
     }
-
 }
