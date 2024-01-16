@@ -177,6 +177,8 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         telemetry.addData("Slide Position", slideMotor.getCurrentPosition());
         telemetry.addData("Slide last power", lastPower);
         telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
+        telemetry.addLine("Comparing " + Math.abs(lastPower) + " and " + POWER_TOLERANCE);
+        telemetry.addData("Result", Math.abs(lastPower) <= POWER_TOLERANCE);
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
 //        telemetry.addData("Power", slideMotor.getPower());

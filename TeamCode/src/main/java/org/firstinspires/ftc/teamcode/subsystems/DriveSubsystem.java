@@ -62,6 +62,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
         imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
         configureIMU();
+        resetGyro();
     }
 
     /** Configure the drive motors by setting their directions and zero power behaviors. */
@@ -159,6 +160,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
     }
 
     public void strafe(double inches) {
+        // TODO: These aren't correct somehow
         frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + toPulses(inches));
         frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
         rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - toPulses(inches));
@@ -170,6 +172,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    // TODO: Do this based on gyro
     public void turn(double inches) {
         frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + toPulses(inches));
         frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));

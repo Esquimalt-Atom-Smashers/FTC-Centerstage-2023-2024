@@ -106,6 +106,7 @@ public class CommandManager {
 
         droneCancelCommand = new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.DRIVING));
 
+        // TODO: Add a command to outtake
         defaultIntakeCommand = new RunCommand(() -> {
             if (robot.getScoringState() == Robot.ScoringState.INTAKE || robot.getScoringState() == Robot.ScoringState.LOADING_PIXELS) {
                 if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.DPAD_UP)) robot.getIntakeSubsystem().outtake();
@@ -128,8 +129,8 @@ public class CommandManager {
         }, robot.getLinearSlideSubsystem());
 
         defaultWinchCommand = new RunCommand(() -> {
-            if (robot.getDriverGamepad().getButton(GamepadKeys.Button.A)) robot.getWinchSubsystem().winch();
-            else if (robot.getDriverGamepad().getButton(GamepadKeys.Button.B)) robot.getWinchSubsystem().unwinch();
+            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.A)) robot.getWinchSubsystem().winch();
+            else if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.B)) robot.getWinchSubsystem().unwinch();
             else robot.getWinchSubsystem().stopMotor();
         }, robot.getWinchSubsystem());
 
@@ -137,10 +138,10 @@ public class CommandManager {
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.INTAKE)),
                 new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
                 new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
+                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition())
                 // Start the intake to be redundant
-                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem())
         );
 
         // Emergency stop trying to pick up the pixels
@@ -154,6 +155,7 @@ public class CommandManager {
         pickupPixelsCommand = new SequentialCommandGroup(
                 // Set the scoring state to loading pixels
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.LOADING_PIXELS)),
+                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
                 // Stop the intake and move it up
                 new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
                 new InstantCommand(robot.getIntakeSubsystem()::upPosition, robot.getIntakeSubsystem()),

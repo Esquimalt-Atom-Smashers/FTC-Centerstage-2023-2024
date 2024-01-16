@@ -173,8 +173,7 @@ public class Constants {
         // TODO: Find new value
         public static  int HIGH_SCORING_POSITION = -1; //2800;
 
-        // TODO: Find new value
-        public static final double POWER_TOLERANCE = 0.25;
+        public static final double POWER_TOLERANCE = .3;
 
         public static final String SLIDE_LIMIT_SWITCH_NAME = "slideLimit";
     }

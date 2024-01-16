@@ -53,6 +53,7 @@ public class Robot {
     private final CommandManager commandManager;
 
     //private DriveState driveState = DriveState.DRIVER_CONTROLLED;
+    // TODO: Make sure this is being used properly
     private ScoringState scoringState = ScoringState.STARTING;
 
     /* enum DriveState {
@@ -108,11 +109,11 @@ public class Robot {
     private void bindCommands() {
         // --- BoxReleaseSubsystem ---
         // Press driver B to open the box
-        Trigger openBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.DRIVING);
+        Trigger openBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B));
         openBoxTrigger.whenActive(commandManager.getOpenBoxCommand());
 
         // Press driver A to close the box
-        Trigger closeBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.A) && scoringState == ScoringState.DRIVING);
+        Trigger closeBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.A));
         closeBoxTrigger.whenActive(commandManager.getCloseBoxCommand());
 
         // --- DriveSubsystem ---
@@ -174,19 +175,19 @@ public class Robot {
 
         // --- Complex Commands (commands that use more than one subsystem) ---
         // Press operator left dpad while in driving mode to move the arm to low preset scoring position
-        Trigger lowScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
+        Trigger lowScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
         lowScoringPositionTrigger.whenActive(commandManager.getLowScoringPositionCommand());
 
         // Press operator up dpad while in driving mode to move the arm to medium scoring position
-        Trigger mediumScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP) && scoringState == ScoringState.DRIVING);
+        Trigger mediumScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP));
         mediumScoringPositionTrigger.whenActive(commandManager.getMediumScoringPositionCommand());
 
         // Press operator right dpad while in driving mode to move the arm to high scoring position
-        Trigger highScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT) && scoringState == ScoringState.DRIVING);
+        Trigger highScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
         highScoringPositionTrigger.whenActive(commandManager.getHighScoringPositionCommand());
 
         // Press operator down dpad while in driving mode to move the arm to home position (used while driving)
-        Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN) && scoringState == ScoringState.DRIVING);
+        Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
         homePositionTrigger.whenActive(commandManager.getHomePostionCommand());
     }
 
@@ -212,6 +213,7 @@ public class Robot {
             CommandScheduler.getInstance().run();
 
         opMode.telemetry.addData("Scoring state", scoringState);
+        linearSlideSubsystem.printData();
         distanceSensorSubsystem.printData();
         opMode.telemetry.update();
     }
