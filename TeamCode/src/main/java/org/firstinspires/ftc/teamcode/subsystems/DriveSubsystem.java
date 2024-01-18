@@ -35,8 +35,6 @@ public class DriveSubsystem extends CustomSubsystemBase {
     private final BNO055IMU imu;
     private double offset;
 
-    //private double maxSpeedSupplier;
-
 //    private double snapTarget;
 
 //    public static double forwardTarget;
@@ -57,8 +55,6 @@ public class DriveSubsystem extends CustomSubsystemBase {
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
         configureMotors();
-
-        //maxSpeedSupplier = 1.0;
 
         imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
         configureIMU();
@@ -107,6 +103,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * @param fieldCentric If we want this drive to be field centric
      * @param scaled If we want the inputs to be scaled
      */
+    // TODO: Go through the overloads and check to see if they are needed
     public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled, double multiplier) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
@@ -151,7 +148,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     public void drive(double inches) {
         Arrays.stream(motors).forEach(motor ->
-                motor.setTargetPosition(motor.getCurrentPosition() + (int) (toPulses(inches))));
+                motor.setTargetPosition(motor.getCurrentPosition() + toPulses(inches)));
         setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
         drive(AUTO_DRIVE_SPEED, 0, 0, false, false, 1);
         while (motorsBusy()) {}
@@ -161,9 +158,9 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     public void strafe(double inches) {
         // TODO: These aren't correct somehow
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + toPulses(inches));
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - toPulses(inches));
         frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - toPulses(inches));
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
         rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + toPulses(inches));
         setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
         drive(0, AUTO_STRAFE_SPEED, 0, false, false, 1);

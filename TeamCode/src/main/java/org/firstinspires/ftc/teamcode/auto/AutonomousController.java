@@ -104,32 +104,6 @@ public class AutonomousController {
 //        startOpenCV();
     }
 
-    /*
-     * Creates a webcam and asynchronously opens an open cv pipeline. Waits until the camera is ready
-     */
-//    private void startOpenCV(){
-//        updateStatus("Not Ready (Starting OpenCVPipeline)...");
-//        pipeline = new OpenCVPipeline();
-//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME), cameraMonitorViewId);
-//        webcam.setPipeline(pipeline);
-//        webcam.setMillisecondsPermissionTimeout(5000);
-//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-//        {
-//            @Override
-//            public void onOpened()
-//            {
-//                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
-//            }
-//            @Override
-//            public void onError(int errorCode)
-//            {
-//            }
-//        });
-//        while (!pipeline.cameraReady) updateStatus("Not Ready (Waiting for camera)...\nDo not press stop!");
-//        updateStatus("Ready");
-//    }
-
     /**
      * Sets the settings for the AutonomousController, controlling where we start and if we want to place a yellow pixel on the backdrop
      *
@@ -245,7 +219,7 @@ public class AutonomousController {
 
     /**
      * Schedules a command to be run. Adds a 1 ms wait commands to the end of the provided command and sets current command to it.
-     * (Calling isFinished on a SequentialCommandGroup doesn't seem to work properly)
+     * (Calling isFinished on a SequentialCommandGroup doesn't seem to work as expected)
      *
      * @param command The command to be scheduled.
      */
@@ -293,47 +267,4 @@ public class AutonomousController {
     public boolean isUpstage() {
         return isUpstage;
     }
-
-//    private void lineUpWithAprilTag(){
-//        CameraSubsystem cameraSubsystem = new CameraSubsystem(hardwareMap);
-//        updateStatus("Lining up with april tag ID: " + aprilTagID);
-//
-//        // Get to the correct distance away from the backdrop
-//        do {
-//            // Re-check distance to april tag
-//            cameraSubsystem.detect();
-//            aprilTagForwardDistance = cameraSubsystem.getDistance(aprilTagID);
-//
-//            telemetry.addData("Distance", aprilTagForwardDistance);
-//
-//            if (aprilTagForwardDistance != -1) {
-//                // Move robot closer to april tag
-//                if (aprilTagForwardDistance < aprilTagForwardTarget) {
-//                        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).back(aprilTagForwardTarget - aprilTagForwardDistance).build());
-//                }
-//                if (aprilTagForwardDistance > aprilTagForwardTarget) {
-//                        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(aprilTagForwardDistance - aprilTagForwardTarget).build());
-//                }
-//            }
-//            telemetry.update();
-//
-//        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.25); // +-1/4" tolerance
-//
-////         Line up with april tag
-//        do {
-//            // Re-check lateral distance to april tag
-//            aprilTagLateralDistance = cameraSubsystem.getLateralDistance(aprilTagID);
-////
-//            // Move robot closer to april tag
-//            if (aprilTagLateralDistance < 0) {
-//                telemetry.addData("Should be going left", aprilTagLateralDistance);
-//                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeLeft(-aprilTagLateralDistance).build());
-//            }
-//            if (aprilTagLateralDistance > 0) {
-//                telemetry.addData("Should be going right", aprilTagLateralDistance);
-//                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeRight(aprilTagLateralDistance).build());
-//            }
-//            telemetry.update();
-//        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1); // +-1" tolerance
-//    }
 }

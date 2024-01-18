@@ -82,11 +82,7 @@ public class CommandManager {
         resetGyroCommand = new InstantCommand(() -> robot.getDriveSubsystem().resetGyro());
 
         // Snap right
-        snapRightCommand = new SequentialCommandGroup(
-            new InstantCommand(() -> robot.getDriveSubsystem().getNormalizedAngle()),
-            new InstantCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem())
-
-        );
+        snapRightCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem());
         // Snap left
         snapLeftCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem());
         // Snap up

@@ -229,7 +229,7 @@ public class Robot {
      * Controls the elbow, intake, slide, box, drone and drive subsystem manually, without any commands running or PID controllers.
      */
     public void runManually() {
-        driveSubsystem.drive(driverGamepad, isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1);
+        driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX(), !isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)), false, isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1);
 
         if (driverGamepad.getButton(GamepadKeys.Button.BACK)) driveSubsystem.resetGyro();
 
