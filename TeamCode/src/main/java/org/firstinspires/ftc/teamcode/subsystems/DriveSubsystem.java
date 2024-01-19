@@ -1,16 +1,20 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
@@ -32,8 +36,10 @@ public class DriveSubsystem extends CustomSubsystemBase {
     private final DcMotorEx[] motors;
 
     /** The built-in IMU(gyro) on the control hub. */
-    private final BNO055IMU imu;
+    private final BHI260IMU imu;
     private double offset;
+
+    private double headingError = 0;
 
 //    private double snapTarget;
 
@@ -56,9 +62,8 @@ public class DriveSubsystem extends CustomSubsystemBase {
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
         configureMotors();
 
-        imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
+        imu = hardwareMap.get(BHI260IMU.class, IMU_NAME);
         configureIMU();
-        resetGyro();
     }
 
     /** Configure the drive motors by setting their directions and zero power behaviors. */
@@ -76,16 +81,14 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     /** Configure the gyro */
     private void configureIMU() {
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        IMU.Parameters parameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                )
+        );
         imu.initialize(parameters);
-    }
-
-    /** Reset the gyro by setting the offset to the current heading */
-    public void resetGyro() {
-        offset = getRawHeading();
+        resetGyro();
     }
 
     /** Reset the encoders on the drive motors */
@@ -123,9 +126,9 @@ public class DriveSubsystem extends CustomSubsystemBase {
         }
         else {
             // Robot centric drive
-            frontLeftMotor.setPower(scaleInput(forward + strafe + turn, multiplier, scaled));
+            frontLeftMotor.setPower(scaleInput(forward - strafe + turn, multiplier, scaled));
             frontRightMotor.setPower(scaleInput(forward - strafe - turn, multiplier, scaled));
-            rearLeftMotor.setPower(scaleInput(forward - strafe + turn, multiplier, scaled));
+            rearLeftMotor.setPower(scaleInput(forward + strafe + turn, multiplier, scaled));
             rearRightMotor.setPower(scaleInput(forward + strafe - turn, multiplier, scaled));
         }
 
@@ -146,6 +149,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
         drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
+    // TODO: Make this able to be run asynchronously
     public void drive(double inches) {
         Arrays.stream(motors).forEach(motor ->
                 motor.setTargetPosition(motor.getCurrentPosition() + toPulses(inches)));
@@ -156,8 +160,8 @@ public class DriveSubsystem extends CustomSubsystemBase {
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    // TODO: Make this able to be run asynchronously
     public void strafe(double inches) {
-        // TODO: These aren't correct somehow
         frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - toPulses(inches));
         frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
         rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
@@ -169,17 +173,49 @@ public class DriveSubsystem extends CustomSubsystemBase {
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    // TODO: Do this based on gyro
-    public void turn(double inches) {
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + toPulses(inches));
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - toPulses(inches));
-        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
-        drive(0, 0, AUTO_TURN_SPEED, false, false, 1);
-        while (motorsBusy()) {}
+    // TODO: Make this able to be run asynchronously
+    public void turn(double angle) {
+
+        double targetHeading = getHeading() + angle;
+
+        drive(0, 0, angle > 0 ? -AUTO_TURN_SPEED : AUTO_TURN_SPEED, false, false, 1);
+
+        while (Math.abs(getHeading() - targetHeading) > AUTO_HEADING_TOLERANCE) {
+            telemetry.addData("Heading", getHeading());
+            telemetry.addData("Target heading", targetHeading);
+            telemetry.update();
+        }
         stopMotors();
-        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Wait for a second
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.milliseconds() <= 500) {}
+
+        drive(0, 0, getHeading() - targetHeading > 0 ? AUTO_TURN_SPEED / 2 : -AUTO_TURN_SPEED / 2, false, false, 1);
+        while (Math.abs(getHeading() - targetHeading) > AUTO_HEADING_TOLERANCE) {
+            telemetry.addData("Heading", getHeading());
+            telemetry.addData("Target heading", targetHeading);
+            telemetry.update();
+        }
+
+        stopMotors();
+        telemetry.addLine("Turning complete! :)");
+        telemetry.update();
+    }
+
+    private double normalize(double angle) {
+        while (angle > 180) angle -= 360;
+        while (angle <= -180) angle += 360;
+        return angle;
+    }
+
+    private boolean isDoneTurning(boolean turningUp, double target) {
+        if (turningUp) {
+            return isWithinTolerance(target, getHeading(), AUTO_HEADING_TOLERANCE) || getHeading() > target;
+        }
+        else {
+            return isWithinTolerance(target, getHeading(), AUTO_HEADING_TOLERANCE) || getHeading() < target;
+        }
     }
 
     private boolean motorsBusy() {
@@ -225,22 +261,26 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     /** @return The heading of the robot */
     public double getHeading() {
-        return getRawHeading() - offset;
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
-    private double getRawHeading() {
-        return imu.getAngularOrientation().firstAngle;
+    /** Reset the gyro by setting the offset to the current heading */
+    public void resetGyro() {
+        imu.resetYaw();
     }
 
+    // TODO: Delete
     /** @return The normalized angle in degrees */
     public int getNormalizedAngle() {
-        return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
+        return -1;
+//        return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
     }
 
     /** Prints data from the motors to the telemetry */
     @Override
     public void printData() {
         telemetry.addLine("--- Drive base ---");
+
         telemetry.addData("Position", frontLeftMotor.getCurrentPosition());
         telemetry.addData("Power", frontLeftMotor.getPower());
         telemetry.addData("Velocity", frontLeftMotor.getVelocity());

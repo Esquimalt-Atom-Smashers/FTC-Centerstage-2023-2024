@@ -134,9 +134,9 @@ public class CommandManager {
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.INTAKE)),
                 new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
                 new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition())
+                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
+                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem())
                 // Start the intake to be redundant
         );
 

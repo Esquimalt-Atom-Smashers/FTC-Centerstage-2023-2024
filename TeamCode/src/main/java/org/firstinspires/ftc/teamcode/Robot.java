@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.commands.CommandManager;
 import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.CustomSubsystemBase;
 import org.firstinspires.ftc.teamcode.subsystems.DistanceSensorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DroneSubsystem;
@@ -213,6 +212,7 @@ public class Robot {
             CommandScheduler.getInstance().run();
 
         opMode.telemetry.addData("Scoring state", scoringState);
+        elbowSubsystem.printData();
         linearSlideSubsystem.printData();
         distanceSensorSubsystem.printData();
         opMode.telemetry.update();
@@ -284,6 +284,10 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.BACK)) resetEncoders();
 
         if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) boxReleaseSubsystem.disableLights();
+
+        opMode.telemetry.addData("Gyro heading: ",  driveSubsystem.getHeading());
+        opMode.telemetry.addData("Normalized angle", driveSubsystem.getNormalizedAngle());
+
 
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();

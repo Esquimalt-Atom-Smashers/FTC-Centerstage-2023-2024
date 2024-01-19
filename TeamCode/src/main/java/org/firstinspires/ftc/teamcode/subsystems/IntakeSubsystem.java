@@ -63,6 +63,10 @@ public class IntakeSubsystem extends CustomSubsystemBase {
         intakeMotor.setPower(INTAKE_SPEED);
     }
 
+    public void intake(double speed) {
+        intakeMotor.setPower(speed);
+    }
+
     /** Start outtaking. */
     public void outtake() {
         intakeMotor.setPower(OUTTAKE_SPEED);

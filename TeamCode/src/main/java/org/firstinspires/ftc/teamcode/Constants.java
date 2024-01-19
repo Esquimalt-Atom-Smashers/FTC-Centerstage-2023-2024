@@ -52,6 +52,7 @@ public class Constants {
         public static double DISTANCE_THRESHOLD = 10;
     }
 
+    @Config
     public static class DriveConstants {
 
         public static final String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
@@ -76,6 +77,7 @@ public class Constants {
         public static final double AUTO_DRIVE_SPEED = 0.5;
         public static final double AUTO_STRAFE_SPEED = 0.5;
         public static final double AUTO_TURN_SPEED = 0.5;
+        public static double AUTO_HEADING_TOLERANCE = 5;
 
         public static final double PULSES_PER_MOTOR_REV = 537.7;
         public static final double DRIVE_GEAR_REDUCTION = 1;
@@ -110,7 +112,7 @@ public class Constants {
         public static  double P = 0.0025, I = 0, D = 0;
 
         public static  int INTAKE_POSITION = 0;
-        public static  int LOW_SCORING_POSITION = 8500;
+        public static  int LOW_SCORING_POSITION = 7350;
 
         // TODO: Raise this a bit more
         public static  int LEVEL_POSITION = 3500;
