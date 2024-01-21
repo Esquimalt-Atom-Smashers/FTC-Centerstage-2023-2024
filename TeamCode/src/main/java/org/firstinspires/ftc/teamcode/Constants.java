@@ -74,7 +74,7 @@ public class Constants {
 
         public static final String IMU_NAME = "imu";
 
-        public static final double AUTO_DRIVE_SPEED = 0.5;
+        public static final double AUTO_DRIVE_SPEED = 0.3;
         public static final double AUTO_STRAFE_SPEED = 0.5;
         public static final double AUTO_TURN_SPEED = 0.5;
         public static double AUTO_HEADING_TOLERANCE = 5;
@@ -163,13 +163,12 @@ public class Constants {
         public static  double P = 0.003, I = 0, D = 0;
 
         // Min and max values for the arm, don't change them
-        // Find new value
         public static final int MIN_POSITION = 0;
         public static final int MAX_POSITION = 2800;
 
-        // TODO: Find new value
         public static  int IN_POSITION = MIN_POSITION;
         public static  int LOW_SCORING_POSITION = 2600;
+
         // TODO: Find new value
         public static  int MEDIUM_SCORING_POSITION = -1; //1870;
         // TODO: Find new value

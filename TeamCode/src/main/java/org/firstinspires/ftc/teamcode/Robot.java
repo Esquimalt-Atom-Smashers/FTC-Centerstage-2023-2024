@@ -16,6 +16,14 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
+/*
+    TODO:
+        Test TestingAutoOpMode to make sure the drive/strafe/turn still work
+        Test autonomous
+        Test elbow moving to zero properly
+        Test snapping
+        Make some of the arm movements and driving happen at the same time
+ */
 /**
  * Represents all of the subsystems that make up the robot
  *
@@ -199,7 +207,7 @@ public class Robot {
 
     /** Schedule any commands that run at the start of teleop mode. */
     public void start() {
-        commandManager.getSetupCommand().schedule();
+//        commandManager.getSetupCommand().schedule();
     }
 
     /**
@@ -218,11 +226,8 @@ public class Robot {
         opMode.telemetry.update();
     }
 
-    /**
-     * Drives the robot using the gamepad inputs, only used in manual mode
-     */
     public void startManual() {
-        droneSubsystem.startPosition();
+
     }
 
     /**

@@ -11,8 +11,10 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import org.firstinspires.ftc.teamcode.Constants;
 //import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 
 public class CommandManager {
+    private final Robot robot;
     /** Command that opens the box release*/
     private final Command openBoxCommand;
     /** Command that opens the box release */
@@ -57,16 +59,22 @@ public class CommandManager {
     private final Command homePostionCommand;
     /** Command run at the start of driver controlled */
     private final Command setupCommand;
+
     /** Command run at the start of autonomous */
     private final Command autoSetupCommand;
+    private final Command autoDriveToSpikeMarksCommand;
     /** Command that moves the intake to place the purple pixel */
     private final Command autoPlacePurpleCommand;
-    /** Command that moves the arm to the placing position */
-    private final Command autoMoveArmCommand;
-    /** Command that places the yellow pixel */
-    private final Command autoPlaceYellowCommand;
+    private final Command autoDriveBackDropLeftCommand;
+    private final Command autoDriveBackDropMiddleCommand;
+    private final Command autoDriveBackDropRightCommand;
+    private final Command autoDriveYellowLeftCommand;
+    private final Command autoDriveYellowRightCommand;
+    private final Command autoDriveYellowMiddleCommand;
 
     public CommandManager(Robot robot) {
+        this.robot = robot;
+
         openBoxCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.getBoxReleaseSubsystem().openBox(), robot.getBoxReleaseSubsystem()),
                 new WaitCommand(1000),
@@ -82,13 +90,13 @@ public class CommandManager {
         resetGyroCommand = new InstantCommand(() -> robot.getDriveSubsystem().resetGyro());
 
         // Snap right
-        snapRightCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem());
+        snapRightCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), -90);
         // Snap left
-        snapLeftCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem());
+        snapLeftCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 90);
         // Snap up
-        snapUpCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem());
+        snapUpCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 0);
         // Snap down
-        snapDownCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad().getLeftY(), robot.getDriverGamepad().getLeftX(), robot.getDriverGamepad().getRightX(), 1), robot.getDriveSubsystem());
+        snapDownCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 180);
 
         droneModeCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.SHOOTING_DRONE)),
@@ -202,42 +210,70 @@ public class CommandManager {
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         );
 
-
-//        autoPlacePurpleCommand = new SequentialCommandGroup(
-//                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+        autoDriveToSpikeMarksCommand = new SequentialCommandGroup(
+                new InstantCommand(robot.getIntakeSubsystem()::upPosition, robot.getIntakeSubsystem()),
+                new DriveCommand(robot.getDriveSubsystem(), 30)
+        );
+//
+//        autoDriveLeftCommand = new SequentialCommandGroup(
+//                new TurnCommand(robot.getDriveSubsystem(), 90),
 //                new WaitCommand(250),
-//                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
+//                new StrafeCommand(robot.getDriveSubsystem(), 5),
 //                new WaitCommand(250),
-//                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
-//                new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem())
+//                new DriveCommand(robot.getDriveSubsystem(), -2),
+//                new WaitCommand(250)
 //        );
-        //TODO: Redo command
+//
+//        autoDriveRightCommand = new SequentialCommandGroup(
+//                new DriveCommand(robot.getDriveSubsystem(), -4),
+//                new WaitCommand(250),
+//                new TurnCommand(robot.getDriveSubsystem(), -90),
+//                new WaitCommand(250),
+//                new DriveCommand(robot.getDriveSubsystem(), -2),
+//                new WaitCommand(250)
+//        );
+//
+//        autoDriveMiddleCommand = new SequentialCommandGroup(
+//                new DriveCommand(robot.getDriveSubsystem(), -7.5)
+//        );
+
         autoPlacePurpleCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem()),
+                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
                 new WaitCommand(250),
-                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem())
+                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
+                new WaitCommand(250),
+                new InstantCommand(() -> {
+                    robot.getIntakeSubsystem().stopMotor();
+                    robot.getIntakeSubsystem().upPosition();
+                }, robot.getIntakeSubsystem())
         );
 
-//        autoMoveArmCommand = new SequentialCommandGroup(
-//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition()),
-//                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getLowScoringPosition())
-//        );
-        //TODO: Redo command
-        autoMoveArmCommand = new SequentialCommandGroup(
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLowScoringPosition()),
-                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getLowScoringPosition())
+        autoDriveBackDropLeftCommand = new SequentialCommandGroup(
+
         );
 
-//        autoPlaceYellowCommand = new SequentialCommandGroup(
-//                new InstantCommand(robot.getClawSubsystem()::openClaw, robot.getClawSubsystem()),
-//                new WaitCommand(750),
-//                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
-//        );
-        //TODO: Redo command
-        autoPlaceYellowCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getBoxReleaseSubsystem()::openBox, robot.getBoxReleaseSubsystem()),
-                new WaitCommand(750),
-                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition())
+        autoDriveBackDropRightCommand = new SequentialCommandGroup(
+                new DriveCommand(robot.getDriveSubsystem(), -4),
+                new WaitCommand(250),
+                new TurnCommand(robot.getDriveSubsystem(), 180),
+                new WaitCommand(250),
+                new DriveCommand(robot.getDriveSubsystem(), 22)
+        );
+
+        autoDriveBackDropMiddleCommand = new SequentialCommandGroup(
+
+        );
+
+        autoDriveYellowLeftCommand = new SequentialCommandGroup(
+
+        );
+
+        autoDriveYellowMiddleCommand = new SequentialCommandGroup(
+
+        );
+
+        autoDriveYellowRightCommand = new SequentialCommandGroup(
+
         );
     }
 
@@ -341,15 +377,43 @@ public class CommandManager {
         return autoSetupCommand;
     }
 
+    public Command getAutoDriveToSpikeMarksCommand() {
+        return autoDriveToSpikeMarksCommand;
+    }
+
     public Command getAutoPlacePurpleCommand() {
         return autoPlacePurpleCommand;
     }
 
-    public Command getAutoMoveArmCommand() {
-        return autoMoveArmCommand;
+//    public Command getAutoDriveLeftCommand() {
+//        return autoDriveLeftCommand;
+//    }
+
+//    public Command getAutoDriveMiddleCommand() {
+//        return autoDriveMiddleCommand;
+//    }
+
+//    public Command getAutoDriveRightCommand() {
+//        return autoDriveRightCommand;
+//    }
+
+    public Command getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark position, boolean placingYellow) {
+        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), position, placingYellow);
     }
 
-    public Command getAutoPlaceYellowCommand() {
-        return autoPlaceYellowCommand;
+    public Command getAutoDriveBackDropLeftCommand() {
+        return autoDriveBackDropLeftCommand;
+    }
+
+    public Command getAutoDriveBackDropMiddleCommand() {
+        return autoDriveBackDropMiddleCommand;
+    }
+
+    public Command getAutoDriveBackDropRightCommand() {
+        return autoDriveBackDropRightCommand;
+    }
+
+    public Command getAutoPlaceYellowAndHideCommand(NewAutonomousController.SpikeMark position) {
+        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), position);
     }
 }

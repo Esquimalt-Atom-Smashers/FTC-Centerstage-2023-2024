@@ -168,7 +168,7 @@ public class AutonomousController {
                 if (canContinue()) {
                     if (isUpstage && isPlacingYellow) {
                         currentState = AutonomousState.MOVING_FROM_SPIKE_MARKS;
-                        scheduleCommand(commandManager.getAutoMoveArmCommand());
+//                        scheduleCommand(commandManager.getAutoMoveArmCommand());
                         drive.followTrajectorySequenceAsync(trajectoryManager.driveFromSpikeMarksTrajectory());
                     }
                     else {
@@ -188,7 +188,7 @@ public class AutonomousController {
             case MOVING_TO_BACKDROP:
                 if (canContinue()) {
                     currentState = AutonomousState.PLACING_YELLOW;
-                    scheduleCommand(commandManager.getAutoPlaceYellowCommand());
+//                    scheduleCommand(commandManager.getAutoPlaceYellowCommand());
                 }
                 break;
             // Placing the yellow pixel on the backstage

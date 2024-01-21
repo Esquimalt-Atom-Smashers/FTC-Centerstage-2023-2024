@@ -121,28 +121,53 @@ public class ElbowSubsystem extends CustomSubsystemBase {
      * Use the PID controller to calculate how fast we should set the motor to. If the motor is moving slow enough,
      * we are close enough and stop moving further.
      */
+    // TODO: Clean this method up
     public void runPID() {
         // If we aren't at the target
         if (state == PIDSubsystemState.MOVING_TO_TARGET)
         {
-            if (target < elbowMotor.getCurrentPosition() && isLimitSwitchPressed()) {
-                stopMotor();
-                resetEncoder();
-                state = PIDSubsystemState.AT_TARGET;
-                return;
+            // If the target is zero, move the arm all the way down
+            // Only stop if we press the limit switch or the timeout ends
+            if (target == 0) {
+                lastPower = -1;
+                elbowMotor.setPower(-1);
+                if (isLimitSwitchPressed() || isTimeoutPassed()) {
+                    stopMotor();
+                    if (isLimitSwitchPressed()) resetEncoder();
+                    state = PIDSubsystemState.AT_TARGET;
+                    return;
+                }
             }
-            // Calculate how much we need to move the motor by
-            controller.setPID(P, I, D);
-            int elbowPosition = elbowMotor.getCurrentPosition();
-            double power = controller.calculate(elbowPosition, target);
-            lastPower = power;
-            elbowMotor.setPower(power);
-            // If the power we are setting is basically none, we are close enough to the target
-            if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
-                state = PIDSubsystemState.AT_TARGET;
-                stopMotor();
+            else {
+                // If we are moving the arm down and pressing the limit switch,
+                // stop and reset the encoders
+                if (target < elbowMotor.getCurrentPosition() && isLimitSwitchPressed()) {
+                    stopMotor();
+                    resetEncoder();
+                    state = PIDSubsystemState.AT_TARGET;
+                    return;
+                }
+                // Calculate how much we need to move the motor by
+                controller.setPID(P, I, D);
+                int elbowPosition = elbowMotor.getCurrentPosition();
+                double power = controller.calculate(elbowPosition, target);
+                lastPower = power;
+                elbowMotor.setPower(power);
+                // If the power we are setting is basically none, we are close enough to the target
+                if (Math.abs(power) <= POWER_TOLERANCE || isTimeoutPassed()) {
+                    state = PIDSubsystemState.AT_TARGET;
+                    stopMotor();
+                }
             }
         }
+    }
+
+    private boolean isTimeoutPassed() {
+        if (timeout > 0 && timer.seconds() >= timeout) {
+            timeout = 0;
+            return true;
+        }
+        return false;
     }
 
     /** @return true if the motor is at the target, false otherwise. */

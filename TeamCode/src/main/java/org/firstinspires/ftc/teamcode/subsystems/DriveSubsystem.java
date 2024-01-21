@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.bosch.BHI260IMU;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,8 +12,6 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
@@ -36,10 +33,20 @@ public class DriveSubsystem extends CustomSubsystemBase {
     private final DcMotorEx[] motors;
 
     /** The built-in IMU(gyro) on the control hub. */
-    private final BHI260IMU imu;
+    private final BHI260IMU imu; // Counter clockwise is positive
     private double offset;
 
     private double headingError = 0;
+
+    private enum DriveState {
+        MANUAL,
+        MOVING_TO_POSITION,
+        TURNING_TO_POSITION
+    }
+
+    private DriveState driveState = DriveState.MANUAL;
+
+    private double targetHeading;
 
 //    private double snapTarget;
 
@@ -149,101 +156,97 @@ public class DriveSubsystem extends CustomSubsystemBase {
         drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
-    // TODO: Make this able to be run asynchronously
-    public void drive(double inches) {
+    // Starts the robot moving forward, you MUST call isFinishedMoving() repeatedly
+    // to check if the robot has made it
+    public void driveByDistanceAsync(double inches) {
+        driveState = DriveState.MOVING_TO_POSITION;
         Arrays.stream(motors).forEach(motor ->
                 motor.setTargetPosition(motor.getCurrentPosition() + toPulses(inches)));
         setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
         drive(AUTO_DRIVE_SPEED, 0, 0, false, false, 1);
-        while (motorsBusy()) {}
-        stopMotors();
-        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    // TODO: Make this able to be run asynchronously
-    public void strafe(double inches) {
+    // Moves the robot inches forward and then stops it
+    public void driveByDistance(double inches) {
+        driveByDistanceAsync(inches);
+        while (!isFinishedMoving()) {}
+    }
+
+    // Strafe the robot inches, you MUST call isFinishedMoving() repeatedly
+    // to check if the robot has made it
+    public void strafeByDistanceAsync(double inches) {
+        driveState = DriveState.MOVING_TO_POSITION;
         frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - toPulses(inches));
         frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
         rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
         rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + toPulses(inches));
         setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
         drive(0, AUTO_STRAFE_SPEED, 0, false, false, 1);
-        while (motorsBusy()) {}
-        stopMotors();
-        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    // TODO: Make this able to be run asynchronously
+    // Strafes the robot inches and stops it when it gets there
+    public void strafeByDistance(double inches) {
+        strafeByDistanceAsync(inches);
+        while (!isFinishedMoving()) {}
+    }
+
+    public void turnAsync(double angle, double speed) {
+        driveState = DriveState.TURNING_TO_POSITION;
+        targetHeading = getHeading() + angle;
+        // Counter clockwise is positive
+        // If the angle is positive, we want to turn negative (counterclockwise)
+        drive(0, 0, getAutoTurnSpeed(speed), false, false, 1);
+    }
+
     public void turn(double angle) {
+        turnAsync(angle, AUTO_TURN_SPEED);
+        while (!isFinishedTurning()) {}
 
-        double targetHeading = getHeading() + angle;
-
-        drive(0, 0, angle > 0 ? -AUTO_TURN_SPEED : AUTO_TURN_SPEED, false, false, 1);
-
-        while (Math.abs(getHeading() - targetHeading) > AUTO_HEADING_TOLERANCE) {
-            telemetry.addData("Heading", getHeading());
-            telemetry.addData("Target heading", targetHeading);
-            telemetry.update();
-        }
-        stopMotors();
-
-        // Wait for a second
+        // Wait for a bit
         ElapsedTime timer = new ElapsedTime();
         while (timer.milliseconds() <= 500) {}
 
-        drive(0, 0, getHeading() - targetHeading > 0 ? AUTO_TURN_SPEED / 2 : -AUTO_TURN_SPEED / 2, false, false, 1);
-        while (Math.abs(getHeading() - targetHeading) > AUTO_HEADING_TOLERANCE) {
-            telemetry.addData("Heading", getHeading());
-            telemetry.addData("Target heading", targetHeading);
-            telemetry.update();
-        }
+        angle = targetHeading - getHeading();
+        turnAsync(angle, AUTO_TURN_SPEED / 2);
+        while (!isFinishedTurning()) {}
 
-        stopMotors();
         telemetry.addLine("Turning complete! :)");
         telemetry.update();
     }
 
-    private double normalize(double angle) {
-        while (angle > 180) angle -= 360;
-        while (angle <= -180) angle += 360;
-        return angle;
+    public double getAutoTurnSpeed(double speed) {
+        double angle = targetHeading - getHeading();
+        return angle > 0 ? -speed : speed;
     }
 
-    private boolean isDoneTurning(boolean turningUp, double target) {
-        if (turningUp) {
-            return isWithinTolerance(target, getHeading(), AUTO_HEADING_TOLERANCE) || getHeading() > target;
-        }
-        else {
-            return isWithinTolerance(target, getHeading(), AUTO_HEADING_TOLERANCE) || getHeading() < target;
-        }
+    public double getAutoTurnSpeed() {
+        return getAutoTurnSpeed(AUTO_TURN_SPEED);
     }
+
+
 
     private boolean motorsBusy() {
         return frontLeftMotor.isBusy() && frontRightMotor.isBusy() && rearRightMotor.isBusy() && rearLeftMotor.isBusy();
     }
 
-//    public boolean forward() {
-//        return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
-//    }
+    public boolean isFinishedMoving() {
+        if (!motorsBusy()) {
+            stopMotors();
+            setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            driveState = DriveState.MANUAL;
+            return true;
+        }
+        return false;
+    }
 
-//    public boolean isFinishedSnapping() {
-////         Checks if we are within the tolerance to auto snap
-//        return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
-//    }
-
-//    public boolean isFinishedSteppingLeft() {
-//        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-//                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-//                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-//                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-//    }
-
-//    public boolean isFinishedSteppingRight() {
-//        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-//                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-//                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-//                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-//    }
+    public boolean isFinishedTurning() {
+        if (Math.abs(getHeading() - targetHeading) <= AUTO_HEADING_TOLERANCE) {
+            stopMotors();
+            driveState = DriveState.MANUAL;
+            return true;
+        }
+        return false;
+    }
 
     /** Stop all of the drive motors */
     public void stopMotors() {
