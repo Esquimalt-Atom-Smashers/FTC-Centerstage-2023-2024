@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.ConceptAprilTag;
 import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
@@ -18,10 +19,18 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
         if (spikeMarkPosition == NewAutonomousController.SpikeMark.LEFT)
             // TODO: Be very careful testing this
             addCommands(
-                    new StrafeCommand(driveSubsystem, -6),
+                    new StrafeCommand(driveSubsystem, -8),
+                    new WaitCommand(250),
+                    new TurnToHeadingCommand(driveSubsystem, 90),
+                    new WaitCommand(250),
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
-                    new TurnCommand(driveSubsystem, -90),
-                    new DriveCommand(driveSubsystem, -20)
+                    new TurnCommand(driveSubsystem, -90, 0.3),
+                    new WaitCommand(250),
+                    new DriveCommand(driveSubsystem, -20),
+                    new WaitCommand(250),
+                    new StrafeCommand(driveSubsystem, -4),
+                    new WaitCommand(250),
+                    new TurnToHeadingCommand(driveSubsystem, 0)
             );
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.MIDDLE)
             addCommands(

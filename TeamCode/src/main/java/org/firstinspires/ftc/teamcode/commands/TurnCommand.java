@@ -13,20 +13,24 @@ public class TurnCommand extends SequentialCommandGroup {
     private Command lastCommand;
 
 
-    public TurnCommand(DriveSubsystem driveSubsystem, double angle) {
+    public TurnCommand(DriveSubsystem driveSubsystem, double angle, double speed) {
         double targetHeading = driveSubsystem.getHeading() + angle;
         lastCommand = new WaitCommand(1);
 
         addCommands(
                 // Turn by angle to the target
-                new TurnByAngleCommand(driveSubsystem, angle, Constants.DriveConstants.AUTO_TURN_SPEED),
+                new TurnByAngleCommand(driveSubsystem, angle, speed),
                 new WaitCommand(250),
                 // Then correct at a slower pace using the target heading
-                new TurnToHeadingCommand(driveSubsystem, targetHeading, Constants.DriveConstants.AUTO_TURN_SPEED / 2),
+                new TurnToHeadingCommand(driveSubsystem, targetHeading, speed / 2),
                 lastCommand
             );
 
         addRequirements(driveSubsystem);
+    }
+
+    public TurnCommand(DriveSubsystem driveSubsystem, double angle) {
+        this(driveSubsystem, angle, Constants.DriveConstants.AUTO_TURN_SPEED);
     }
 
 

@@ -18,10 +18,9 @@ import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
 /*
     TODO:
-        Test TestingAutoOpMode to make sure the drive/strafe/turn still work
-        Test autonomous
-        Test elbow moving to zero properly
-        Test snapping
+        Write conversions of angles for red side autonomous
+        Test red side autonomous
+        Test right spike mark more
         Make some of the arm movements and driving happen at the same time
  */
 /**

@@ -212,7 +212,7 @@ public class CommandManager {
 
         autoDriveToSpikeMarksCommand = new SequentialCommandGroup(
                 new InstantCommand(robot.getIntakeSubsystem()::upPosition, robot.getIntakeSubsystem()),
-                new DriveCommand(robot.getDriveSubsystem(), 30)
+                new DriveCommand(robot.getDriveSubsystem(), 32)
         );
 //
 //        autoDriveLeftCommand = new SequentialCommandGroup(

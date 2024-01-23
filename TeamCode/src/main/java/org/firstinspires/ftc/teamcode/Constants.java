@@ -75,7 +75,7 @@ public class Constants {
         public static final String IMU_NAME = "imu";
 
         public static final double AUTO_DRIVE_SPEED = 0.3;
-        public static final double AUTO_STRAFE_SPEED = 0.5;
+        public static final double AUTO_STRAFE_SPEED = 0.3;
         public static final double AUTO_TURN_SPEED = 0.5;
         public static double AUTO_HEADING_TOLERANCE = 5;
 

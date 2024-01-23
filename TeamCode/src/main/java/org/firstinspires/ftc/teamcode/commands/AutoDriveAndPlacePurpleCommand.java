@@ -21,7 +21,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     new WaitCommand(250),
                     new StrafeCommand(driveSubsystem, 5),
                     new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -2),
+                    new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),
                     // Placing the purple pixel
                     new AutoPlacePurpleCommand(intakeSubsystem)
@@ -30,9 +30,22 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
             if (placingYellow)
                 addCommands(
                     new StrafeCommand(driveSubsystem, 12),
-                    new DriveCommand(driveSubsystem, 40.0 / 2), // Based on my math this is right, but 40 is very scary so I'm halving it for now
-                    new StrafeCommand(driveSubsystem, -20)
+                    new WaitCommand(250),
+                    new DriveCommand(driveSubsystem, 36),
+                    new WaitCommand(250),
+                    new StrafeCommand(driveSubsystem, -20),
+                    new WaitCommand(250),
+                    new TurnToHeadingCommand(driveSubsystem, 90),
+                    new WaitCommand(250)
                     // We are done, we should be at the center of the board
+                );
+            else
+                addCommands(
+                        new DriveCommand(driveSubsystem, 2),
+                        new WaitCommand(250),
+                        new TurnToHeadingCommand(driveSubsystem, 0),
+                        new WaitCommand(250),
+                        new TurnToHeadingCommand(driveSubsystem, 0, 0.25)
                 );
         }
 
@@ -46,8 +59,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                         // TODO: Be careful when testing these
                         new TurnCommand(driveSubsystem, 90),
                         new WaitCommand(250),
-                        // Should maybe be 28
-                        new DriveCommand(driveSubsystem, 30),
+                        new DriveCommand(driveSubsystem, 32),
                         new WaitCommand(250),
                         new StrafeCommand(driveSubsystem, 6),
                         new WaitCommand(250),
@@ -72,6 +84,10 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     new TurnCommand(driveSubsystem, 180),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, 22)
+                );
+            else
+                addCommands(
+                        new TurnCommand(driveSubsystem, 90)
                 );
         }
         lastCommand = new WaitCommand(1);
