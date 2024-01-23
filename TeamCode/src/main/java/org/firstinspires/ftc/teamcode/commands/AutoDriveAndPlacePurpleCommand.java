@@ -47,9 +47,11 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                         new TurnCommand(driveSubsystem, 90),
                         new WaitCommand(250),
                         // Should maybe be 28
-                        new DriveCommand(driveSubsystem, 28),
+                        new DriveCommand(driveSubsystem, 30),
                         new WaitCommand(250),
-                        new StrafeCommand(driveSubsystem, 6)
+                        new StrafeCommand(driveSubsystem, 6),
+                        new WaitCommand(250),
+                        new TurnToHeadingCommand(driveSubsystem, 90)
                 );
         }
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.RIGHT) {

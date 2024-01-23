@@ -143,27 +143,43 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
     /** Runs the PID controllers if we are moving to a target. If we are close enough to the target, get out of PID mode. */
     public void runPID() {
         if (state == PIDSubsystemState.MOVING_TO_TARGET) {
-            if (target < slideMotor.getCurrentPosition() && isLimitSwitchPressed()) {
-                stopMotor();
-                resetEncoder();
-                state = PIDSubsystemState.AT_TARGET;
-                return;
+            if (target == 0) {
+                lastPower = -1;
+                slideMotor.setPower(-1);
+                if (isLimitSwitchPressed() || isTimeoutDone()) {
+                    if (isLimitSwitchPressed()) resetEncoder();
+                    stopMotor();
+                    state = PIDSubsystemState.AT_TARGET;
+                    return;
+                }
             }
-            // Calculate how much we need to move the motor by
-            controller.setPID(P, I, D);
-            int slidePosition = slideMotor.getCurrentPosition();
-            double power = controller.calculate(slidePosition, target);
-            slideMotor.setPower(power);
-            lastPower = power;
-            // If the power isn't much, we are about as close to the target as we are going to get,
-            // so we don't update anymore
-            // Or, if the timer is over the timeout, we also stop
-            if (Math.abs(power) <= POWER_TOLERANCE || (timeout > 0 && timer.seconds() >= timeout)) {
-                state = PIDSubsystemState.AT_TARGET;
-//                lastLastPower = power;
-                stopMotor();
+            else {
+                if (target < slideMotor.getCurrentPosition() && isLimitSwitchPressed()) {
+                    stopMotor();
+                    resetEncoder();
+                    state = PIDSubsystemState.AT_TARGET;
+                    return;
+                }
+                // Calculate how much we need to move the motor by
+                controller.setPID(P, I, D);
+                int slidePosition = slideMotor.getCurrentPosition();
+                double power = controller.calculate(slidePosition, target);
+                slideMotor.setPower(power);
+                lastPower = power;
+                // If the power isn't much, we are about as close to the target as we are going to get,
+                // so we don't update anymore
+                // Or, if the timer is over the timeout, we also stop
+                if (Math.abs(power) <= POWER_TOLERANCE || isTimeoutDone()) {
+                    state = PIDSubsystemState.AT_TARGET;
+    //                lastLastPower = power;
+                    stopMotor();
+                }
             }
         }
+    }
+
+    private boolean isTimeoutDone() {
+        return timeout > 0 && timer.seconds() >= timeout;
     }
 
     public int getPosition() {

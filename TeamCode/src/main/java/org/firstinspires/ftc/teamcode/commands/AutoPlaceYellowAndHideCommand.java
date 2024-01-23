@@ -24,11 +24,15 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
                     new DriveCommand(driveSubsystem, -20)
             );
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.MIDDLE)
-            // TODO: Be very careful testing this
             addCommands(
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
                     new TurnCommand(driveSubsystem, -90),
-                    new DriveCommand(driveSubsystem, -26)
+                    new WaitCommand(250),
+                    new DriveCommand(driveSubsystem, -24),
+                    new WaitCommand(250),
+                    new StrafeCommand(driveSubsystem, -4),
+                    new WaitCommand(250),
+                    new TurnToHeadingCommand(driveSubsystem, 0)
             );
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.RIGHT)
             // TODO: Be very careful testing this

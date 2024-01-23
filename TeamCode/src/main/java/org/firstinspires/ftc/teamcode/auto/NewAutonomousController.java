@@ -72,11 +72,14 @@ public class NewAutonomousController {
                 break;
             case PLACING_PURPLE:
                 if (canContinue()) {
-                    if (isPlacingYellow)
+                    if (isPlacingYellow) {
+                        scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(spikeMarkPosition));
                         state = AutonomousState.MOVING_TO_PLACE_YELLOW;
-                    else
+                    }
+                    else {
                         // TODO: Make it turn the right direction at the end no matter what
                         state = AutonomousState.IDLE;
+                    }
                 }
                 break;
             case MOVING_TO_PLACE_YELLOW:

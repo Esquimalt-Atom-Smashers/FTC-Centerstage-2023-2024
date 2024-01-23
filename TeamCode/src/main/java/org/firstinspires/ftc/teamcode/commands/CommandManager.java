@@ -99,20 +99,20 @@ public class CommandManager {
         snapDownCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 180);
 
         droneModeCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.SHOOTING_DRONE)),
+                new InstantCommand(() -> robot.setState(Robot.RobotState.SHOOTING_DRONE)),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDroneLaunchPosition())
         );
 
         droneLaunchCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.DRIVING)),
+                new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING)),
                 new InstantCommand(robot.getDroneSubsystem()::release, robot.getDroneSubsystem())
         );
 
-        droneCancelCommand = new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.DRIVING));
+        droneCancelCommand = new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING));
 
         // TODO: Add a command to outtake
         defaultIntakeCommand = new RunCommand(() -> {
-            if (robot.getScoringState() == Robot.ScoringState.INTAKE || robot.getScoringState() == Robot.ScoringState.LOADING_PIXELS) {
+            if (robot.getState() == Robot.RobotState.INTAKE || robot.getState() == Robot.RobotState.LOADING_PIXELS) {
                 if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.DPAD_UP)) robot.getIntakeSubsystem().outtake();
                 else robot.getIntakeSubsystem().intake();
             }
@@ -139,7 +139,7 @@ public class CommandManager {
         }, robot.getWinchSubsystem());
 
         intakeModeCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.INTAKE)),
+                new InstantCommand(() -> robot.setState(Robot.RobotState.INTAKE)),
                 new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
                 new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
@@ -153,12 +153,12 @@ public class CommandManager {
             CommandScheduler.getInstance().cancel(getPickupPixelsCommand());
             robot.getIntakeSubsystem().stopMotor();
             robot.getIntakeSubsystem().upPosition();
-            robot.setScoringState(Robot.ScoringState.DRIVING);
+            robot.setState(Robot.RobotState.DRIVING);
         });
 
         pickupPixelsCommand = new SequentialCommandGroup(
                 // Set the scoring state to loading pixels
-                new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.LOADING_PIXELS)),
+                new InstantCommand(() -> robot.setState(Robot.RobotState.LOADING_PIXELS)),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
                 // Stop the intake and move it up
                 new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
@@ -166,7 +166,7 @@ public class CommandManager {
                 // Move the elbow to level position
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLevelPosition()),
 //              // Set the state to driving again
-                new InstantCommand(() -> robot.setScoringState(Robot.ScoringState.DRIVING))
+                new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING))
         );
 
         lowScoringPositionCommand = new SequentialCommandGroup(

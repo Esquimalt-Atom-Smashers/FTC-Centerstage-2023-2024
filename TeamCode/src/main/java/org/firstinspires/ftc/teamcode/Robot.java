@@ -59,25 +59,13 @@ public class Robot {
 
     private final CommandManager commandManager;
 
-    //private DriveState driveState = DriveState.DRIVER_CONTROLLED;
     // TODO: Make sure this is being used properly
-    private ScoringState scoringState = ScoringState.STARTING;
+    private RobotState state = RobotState.DRIVING;
 
-    /* enum DriveState {
-        DRIVER_CONTROLLED,
-        SNAPPING,
-        DETECTING_TAG,
-        CENTERING_TAG,
-        STEPPING_LEFT,
-        STEPPING_RIGHT
-    }*/
-
-    public enum ScoringState {
-        STARTING,
+    public enum RobotState {
+        DRIVING,
         INTAKE,
         LOADING_PIXELS,
-        DRIVING,
-        MANUAL,
         SHOOTING_DRONE
     }
 
@@ -130,32 +118,34 @@ public class Robot {
         resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
 
         // Press driver left dpad while in driving mode to snap to left side of field
-        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT) && scoringState == ScoringState.DRIVING);
+        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
         snapLeftTrigger.whenActive(commandManager.getSnapLeftCommand());
 
         // Press driver up dpad while in driving mode to snap to forward (far edge) side of field
-        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP) && scoringState == ScoringState.DRIVING);
+        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP));
         snapUpTrigger.whenActive(commandManager.getSnapUpCommand());
 
         // Press driver right dpad while in driving mode to snap to right side of field
-        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT) && scoringState == ScoringState.DRIVING);
+        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
         snapRightTrigger.whenActive(commandManager.getSnapRightCommand());
 
         // Press driver down dpad while in driving mode to snap to back (near edge) side of field
-        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN) && scoringState == ScoringState.DRIVING);
+        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
         snapDownTrigger.whenActive(commandManager.getSnapDownCommand());
 
         // --- DroneSubsystem ---
         // Press operator A to raise the arm and enter shooting drone mode
-        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A));
+        // We must be in driving mode, because this changes states to SHOOTING_DRONE
+        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A) && state == RobotState.DRIVING);
         droneLaunchModeTrigger.whenActive(commandManager.getDroneModeCommand());
 
         // Press operator B to launch the drone
-        Trigger droneLaunchTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && scoringState == ScoringState.SHOOTING_DRONE);
+        // We must be in shooting mode
+        Trigger droneLaunchTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && state == RobotState.SHOOTING_DRONE);
         droneLaunchTrigger.whenActive(commandManager.getDroneLaunchCommand());
 
-        // Returns launch servo to start position using operator button Y, does not move arm
-        Trigger cancelDroneModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && scoringState == ScoringState.SHOOTING_DRONE);
+        // Press operator Y to exit shooting drone mode
+        Trigger cancelDroneModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && state == RobotState.SHOOTING_DRONE);
         cancelDroneModeTrigger.whenActive(commandManager.getDroneCancelCommand());
 
         // --- ElbowSubsystem ---
@@ -168,12 +158,14 @@ public class Robot {
         winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
 
         // --- IntakeSubsystem ---
-        // Press operator RT to enter intake mode, hold operator dpad up to outtake
-        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && scoringState != ScoringState.INTAKE);
+        // Press operator RT to enter intake mode
+        // We don't want to be in shooting drone mode, but anything else is fine
+        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state != RobotState.SHOOTING_DRONE);
         intakeTrigger.whenActive(commandManager.getIntakeModeCommand());
 
         // Press operator RT to pickup the pixels while the arm is down
-        Trigger pickupPixelsTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && scoringState == ScoringState.INTAKE);
+        // We must be in intake mode
+        Trigger pickupPixelsTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && state == RobotState.INTAKE);
         pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
 
         // Press operator RB to exit intake mode as well as canceling the pickup command if it's running (as an emergency stop)
@@ -219,7 +211,7 @@ public class Robot {
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
-        opMode.telemetry.addData("Scoring state", scoringState);
+        opMode.telemetry.addData("Scoring state", state);
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();
         distanceSensorSubsystem.printData();
@@ -260,8 +252,8 @@ public class Robot {
 
         // Box release Subsystem (driver)
         // B -> Open/Red, A -> Close/Green
-        if (driverGamepad.getButton(GamepadKeys.Button.B)) boxReleaseSubsystem.openBox();
-        if (driverGamepad.getButton(GamepadKeys.Button.A)) boxReleaseSubsystem.closeBox();
+        if (driverGamepad.getButton(GamepadKeys.Button.B) && !driverGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.openBox();
+        if (driverGamepad.getButton(GamepadKeys.Button.A) && !driverGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.closeBox();
 /*        if (driverGamepad.getButton(GamepadKeys.Button.A)) {
             if (boxReleaseSubsystem.boxOpen){
                 boxReleaseSubsystem.closeBox();
@@ -271,13 +263,8 @@ public class Robot {
         }*/
 
         // Drone subsystem (operator)
-        // B -> Release, A-> Go to start position with elbow up, Y -> Go to start position for servo only
-        if (operatorGamepad.getButton(GamepadKeys.Button.B)) droneSubsystem.release();
-        if (operatorGamepad.getButton(GamepadKeys.Button.A)) {
-            droneSubsystem.startPosition();
-            elbowSubsystem.moveManually(Constants.ElbowConstants.DRONE_LAUNCH_POSITION);
-            elbowSubsystem.stopMotor();
-        }
+        // X -> Release, Y -> Go to start position
+        if (operatorGamepad.getButton(GamepadKeys.Button.X)) droneSubsystem.release();
         if (operatorGamepad.getButton(GamepadKeys.Button.Y)) droneSubsystem.startPosition();
 
         // Winch subsystem (operator)
@@ -302,12 +289,12 @@ public class Robot {
         opMode.telemetry.update();
     }
 
-    public void setScoringState(ScoringState newState) {
-        scoringState = newState;
+    public void setState(RobotState newState) {
+        state = newState;
     }
 
-    public ScoringState getScoringState() {
-        return scoringState;
+    public RobotState getState() {
+        return state;
     }
 
     public GamepadEx getOperatorGamepad() {
