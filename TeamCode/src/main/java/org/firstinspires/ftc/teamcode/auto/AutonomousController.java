@@ -159,7 +159,7 @@ public class AutonomousController {
             case MOVING_TO_CORRECT_SPIKE_MARK:
                 if (canContinue()) {
 //                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToCorrectSpikeMarkTrajectory());
-                    scheduleCommand(commandManager.getAutoPlacePurpleCommand());
+//                    scheduleCommand(commandManager.getAutoPlacePurpleCommand());
                     currentState = AutonomousState.PLACING_PURPLE;
                 }
                 break;

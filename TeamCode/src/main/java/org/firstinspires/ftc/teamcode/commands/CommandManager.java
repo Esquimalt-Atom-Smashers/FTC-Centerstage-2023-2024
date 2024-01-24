@@ -60,17 +60,9 @@ public class CommandManager {
     /** Command run at the start of driver controlled */
     private final Command setupCommand;
 
-    /** Command run at the start of autonomous */
-    private final Command autoSetupCommand;
-    private final Command autoDriveToSpikeMarksCommand;
-    /** Command that moves the intake to place the purple pixel */
-    private final Command autoPlacePurpleCommand;
-    private final Command autoDriveBackDropLeftCommand;
-    private final Command autoDriveBackDropMiddleCommand;
-    private final Command autoDriveBackDropRightCommand;
-    private final Command autoDriveYellowLeftCommand;
-    private final Command autoDriveYellowRightCommand;
-    private final Command autoDriveYellowMiddleCommand;
+//    /** Command run at the start of autonomous */
+//    private final Command autoSetupCommand;
+//    private final Command autoDriveToSpikeMarksCommand;
 
     public CommandManager(Robot robot) {
         this.robot = robot;
@@ -193,88 +185,6 @@ public class CommandManager {
                 new InstantCommand(robot.getDroneSubsystem()::startPosition, robot.getDroneSubsystem()),
                 new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem())
         );
-
-//        autoSetupCommand = new SequentialCommandGroup(
-//                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
-//                new InstantCommand(robot.getClawSubsystem()::closeClawSingle, robot.getClawSubsystem()),
-//                new InstantCommand(robot.getIntakeSubsystem()::mediumPosition, robot.getIntakeSubsystem()),
-//                new WaitCommand(500),
-//                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
-//        );
-        //TODO: Redo command
-        autoSetupCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
-                new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
-                new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
-        );
-
-        autoDriveToSpikeMarksCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getIntakeSubsystem()::upPosition, robot.getIntakeSubsystem()),
-                new DriveCommand(robot.getDriveSubsystem(), 32)
-        );
-//
-//        autoDriveLeftCommand = new SequentialCommandGroup(
-//                new TurnCommand(robot.getDriveSubsystem(), 90),
-//                new WaitCommand(250),
-//                new StrafeCommand(robot.getDriveSubsystem(), 5),
-//                new WaitCommand(250),
-//                new DriveCommand(robot.getDriveSubsystem(), -2),
-//                new WaitCommand(250)
-//        );
-//
-//        autoDriveRightCommand = new SequentialCommandGroup(
-//                new DriveCommand(robot.getDriveSubsystem(), -4),
-//                new WaitCommand(250),
-//                new TurnCommand(robot.getDriveSubsystem(), -90),
-//                new WaitCommand(250),
-//                new DriveCommand(robot.getDriveSubsystem(), -2),
-//                new WaitCommand(250)
-//        );
-//
-//        autoDriveMiddleCommand = new SequentialCommandGroup(
-//                new DriveCommand(robot.getDriveSubsystem(), -7.5)
-//        );
-
-        autoPlacePurpleCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
-                new WaitCommand(250),
-                new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem()),
-                new WaitCommand(250),
-                new InstantCommand(() -> {
-                    robot.getIntakeSubsystem().stopMotor();
-                    robot.getIntakeSubsystem().upPosition();
-                }, robot.getIntakeSubsystem())
-        );
-
-        autoDriveBackDropLeftCommand = new SequentialCommandGroup(
-
-        );
-
-        autoDriveBackDropRightCommand = new SequentialCommandGroup(
-                new DriveCommand(robot.getDriveSubsystem(), -4),
-                new WaitCommand(250),
-                new TurnCommand(robot.getDriveSubsystem(), 180),
-                new WaitCommand(250),
-                new DriveCommand(robot.getDriveSubsystem(), 22)
-        );
-
-        autoDriveBackDropMiddleCommand = new SequentialCommandGroup(
-
-        );
-
-        autoDriveYellowLeftCommand = new SequentialCommandGroup(
-
-        );
-
-        autoDriveYellowMiddleCommand = new SequentialCommandGroup(
-
-        );
-
-        autoDriveYellowRightCommand = new SequentialCommandGroup(
-
-        );
     }
 
     public Command getOpenBoxCommand() {
@@ -373,17 +283,13 @@ public class CommandManager {
         return setupCommand;
     }
 
-    public Command getAutoSetupCommand() {
-        return autoSetupCommand;
-    }
+//    public Command getAutoSetupCommand() {
+//        return autoSetupCommand;
+//    }
 
-    public Command getAutoDriveToSpikeMarksCommand() {
-        return autoDriveToSpikeMarksCommand;
-    }
-
-    public Command getAutoPlacePurpleCommand() {
-        return autoPlacePurpleCommand;
-    }
+//    public Command getAutoDriveToSpikeMarksCommand() {
+//        return autoDriveToSpikeMarksCommand;
+//    }
 
 //    public Command getAutoDriveLeftCommand() {
 //        return autoDriveLeftCommand;
@@ -397,20 +303,12 @@ public class CommandManager {
 //        return autoDriveRightCommand;
 //    }
 
-    public Command getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark position, boolean placingYellow) {
-        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), position, placingYellow);
+    public Command getAutoSetupCommand() {
+        return new AutoSetupCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem());
     }
 
-    public Command getAutoDriveBackDropLeftCommand() {
-        return autoDriveBackDropLeftCommand;
-    }
-
-    public Command getAutoDriveBackDropMiddleCommand() {
-        return autoDriveBackDropMiddleCommand;
-    }
-
-    public Command getAutoDriveBackDropRightCommand() {
-        return autoDriveBackDropRightCommand;
+    public Command getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark position) {
+        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), position);
     }
 
     public Command getAutoPlaceYellowAndHideCommand(NewAutonomousController.SpikeMark position) {

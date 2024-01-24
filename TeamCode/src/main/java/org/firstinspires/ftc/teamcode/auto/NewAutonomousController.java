@@ -53,7 +53,7 @@ public class NewAutonomousController {
 
     public void start() {
         state = AutonomousState.MOVING_TO_SPIKE_MARKS;
-        scheduleCommand(commandManager.getAutoDriveToSpikeMarksCommand(), 1000);
+        scheduleCommand(commandManager.getAutoSetupCommand(), 1000);
     }
 
     public void run() {
@@ -67,7 +67,7 @@ public class NewAutonomousController {
                     else
                         spikeMarkPosition = SpikeMark.MIDDLE;
                     state = AutonomousState.PLACING_PURPLE;
-                    scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(spikeMarkPosition, isPlacingYellow));
+                    scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(spikeMarkPosition));
                 }
                 break;
             case PLACING_PURPLE:
@@ -106,6 +106,10 @@ public class NewAutonomousController {
 
     public SpikeMark getSpikeMark() {
         return spikeMarkPosition;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     private boolean canContinue() {

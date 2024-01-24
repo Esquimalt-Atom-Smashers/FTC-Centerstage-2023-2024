@@ -291,6 +291,10 @@ public class DriveSubsystem extends CustomSubsystemBase {
         telemetry.addData("Is over current?", frontLeftMotor.isOverCurrent());
     }
 
+    public Telemetry getTelemetry() {
+        return telemetry;
+    }
+
     /**
      * Takes a joystick input and clips it.
      *

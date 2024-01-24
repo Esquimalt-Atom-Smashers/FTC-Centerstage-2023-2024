@@ -10,13 +10,16 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
 public class TurnCommand extends SequentialCommandGroup {
-    private Command lastCommand;
+    private final Command lastCommand;
 
 
     public TurnCommand(DriveSubsystem driveSubsystem, double angle, double speed) {
         double targetHeading = driveSubsystem.getHeading() + angle;
         lastCommand = new WaitCommand(1);
 
+        driveSubsystem.getTelemetry().addData("Angle", angle).setRetained(true);
+        driveSubsystem.getTelemetry().addData("Speed", speed).setRetained(true);
+        driveSubsystem.getTelemetry().addData("Target heading", targetHeading).setRetained(true);
         addCommands(
                 // Turn by angle to the target
                 new TurnByAngleCommand(driveSubsystem, angle, speed),
