@@ -14,23 +14,22 @@ import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
 public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
     private final Command lastCommand;
-    public AutoPlaceYellowAndHideCommand(DriveSubsystem driveSubsystem, ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem, NewAutonomousController.SpikeMark spikeMarkPosition) {
+    public AutoPlaceYellowAndHideCommand(DriveSubsystem driveSubsystem, ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem, NewAutonomousController.SpikeMark spikeMarkPosition, boolean blue) {
+        int multiplier = blue ? 1 : -1;
         lastCommand = new WaitCommand(1);
         if (spikeMarkPosition == NewAutonomousController.SpikeMark.LEFT)
             // TODO: Be very careful testing this
             addCommands(
-                    new StrafeCommand(driveSubsystem, -8),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 90),
+                    new TurnToHeadingCommand(driveSubsystem, 90 * multiplier),
                     new WaitCommand(250),
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
                     new TurnCommand(driveSubsystem, -90, 0.3),
                     new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -20),
+                    new DriveCommand(driveSubsystem, -15),
                     new WaitCommand(250),
                     new StrafeCommand(driveSubsystem, -4),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0)
+                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
             );
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.MIDDLE)
             addCommands(
@@ -41,14 +40,16 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
                     new WaitCommand(250),
                     new StrafeCommand(driveSubsystem, -4),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0)
+                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
             );
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.RIGHT)
             // TODO: Be very careful testing this
             addCommands(
-                    new StrafeCommand(driveSubsystem, 6),
+                    new StrafeCommand(driveSubsystem, 8),
+                    new WaitCommand(250),
+                    new TurnToHeadingCommand(driveSubsystem, 90),
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
-                    new TurnCommand(driveSubsystem, -90),
+                    new TurnCommand(driveSubsystem, -90 * multiplier),
                     new DriveCommand(driveSubsystem, -30)
             );
         addCommands(lastCommand);

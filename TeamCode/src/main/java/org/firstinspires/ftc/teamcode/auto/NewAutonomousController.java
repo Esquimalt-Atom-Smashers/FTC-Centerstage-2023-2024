@@ -15,9 +15,8 @@ public class NewAutonomousController {
     enum AutonomousState {
         MOVING_TO_SPIKE_MARKS,
         PLACING_PURPLE,
+        MOVING_TO_BACKDROP,
         MOVING_TO_PLACE_YELLOW,
-        PLACING_YELLOW,
-        HIDING,
         IDLE
     }
 
@@ -67,32 +66,22 @@ public class NewAutonomousController {
                     else
                         spikeMarkPosition = SpikeMark.MIDDLE;
                     state = AutonomousState.PLACING_PURPLE;
-                    scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(spikeMarkPosition));
+                    scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(spikeMarkPosition, isBlueAlliance));
                 }
                 break;
             case PLACING_PURPLE:
                 if (canContinue()) {
-                    if (isPlacingYellow) {
-                        scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(spikeMarkPosition));
-                        state = AutonomousState.MOVING_TO_PLACE_YELLOW;
-                    }
-                    else {
-                        // TODO: Make it turn the right direction at the end no matter what
-                        state = AutonomousState.IDLE;
-                    }
+                    state = isPlacingYellow ? AutonomousState.MOVING_TO_BACKDROP : AutonomousState.IDLE;
+                    scheduleCommand(commandManager.getAutoDriveFromPurpleCommand(spikeMarkPosition, isBlueAlliance, isPlacingYellow));
+                }
+                break;
+            case MOVING_TO_BACKDROP:
+                if (canContinue()) {
+                    scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(spikeMarkPosition, isBlueAlliance));
+                    state = AutonomousState.MOVING_TO_PLACE_YELLOW;
                 }
                 break;
             case MOVING_TO_PLACE_YELLOW:
-                if (canContinue()) {
-                    state = AutonomousState.PLACING_YELLOW;
-                }
-                break;
-            case PLACING_YELLOW:
-                if (canContinue()) {
-                    state = AutonomousState.HIDING;
-                }
-                break;
-            case HIDING:
                 if (canContinue()) {
                     state = AutonomousState.IDLE;
                 }
@@ -116,9 +105,9 @@ public class NewAutonomousController {
         return currentCommand.isFinished();
     }
 
-    private void scheduleCommand(Command command, double waitTime) {
+    private void scheduleCommand(Command command, int waitTime) {
         SequentialCommandGroup group = new SequentialCommandGroup(command);
-        currentCommand = new WaitCommand((long) waitTime);
+        currentCommand = new WaitCommand(waitTime);
         group.addCommands(currentCommand);
         group.schedule();
     }

@@ -8,23 +8,31 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
 public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
     private final Command lastCommand;
-    public AutoDriveAndPlacePurpleCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem, NewAutonomousController.SpikeMark spikeMarkPosition) {
+    public AutoDriveAndPlacePurpleCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem, NewAutonomousController.SpikeMark spikeMarkPosition, boolean blue) {
+        int multiplier = blue ? 1 : -1;
         // This starts from 30 inches forward
         if (spikeMarkPosition == NewAutonomousController.SpikeMark.LEFT) {
             addCommands(
                     // TODO: Test this chunk
                     // Driving to the correct position
-                    new TurnCommand(driveSubsystem, 90),
+                    new DriveCommand(driveSubsystem, -18),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, 5),
+                    new StrafeCommand(driveSubsystem, -8),
                     new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -2),
-                    new WaitCommand(250),
-                    // Placing the purple pixel
                     new AutoPlacePurpleCommand(intakeSubsystem)
+
+//                    new TurnCommand(driveSubsystem, 90 * multiplier),
+//                    new WaitCommand(250),
+//                    new StrafeCommand(driveSubsystem, 5),
+//                    new WaitCommand(250),
+//                    new DriveCommand(driveSubsystem, -4),
+//                    new WaitCommand(250),
+//                    // Placing the purple pixel
+//                    new AutoPlacePurpleCommand(intakeSubsystem)
             );
 //            if (placingYellow)
 //                addCommands(
@@ -42,7 +50,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
 
         else if (spikeMarkPosition == NewAutonomousController.SpikeMark.MIDDLE) {
             addCommands(
-                    new DriveCommand(driveSubsystem, -6),
+                    new DriveCommand(driveSubsystem, -7),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
 //            if (placingYellow)
@@ -61,7 +69,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
             addCommands(
                     new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, -90),
+                    new TurnCommand(driveSubsystem, -90 * multiplier),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, -2),
                     new WaitCommand(250),

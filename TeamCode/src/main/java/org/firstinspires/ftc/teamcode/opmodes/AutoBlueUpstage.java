@@ -11,20 +11,15 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
 @Autonomous(name = "BlueUpstage", group = "Auto")
 public class AutoBlueUpstage extends LinearOpMode {
-
     @Override
     public void runOpMode() throws InterruptedException {
         NewAutonomousController autonomousController = new NewAutonomousController(this, true, true, true);
 
-        autonomousController.getCommandManager().getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark.RIGHT);
-        telemetry.update();
         waitForStart();
         autonomousController.start();
 
         while (opModeIsActive() && !isStopRequested()) {
-            telemetry.addData("Spike mark", autonomousController.getSpikeMark());
             autonomousController.run();
-            telemetry.update();
         }
     }
 }

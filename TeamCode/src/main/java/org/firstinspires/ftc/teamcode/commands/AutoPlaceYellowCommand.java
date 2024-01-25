@@ -28,7 +28,7 @@ public class AutoPlaceYellowCommand extends SequentialCommandGroup {
                 // Move the arm back down
                 // TODO: Make this happen somewhere else (maybe while hiding)
                 new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getInPosition()),
-                new MoveElbowCommand(elbowSubsystem, elbowSubsystem.getDrivingPosition()),
+                new MoveElbowCommand(elbowSubsystem, elbowSubsystem.getLevelPosition()),
                 lastCommand
         );
         addRequirements(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem);

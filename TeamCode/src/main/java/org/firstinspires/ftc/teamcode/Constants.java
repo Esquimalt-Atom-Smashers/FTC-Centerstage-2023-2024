@@ -112,7 +112,7 @@ public class Constants {
         public static  double P = 0.0025, I = 0, D = 0;
 
         public static  int INTAKE_POSITION = 0;
-        public static  int LOW_SCORING_POSITION = 7350;
+        public static  int LOW_SCORING_POSITION = 7600;
 
         // TODO: Raise this a bit more
         public static  int LEVEL_POSITION = 3500;

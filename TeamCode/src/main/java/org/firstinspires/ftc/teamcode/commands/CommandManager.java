@@ -124,6 +124,8 @@ public class CommandManager {
             else robot.getLinearSlideSubsystem().stopMotor();
         }, robot.getLinearSlideSubsystem());
 
+
+        // TODO: Who is supposed to use the winch???
         defaultWinchCommand = new RunCommand(() -> {
             if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.A)) robot.getWinchSubsystem().winch();
             else if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.B)) robot.getWinchSubsystem().unwinch();
@@ -307,11 +309,15 @@ public class CommandManager {
         return new AutoSetupCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem());
     }
 
-    public Command getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark position) {
-        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), position);
+    public Command getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark position, boolean blue) {
+        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), position, blue);
     }
 
-    public Command getAutoPlaceYellowAndHideCommand(NewAutonomousController.SpikeMark position) {
-        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), position);
+    public Command getAutoDriveFromPurpleCommand(NewAutonomousController.SpikeMark position, boolean blue, boolean placingYellow) {
+        return new AutoDriveFromPurpleCommand(robot.getDriveSubsystem(), position, blue, placingYellow);
+    }
+
+    public Command getAutoPlaceYellowAndHideCommand(NewAutonomousController.SpikeMark position, boolean blue) {
+        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), position, blue);
     }
 }

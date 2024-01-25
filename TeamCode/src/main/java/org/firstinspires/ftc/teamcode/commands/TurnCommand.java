@@ -17,9 +17,6 @@ public class TurnCommand extends SequentialCommandGroup {
         double targetHeading = driveSubsystem.getHeading() + angle;
         lastCommand = new WaitCommand(1);
 
-        driveSubsystem.getTelemetry().addData("Angle", angle).setRetained(true);
-        driveSubsystem.getTelemetry().addData("Speed", speed).setRetained(true);
-        driveSubsystem.getTelemetry().addData("Target heading", targetHeading).setRetained(true);
         addCommands(
                 // Turn by angle to the target
                 new TurnByAngleCommand(driveSubsystem, angle, speed),
