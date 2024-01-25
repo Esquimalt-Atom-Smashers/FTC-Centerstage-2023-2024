@@ -21,9 +21,9 @@ public class NewAutonomousController {
     }
 
     public enum SpikeMark {
-        LEFT,
+        UPSTAGE,
         MIDDLE,
-        RIGHT
+        DOWNSTAGE
     }
 
     private final HardwareMap hardwareMap;
@@ -33,11 +33,8 @@ public class NewAutonomousController {
 
     private WaitCommand currentCommand;
     private AutonomousState state;
-    private SpikeMark spikeMarkPosition;
 
-    private final boolean isBlueAlliance;
-    private final boolean isUpstage;
-    private final boolean isPlacingYellow;
+    private final AutoPosition autoPosition;
 
     public NewAutonomousController(LinearOpMode opMode, boolean isBlueAlliance, boolean isUpstage, boolean isPlacingYellow) {
         this.hardwareMap = opMode.hardwareMap;
@@ -45,9 +42,7 @@ public class NewAutonomousController {
         robot = new Robot(opMode, true, true);
         commandManager = new CommandManager(robot);
 
-        this.isBlueAlliance = isBlueAlliance;
-        this.isUpstage = isUpstage;
-        this.isPlacingYellow = isPlacingYellow;
+        autoPosition = new AutoPosition(isBlueAlliance, isPlacingYellow, isUpstage);
     }
 
     public void start() {
@@ -60,24 +55,24 @@ public class NewAutonomousController {
             case MOVING_TO_SPIKE_MARKS:
                 if (canContinue()) {
                     if (robot.getDistanceSensorSubsystem().isLeftBlocked())
-                        spikeMarkPosition = SpikeMark.LEFT;
+                        autoPosition.setSpikeMark(autoPosition.isBlue ? SpikeMark.UPSTAGE : SpikeMark.DOWNSTAGE);
                     else if (robot.getDistanceSensorSubsystem().isRightBlocked())
-                        spikeMarkPosition = SpikeMark.RIGHT;
+                        autoPosition.setSpikeMark(autoPosition.isBlue ? SpikeMark.DOWNSTAGE : SpikeMark.UPSTAGE);
                     else
-                        spikeMarkPosition = SpikeMark.MIDDLE;
+                        autoPosition.setSpikeMark(SpikeMark.MIDDLE);
                     state = AutonomousState.PLACING_PURPLE;
-                    scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(spikeMarkPosition, isBlueAlliance));
+                    scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(autoPosition));
                 }
                 break;
             case PLACING_PURPLE:
                 if (canContinue()) {
-                    state = isPlacingYellow ? AutonomousState.MOVING_TO_BACKDROP : AutonomousState.IDLE;
-                    scheduleCommand(commandManager.getAutoDriveFromPurpleCommand(spikeMarkPosition, isBlueAlliance, isPlacingYellow));
+                    state = autoPosition.isPlacingYellow ? AutonomousState.MOVING_TO_BACKDROP : AutonomousState.IDLE;
+                    scheduleCommand(commandManager.getAutoDriveFromPurpleCommand(autoPosition));
                 }
                 break;
             case MOVING_TO_BACKDROP:
                 if (canContinue()) {
-                    scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(spikeMarkPosition, isBlueAlliance));
+                    scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(autoPosition));
                     state = AutonomousState.MOVING_TO_PLACE_YELLOW;
                 }
                 break;
@@ -94,7 +89,7 @@ public class NewAutonomousController {
     }
 
     public SpikeMark getSpikeMark() {
-        return spikeMarkPosition;
+        return autoPosition.spikeMark;
     }
 
     public CommandManager getCommandManager() {

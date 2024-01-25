@@ -15,7 +15,7 @@ public class AutoPlacePurpleCommand extends SequentialCommandGroup {
         lastCommand = new WaitCommand(1);
         addCommands(
                 new InstantCommand(intakeSubsystem::downPosition, intakeSubsystem),
-                new WaitCommand(250),
+                new WaitCommand(500),
                 new InstantCommand(() -> intakeSubsystem.intake(0.5), intakeSubsystem),
                 new WaitCommand(500),
                 new InstantCommand(intakeSubsystem::stopMotor, intakeSubsystem),

@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import org.firstinspires.ftc.teamcode.Constants;
 //import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.auto.AutoPosition;
 import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 
 public class CommandManager {
@@ -127,8 +128,8 @@ public class CommandManager {
 
         // TODO: Who is supposed to use the winch???
         defaultWinchCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.A)) robot.getWinchSubsystem().winch();
-            else if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.B)) robot.getWinchSubsystem().unwinch();
+            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.LEFT_BUMPER)) robot.getWinchSubsystem().winch();
+            else if (robot.isPressed(robot.getOperatorGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) robot.getWinchSubsystem().unwinch();
             else robot.getWinchSubsystem().stopMotor();
         }, robot.getWinchSubsystem());
 
@@ -309,15 +310,15 @@ public class CommandManager {
         return new AutoSetupCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem());
     }
 
-    public Command getAutoDriveAndPlacePurpleCommand(NewAutonomousController.SpikeMark position, boolean blue) {
-        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), position, blue);
+    public Command getAutoDriveAndPlacePurpleCommand(AutoPosition autoPosition) {
+        return new AutoDriveAndPlacePurpleCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem(), autoPosition);
     }
 
-    public Command getAutoDriveFromPurpleCommand(NewAutonomousController.SpikeMark position, boolean blue, boolean placingYellow) {
-        return new AutoDriveFromPurpleCommand(robot.getDriveSubsystem(), position, blue, placingYellow);
+    public Command getAutoDriveFromPurpleCommand(AutoPosition autoPosition) {
+        return new AutoDriveFromPurpleCommand(robot.getDriveSubsystem(), autoPosition);
     }
 
-    public Command getAutoPlaceYellowAndHideCommand(NewAutonomousController.SpikeMark position, boolean blue) {
-        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), position, blue);
+    public Command getAutoPlaceYellowAndHideCommand(AutoPosition autoPosition) {
+        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), autoPosition);
     }
 }
