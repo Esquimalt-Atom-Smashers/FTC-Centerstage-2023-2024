@@ -29,7 +29,6 @@ public class CommandManager {
     private final Command snapLeftCommand;
     private final Command snapUpCommand;
     private final Command snapDownCommand;
-    private final Command defaultIntakeCommand;
     /** Command that moves the arm up and enters launching drone mode */
     private final Command droneModeCommand;
     /** Command that launches the drone */
@@ -48,6 +47,7 @@ public class CommandManager {
     //private final Command outtakeModeCommand;
     /** Command that exits intake mode */
     private final Command intakeCancelCommand;
+    private final Command outtakeCommand;
     /** Command that picks pixels up and exits intake mode */
     private final Command pickupPixelsCommand;
     /** Command that moves the arm to low scoring position */
@@ -103,14 +103,6 @@ public class CommandManager {
 
         droneCancelCommand = new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING));
 
-        // TODO: Add a command to outtake
-        defaultIntakeCommand = new RunCommand(() -> {
-            if (robot.getState() == Robot.RobotState.INTAKE || robot.getState() == Robot.RobotState.LOADING_PIXELS) {
-                if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.DPAD_UP)) robot.getIntakeSubsystem().outtake();
-                else robot.getIntakeSubsystem().intake();
-            }
-            else robot.getIntakeSubsystem().stopMotor();
-        });
 
         defaultElbowCommand = new RunCommand(() -> {
             if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().moveManually(1);
@@ -118,15 +110,12 @@ public class CommandManager {
             else robot.getElbowSubsystem().stopMotor();
         }, robot.getElbowSubsystem());
 
-        // TODO: Check this after
         defaultSlideCommand = new RunCommand(() -> {
             if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().moveManually(1);
             else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().moveManually(-1);
             else robot.getLinearSlideSubsystem().stopMotor();
         }, robot.getLinearSlideSubsystem());
 
-
-        // TODO: Who is supposed to use the winch???
         defaultWinchCommand = new RunCommand(() -> {
             if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.LEFT_BUMPER)) robot.getWinchSubsystem().winch();
             else if (robot.isPressed(robot.getOperatorGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) robot.getWinchSubsystem().unwinch();
@@ -150,6 +139,8 @@ public class CommandManager {
             robot.getIntakeSubsystem().upPosition();
             robot.setState(Robot.RobotState.DRIVING);
         });
+
+        outtakeCommand = new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem());
 
         pickupPixelsCommand = new SequentialCommandGroup(
                 // Set the scoring state to loading pixels
@@ -280,6 +271,10 @@ public class CommandManager {
 
     public Command getHomePostionCommand () {
         return homePostionCommand;
+    }
+
+    public Command getOuttakeCommand() {
+        return outtakeCommand;
     }
 
     public Command getSetupCommand() {

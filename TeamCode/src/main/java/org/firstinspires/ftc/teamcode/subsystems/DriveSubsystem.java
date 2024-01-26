@@ -272,13 +272,6 @@ public class DriveSubsystem extends CustomSubsystemBase {
         imu.resetYaw();
     }
 
-    // TODO: Delete
-    /** @return The normalized angle in degrees */
-    public int getNormalizedAngle() {
-        return -1;
-//        return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
-    }
-
     /** Prints data from the motors to the telemetry */
     @Override
     public void printData() {

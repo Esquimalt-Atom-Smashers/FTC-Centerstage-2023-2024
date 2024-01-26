@@ -16,7 +16,6 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
         // This starts from 30 inches forward
         if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE) {
             addCommands(
-                    // TODO: Test this chunk
                     // Driving to the correct position
                     new DriveCommand(driveSubsystem, -18),
                     new WaitCommand(250),
@@ -24,28 +23,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     new WaitCommand(250),
                     new TurnToHeadingCommand(driveSubsystem, 0 * multiplier),
                     new AutoPlacePurpleCommand(intakeSubsystem)
-
-//                    new TurnCommand(driveSubsystem, 90 * multiplier),
-//                    new WaitCommand(250),
-//                    new StrafeCommand(driveSubsystem, 5),
-//                    new WaitCommand(250),
-//                    new DriveCommand(driveSubsystem, -4),
-//                    new WaitCommand(250),
-//                    // Placing the purple pixel
-//                    new AutoPlacePurpleCommand(intakeSubsystem)
             );
-//            if (placingYellow)
-//                addCommands(
-//                    // We are done, we should be at the center of the board
-//                );
-//            else
-//                addCommands(
-//                        new DriveCommand(driveSubsystem, 2),
-//                        new WaitCommand(250),
-//                        new TurnToHeadingCommand(driveSubsystem, 0),
-//                        new WaitCommand(250),
-//                        new TurnToHeadingCommand(driveSubsystem, 0, 0.25)
-//                );
         }
 
         else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE) {
@@ -53,17 +31,6 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     new DriveCommand(driveSubsystem, -7),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
-//            if (placingYellow)
-//                addCommands(
-//                        // TODO: Be careful when testing these
-//                        new TurnCommand(driveSubsystem, 90),
-//                        new WaitCommand(250),
-//                        new DriveCommand(driveSubsystem, 32),
-//                        new WaitCommand(250),
-//                        new StrafeCommand(driveSubsystem, 6),
-//                        new WaitCommand(250),
-//                        new TurnToHeadingCommand(driveSubsystem, 90)
-//                );
         }
         else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.DOWNSTAGE) {
             addCommands(
@@ -76,18 +43,6 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     // Placing purple
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
-//            if (placingYellow)
-//                addCommands(
-//                    new DriveCommand(driveSubsystem, -4),
-//                    new WaitCommand(250),
-//                    new TurnCommand(driveSubsystem, 180, 0.3),
-//                    new WaitCommand(250),
-//                    new DriveCommand(driveSubsystem, 22)
-//                );
-//            else
-//                addCommands(
-//                        new TurnCommand(driveSubsystem, 90)
-//                );
         }
         lastCommand = new WaitCommand(1);
         addCommands(lastCommand);

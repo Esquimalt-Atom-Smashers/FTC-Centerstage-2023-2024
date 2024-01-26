@@ -14,7 +14,7 @@ public class AutoPlaceYellowCommand extends SequentialCommandGroup {
     public AutoPlaceYellowCommand(ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem) {
         lastCommand = new WaitCommand(1);
         addCommands(
-                // TODO: Make this happen somewhere else (maybe while placing the purple pixel?
+                // TODO: Make this happen somewhere else (maybe while placing the purple pixel?)
                 // First move the slide and arm in to make sure their zeroes are good
                 new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getInPosition()),
                 new MoveElbowCommand(elbowSubsystem, 0),

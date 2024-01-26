@@ -23,13 +23,6 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
                     new DriveCommand(driveSubsystem, 24),
                     new WaitCommand(250),
                     new StrafeCommand(driveSubsystem, 8 * multiplier)
-//
-//                    new DriveCommand(driveSubsystem, 36),
-//                    new WaitCommand(250),
-//                    new StrafeCommand(driveSubsystem, -20),
-//                    new WaitCommand(250),
-//                    new TurnToHeadingCommand(driveSubsystem, 90),
-//                    new WaitCommand(250)
             );
         }
         else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE) {
@@ -49,7 +42,6 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
                     new WaitCommand(250),
                     new TurnCommand(driveSubsystem, 180 * multiplier, 0.3),
                     new WaitCommand(250),
-                    // TODO: This might need to drive a bit farther
                     new DriveCommand(driveSubsystem, 22)
             );
         }

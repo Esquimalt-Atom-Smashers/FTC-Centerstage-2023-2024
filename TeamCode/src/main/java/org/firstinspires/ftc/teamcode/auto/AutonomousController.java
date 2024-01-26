@@ -22,6 +22,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 /**
  * A controller that controls the drive base and arm during autonomous.
  */
+@Deprecated
 public class AutonomousController {
     enum AutonomousState {
         PICKING_UP_PIXELS,

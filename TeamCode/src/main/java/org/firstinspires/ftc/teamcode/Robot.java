@@ -58,7 +58,6 @@ public class Robot {
 
     private final CommandManager commandManager;
 
-    // TODO: Make sure this is being used properly
     private RobotState state = RobotState.DRIVING;
 
     public enum RobotState {
@@ -162,14 +161,13 @@ public class Robot {
         Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state != RobotState.SHOOTING_DRONE);
         intakeTrigger.whenActive(commandManager.getIntakeModeCommand());
 
-        // Press operator RT to pickup the pixels while the arm is down
+        // Press operator RB to pickup the pixels while the arm is down
         // We must be in intake mode
         Trigger pickupPixelsTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && state == RobotState.INTAKE);
         pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
 
-        // Press operator RB to exit intake mode as well as canceling the pickup command if it's running (as an emergency stop)
-//        Trigger cancelIntakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-//        cancelIntakeTrigger.whenActive(commandManager.getIntakeCancelCommand());
+        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X) && state == RobotState.INTAKE);
+        outtakeTrigger.whenActive(commandManager.getOuttakeCommand());
 
         // --- Complex Commands (commands that use more than one subsystem) ---
         // Press operator left dpad while in driving mode to move the arm to low preset scoring position
@@ -277,7 +275,6 @@ public class Robot {
         if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) boxReleaseSubsystem.disableLights();
 
         opMode.telemetry.addData("Gyro heading: ",  driveSubsystem.getHeading());
-        opMode.telemetry.addData("Normalized angle", driveSubsystem.getNormalizedAngle());
 
 
         elbowSubsystem.printData();

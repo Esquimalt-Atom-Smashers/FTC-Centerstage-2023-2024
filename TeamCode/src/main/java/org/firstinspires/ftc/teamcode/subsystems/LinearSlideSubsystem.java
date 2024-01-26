@@ -228,6 +228,10 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         return IN_POSITION;
     }
 
+    public int getAutoScoringPosition() {
+        return AUTO_SCORING_POSITION;
+    }
+
     private boolean isLimitSwitchPressed() {
         return !slideLimitSwitch.getState();
     }

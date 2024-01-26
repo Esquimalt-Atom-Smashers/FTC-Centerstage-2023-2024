@@ -225,6 +225,10 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         return INTAKE_POSITION;
     }
 
+    public int getAutoScoringPosition() {
+        return AUTO_SCORING_POSITION;
+    }
+
     private boolean isLimitSwitchPressed() {
         return !elbowLimitSwitch.getState();
     }

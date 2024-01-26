@@ -20,7 +20,7 @@ public class MoveSlideCommand extends CommandBase {
             cancel();
             return;
         }
-        linearSlideSubsystem.setTarget(target, 5.0);
+        linearSlideSubsystem.setTarget(target, 1.5);
     }
 
     @Override

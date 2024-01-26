@@ -17,7 +17,6 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
         int multiplier = autoPosition.isBlue ? 1 : -1;
         lastCommand = new WaitCommand(1);
         if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE)
-            // TODO: Be very careful testing this
             addCommands(
                     new TurnToHeadingCommand(driveSubsystem, 90 * multiplier),
                     new WaitCommand(250),
