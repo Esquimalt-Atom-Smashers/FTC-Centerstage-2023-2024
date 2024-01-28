@@ -43,6 +43,8 @@ public class NewAutonomousController {
         commandManager = new CommandManager(robot);
 
         autoPosition = new AutoPosition(isBlueAlliance, isPlacingYellow, isUpstage);
+        if (isBlueAlliance) robot.getLedSubsystem().setBlue();
+        else robot.getLedSubsystem().setRed();
     }
 
     public void start() {

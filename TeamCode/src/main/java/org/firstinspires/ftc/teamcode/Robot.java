@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DroneSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.LEDSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
@@ -53,6 +55,8 @@ public class Robot {
     private final LinearSlideSubsystem linearSlideSubsystem;
     /** The winch of the robot */
     private final WinchSubsystem winchSubsystem;
+    /** The LED's on the side of the robot */
+    private final LEDSubsystem ledSubsystem;
 
     private final boolean manualMode;
 
@@ -91,8 +95,11 @@ public class Robot {
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap, opMode.telemetry);
+        ledSubsystem = new LEDSubsystem(opMode.hardwareMap, opMode.telemetry);
 
         commandManager = new CommandManager(this);
+        CommandScheduler.getInstance().reset();
+        CommandScheduler.getInstance().cancelAll();
 
         if (!manualMode) bindCommands();
         if (resetEncoders) resetEncoders();
@@ -133,8 +140,7 @@ public class Robot {
 
         // --- DroneSubsystem ---
         // Press operator A to raise the arm and enter shooting drone mode
-        // We must be in driving mode, because this changes states to SHOOTING_DRONE
-        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A) && state == RobotState.DRIVING);
+        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A));
         droneLaunchModeTrigger.whenActive(commandManager.getDroneModeCommand());
 
         // Press operator B to launch the drone
@@ -331,6 +337,10 @@ public class Robot {
 
     public WinchSubsystem getWinchSubsystem() {
         return winchSubsystem;
+    }
+
+    public LEDSubsystem getLedSubsystem() {
+        return ledSubsystem;
     }
 
     /**

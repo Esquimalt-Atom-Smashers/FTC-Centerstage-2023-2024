@@ -49,7 +49,7 @@ public class Constants {
         public static final String RIGHT_DISTANCE_SENSOR_NAME = "rightDistanceSensor";
 
         // TODO: Find value
-        public static double DISTANCE_THRESHOLD = 10;
+        public static double DISTANCE_THRESHOLD = 7;
     }
 
     @Config
@@ -120,7 +120,7 @@ public class Constants {
         public static  int DRIVING_POSITION = 1100;
 
 
-        public static  int DRONE_LAUNCH_POSITION = 6250;
+        public static  int DRONE_LAUNCH_POSITION = 6900;
 
         // TODO: Find new value
         public static  int MEDIUM_SCORING_POSITION = 10400;
@@ -150,7 +150,10 @@ public class Constants {
         public static final double INTAKE_SPEED = 1;
         public static final double OUTTAKE_SPEED = -1;
     }
-
+    @Config
+    public static class LEDConstants {
+        public static final String LED_NAME = "LED";
+    }
     @Config
     public static class LinearSlideConstants {
         public static final String SLIDE_MOTOR_NAME = "linearSlideMotor";

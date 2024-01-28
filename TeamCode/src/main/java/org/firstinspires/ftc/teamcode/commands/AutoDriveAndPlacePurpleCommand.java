@@ -13,8 +13,8 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
     private final Command lastCommand;
     public AutoDriveAndPlacePurpleCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem, AutoPosition autoPosition) {
         int multiplier = autoPosition.isBlue ? 1 : -1;
-        // This starts from 30 inches forward
-        if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE) {
+        // This is if we are upstage and the team prop is upstage
+        if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
             addCommands(
                     // Driving to the correct position
                     new DriveCommand(driveSubsystem, -18),
@@ -25,7 +25,21 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
-
+        // This is if we are downstage and the team prop is upstage
+        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE) {
+            addCommands(
+                    new StrafeCommand(driveSubsystem, 7 * multiplier),
+                    new WaitCommand(250),
+                    new DriveCommand(driveSubsystem, -4),
+                    new WaitCommand(250),
+                    new TurnCommand(driveSubsystem, 90 * multiplier),
+                    new WaitCommand(250),
+                    new DriveCommand(driveSubsystem, 3),
+                    new WaitCommand(250),
+                    // Placing purple
+                    new AutoPlacePurpleCommand(intakeSubsystem)
+            );
+        }
         else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE) {
             addCommands(
                     new DriveCommand(driveSubsystem, -7),
