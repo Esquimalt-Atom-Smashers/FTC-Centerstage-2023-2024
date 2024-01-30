@@ -1,179 +1,235 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Constants;
 
 import static org.firstinspires.ftc.teamcode.Constants.ElbowConstants.*;
+
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
 
 /**
- * A subsystem that represents the motor that controls the arm.
+ * A subsystem that represents the motor that controls the elbow of the arm.
+ *
+ * @author Esquimalt Atom Smashers
  */
-public class ElbowSubsystem extends SubsystemBase {
-    // Motor used for this subsystem
+@Config
+public class ElbowSubsystem extends CustomSubsystemBase {
     private final DcMotorEx elbowMotor;
 
     private final PIDController controller;
 
-    public static double target;
+    // TODO: Hide this
+    public static double target = 0;
     private double lastPower;
 
+    private ElapsedTime timer;
+    private double timeout;
+
+    private final DigitalChannel elbowLimitSwitch;
+
+    /** The state the arm is in: (manual, moving-to-target, or at-target) */
     private PIDSubsystemState state;
 
     /**
-     * Creates a new ElbowSubsystem. Initializes the {@link DcMotorEx} using the provided {@link HardwareMap}. Initializes a PID controller.
+     * Constructs an ElbowSubsystem.
+     *
      * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public ElbowSubsystem(HardwareMap hardwareMap) {
+    public ElbowSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
+
         elbowMotor = hardwareMap.get(DcMotorEx.class, ELBOW_DC_MOTOR_NAME);
-        elbowMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        configureMotor();
 
         controller = new PIDController(P, I, D);
+
+        elbowLimitSwitch = hardwareMap.get(DigitalChannel.class, ELBOW_LIMIT_SWITCH_NAME);
+        elbowLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
 
         state = PIDSubsystemState.MANUAL;
     }
 
-    /**
-     * Sets the target to intake position, used for picking up pixels.
-     */
-    public void intakePosition() {
-        setTarget(INTAKE_POSITION);
+    /** Configure the elbow motor by setting the direction and zero power behavior */
+    private void configureMotor() {
+        elbowMotor.setDirection(ELBOW_MOTOR_DIRECTION);
+        elbowMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    /**
-     * Sets the target to driving position, used when driving.
-     */
-    public void drivingPosition() {
-        setTarget(DRIVING_POSITION);
+    /** Resets the encoder on the elbow motor. */
+    public void resetEncoder() {
+        elbowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbowMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    /**
-     * Sets the target to level position.
-     */
-    public void levelPosition() {
-        setTarget(LEVEL_POSITION);
-    }
-
-    /**
-     * Sets the target to test position, used for testing where position are.
-     */
-    public void testPosition() {
-        setTarget(TEST_POSITION);
-    }
-
-    /**
-     * Sets the target to tilt position, used to push the pixels against the intake to angle better for the board.
-     */
-    public void tiltPosition() {
-        setTarget(TILT_POSITION);
-    }
-
-    /**
-     * Sets the target to low scoring position, used for scoring from the first set line and down.
-     */
-    public void lowScoringPosition() {
-        setTarget(LOW_SCORING_POSITION);
-    }
-
-    /**
-     * Sets the target to medium scoring position, used for scoring from around the second set line to the first.
-     */
-    public void mediumScoringPosition() {
-        setTarget(MEDIUM_SCORING_POSITION);
-    }
-
-    /**
-     * Sets the target to high scoring position, used for scoring on the highest level.
-     */
-    public void highScoringPosition() {
-        setTarget(HIGH_SCORING_POSITION);
-    }
-
-    /**
-     * Stop the arm from moving.
-     */
-    public void stop() {
+    /** Stops the elbow motor. */
+    public void stopMotor() {
         elbowMotor.setPower(0);
     }
 
     /**
-     * Raise the arm manually.
-     * @param multiplier A multiplier for the speed of the motor
+     * Raises the arm manually.
+     *
+     * @param input A input for the speed of the motor
      */
-    public void raiseManually(double multiplier) {
+    public void moveManually(double input) {
         state = PIDSubsystemState.MANUAL;
-        elbowMotor.setPower(MANUAL_MOTOR_SPEED * multiplier);
+        if (input < 0 && isLimitSwitchPressed()) {
+            stopMotor();
+            resetEncoder();
+            return;
+        }
+        elbowMotor.setPower(input * MANUAL_MOTOR_SPEED_MULTIPLIER);
     }
 
     /**
-     * Lower the arm manually
+     * Lowers the arm manually
+     *
      * @param multiplier A multiplier for the speed of the motor
      */
+    @Deprecated
     public void lowerManually(double multiplier) {
         state = PIDSubsystemState.MANUAL;
-        elbowMotor.setPower(-MANUAL_MOTOR_SPEED * multiplier);
+        if (isLimitSwitchPressed()) {
+            stopMotor();
+            return;
+        }
+        elbowMotor.setPower(-MANUAL_MOTOR_SPEED_MULTIPLIER * multiplier);
     }
 
     /**
      * Set the target for the PID controller. This will make the robot start moving the arm automatically.
+     *
      * @param targetPosition The target position in pulses
      */
-    public void setTarget(double targetPosition) {
+    public void setTarget(double targetPosition, double timeout) {
         target = targetPosition;
         state = PIDSubsystemState.MOVING_TO_TARGET;
-    }
-
-    /**
-     * Print data to the provided telemtery. Assumes the telemetry will be updated elsewhere.
-     * @param telemetry The telemetry to print to
-     */
-    public void printData(Telemetry telemetry) {
-        telemetry.addLine("--- Elbow Subsystem ---");
-        telemetry.addData("Position", elbowMotor.getCurrentPosition());
-        telemetry.addData("Target", target);
-        telemetry.addData("State", state);
+        if (timer == null) timer = new ElapsedTime();
+        else timer.reset();
+        this.timeout = timeout;
     }
 
     /**
      * Use the PID controller to calculate how fast we should set the motor to. If the motor is moving slow enough,
      * we are close enough and stop moving further.
      */
+    // TODO: Clean this method up
     public void runPID() {
         // If we aren't at the target
         if (state == PIDSubsystemState.MOVING_TO_TARGET)
         {
-            // Calculate how much we need to move the motor by
-            controller.setPID(P, I, D);
-            int elbowPosition = elbowMotor.getCurrentPosition();
-            double power = controller.calculate(elbowPosition, target);
-            lastPower = power;
-            elbowMotor.setPower(power);
-            // If the power we are setting is basically none, we are close enough to the target
-            if (Math.abs(power) <= POWER_TOLERANCE) {
-                state = PIDSubsystemState.AT_TARGET;
+            // If the target is zero, move the arm all the way down
+            // Only stop if we press the limit switch or the timeout ends
+            if (target == 0) {
+                lastPower = -1;
+                elbowMotor.setPower(-1);
+                if (isLimitSwitchPressed() || isTimeoutPassed()) {
+                    stopMotor();
+                    if (isLimitSwitchPressed()) resetEncoder();
+                    state = PIDSubsystemState.AT_TARGET;
+                    return;
+                }
+            }
+            else {
+                // If we are moving the arm down and pressing the limit switch,
+                // stop and reset the encoders
+                if (target < elbowMotor.getCurrentPosition() && isLimitSwitchPressed()) {
+                    stopMotor();
+                    resetEncoder();
+                    state = PIDSubsystemState.AT_TARGET;
+                    return;
+                }
+                // Calculate how much we need to move the motor by
+                controller.setPID(P, I, D);
+                int elbowPosition = elbowMotor.getCurrentPosition();
+                double power = controller.calculate(elbowPosition, target);
+                lastPower = power;
+                elbowMotor.setPower(power);
+                // If the power we are setting is basically none, we are close enough to the target
+                if (Math.abs(power) <= POWER_TOLERANCE || isTimeoutPassed()) {
+                    state = PIDSubsystemState.AT_TARGET;
+                    stopMotor();
+                }
             }
         }
     }
 
-    /**
-     * Checks if the arm is below level, for safety concerns with the slide.
-     * @return Whether the arm is below level/flat
-     */
-    public boolean isBelowLevel() {
-        return elbowMotor.getCurrentPosition() <= LEVEL_POSITION;
+    private boolean isTimeoutPassed() {
+        if (timeout > 0 && timer.seconds() >= timeout) {
+            timeout = 0;
+            return true;
+        }
+        return false;
     }
 
-    /**
-     * Checks if the motor is at the target.
-     * @return Whether the motor is at the target
-     */
+    /** @return true if the motor is at the target, false otherwise. */
     public boolean isAtTarget() {
         return state == PIDSubsystemState.AT_TARGET;
+    }
+
+    public int getPosition() {
+        return elbowMotor.getCurrentPosition();
+    }
+
+    /** Print data from the elbow motor. */
+    @Override
+    public void printData() {
+        telemetry.addLine("--- Elbow Subsystem ---");
+        telemetry.addData("Elbow Position", elbowMotor.getCurrentPosition());
+        telemetry.addData("Elbow last power", lastPower);
+        telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
+//        telemetry.addData("Target", target);
+//        telemetry.addData("State", state);
+    }
+
+    /** @return the preset low scoring position */
+    public int getLowScoringPosition() {
+        return LOW_SCORING_POSITION;
+    }
+
+    /** @return the preset medium scoring position */
+    public int getMediumScoringPosition() {
+        return MEDIUM_SCORING_POSITION;
+    }
+
+    /** @return the preset high scoring position */
+    public int getHighScoringPosition() {
+        return HIGH_SCORING_POSITION;
+    }
+
+    /** @return the drone launching position of the elbow */
+    public int getDroneLaunchPosition() {
+        return DRONE_LAUNCH_POSITION;
+    }
+
+    /** @return the level position of the elbow */
+    public int getLevelPosition() {
+        return LEVEL_POSITION;
+    }
+
+    /** @return the driving position of the elbow */
+    public int getDrivingPosition() {
+        return DRIVING_POSITION;
+    }
+
+    /** @return the minimum position of the elbow */
+    public int getIntakePosition() {
+        return INTAKE_POSITION;
+    }
+
+    public int getAutoScoringPosition() {
+        return AUTO_SCORING_POSITION;
+    }
+
+    private boolean isLimitSwitchPressed() {
+        return !elbowLimitSwitch.getState();
     }
 }

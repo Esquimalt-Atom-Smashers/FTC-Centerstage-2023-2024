@@ -8,6 +8,7 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 import static org.firstinspires.ftc.teamcode.Constants.CameraConstants.*;
 
+@Deprecated
 public class OpenCVPipeline extends OpenCvPipeline {
     int cameraWidth;
     int cameraHeight;

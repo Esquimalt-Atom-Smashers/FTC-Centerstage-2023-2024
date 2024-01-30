@@ -1,51 +1,80 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.roadrunner.util.Encoder;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 import java.util.Arrays;
+//import java.util.function.DoubleSupplier;
 
 /**
- * A subsystem representing the wheels and gyro of the robot. Uses four {@link DcMotorEx} for the wheels and a {@link BNO055IMU} for the gyro
+ * A subsystem that represents the drive base of the robot. Uses four motors and a gyro to drive.
+ *
+ * @author Esquimalt Atom Smashers
  */
-public class DriveSubsystem extends SubsystemBase {
-    // Motors
-    private final DcMotorEx frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
+public class DriveSubsystem extends CustomSubsystemBase {
+    /** The DC motors on the robot. */
+    private final DcMotorEx frontLeftMotor;
+    private final DcMotorEx frontRightMotor;
+    private final DcMotorEx rearLeftMotor;
+    private final DcMotorEx rearRightMotor;
     private final DcMotorEx[] motors;
 
-    // Gyro
-    private final BNO055IMU imu;
+    /** The built-in IMU(gyro) on the control hub. */
+    private final BHI260IMU imu; // Counter clockwise is positive
+    private double offset;
 
-    private double snapTarget;
+    private double headingError = 0;
 
-    public static double forwardTarget;
-    private boolean atForwardTarget;
+    private enum DriveState {
+        MANUAL,
+        MOVING_TO_POSITION,
+        TURNING_TO_POSITION
+    }
+
+    private DriveState driveState = DriveState.MANUAL;
+
+    private double targetHeading;
+
+//    private double snapTarget;
+
+//    public static double forwardTarget;
+//    private boolean atForwardTarget;
 
     /**
-     * Create a new DriveSubsystem. Initializes the four {@link DcMotorEx} and adds them to an array. Also sets their direction
-     * correctly, sets their zero power behaviour to brake, resets their encoders. Initializes the gyro.
+     * Constructs a new DriveSubsystem.
+     *
      * @param hardwareMap The hardware map of the robot
+     * @param telemetry The telemetry of the robot
      */
-    public DriveSubsystem(HardwareMap hardwareMap) {
-        // Initialize the motors
+    public DriveSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+        super(hardwareMap, telemetry);
+
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, FRONT_LEFT_MOTOR_NAME);
         frontRightMotor = hardwareMap.get(DcMotorEx.class, FRONT_RIGHT_MOTOR_NAME);
         rearLeftMotor = hardwareMap.get(DcMotorEx.class, REAR_LEFT_MOTOR_NAME);
         rearRightMotor = hardwareMap.get(DcMotorEx.class, REAR_RIGHT_MOTOR_NAME);
-
         motors = new DcMotorEx[]{frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor};
+        configureMotors();
 
+        imu = hardwareMap.get(BHI260IMU.class, IMU_NAME);
+        configureIMU();
+    }
+
+    /** Configure the drive motors by setting their directions and zero power behaviors. */
+    private void configureMotors() {
         // Set the direction of the motors
         frontLeftMotor.setDirection(FRONT_LEFT_MOTOR_DIRECTION);
         frontRightMotor.setDirection(FRONT_RIGHT_MOTOR_DIRECTION);
@@ -54,259 +83,239 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Set the motor modes and zero power behavior
         Arrays.stream(motors).forEach(motor -> motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE));
+        resetEncoder();
+    }
+
+    /** Configure the gyro */
+    private void configureIMU() {
+        IMU.Parameters parameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                )
+        );
+        imu.initialize(parameters);
+        resetGyro();
+    }
+
+    /** Reset the encoders on the drive motors */
+    public void resetEncoder() {
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // Initialize the imu
-        imu = hardwareMap.get(BNO055IMU.class, IMU_NAME);
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        imu.initialize(parameters);
-
-//        forwardPIDController = new PIDController(fP, fI, fD);
     }
 
     /**
      * Drives the robot using joystick input.
+     *
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn
-     * @param fieldCentric If we want this drive to be field centric. Default is true
-     * @param scaled If we want the inputs to be scaled. Default is true
+     * @param fieldCentric If we want this drive to be field centric
+     * @param scaled If we want the inputs to be scaled
      */
-    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled) {
+    // TODO: Go through the overloads and check to see if they are needed
+    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled, double multiplier) {
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
         turn = Math.abs(turn) >= DEADZONE ? turn : 0;
+        multiplier = Range.clip(multiplier, 0, 1);
+
         if (fieldCentric) {
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
             double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
             double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
 
-            frontLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, scaled));
-            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, scaled));
-            rearLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, scaled));
-            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, scaled));
+            frontLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, multiplier, scaled));
+            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, multiplier, scaled));
+            rearLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, multiplier, scaled));
+            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, multiplier, scaled));
         }
         else {
             // Robot centric drive
-            frontLeftMotor.setPower(scaleInput(forward + strafe + turn, scaled));
-            frontRightMotor.setPower(scaleInput(forward - strafe - turn, scaled));
-            rearLeftMotor.setPower(scaleInput(forward - strafe + turn, scaled));
-            rearRightMotor.setPower(scaleInput(forward + strafe - turn, scaled));
+            frontLeftMotor.setPower(scaleInput(forward - strafe + turn, multiplier, scaled));
+            frontRightMotor.setPower(scaleInput(forward - strafe - turn, multiplier, scaled));
+            rearLeftMotor.setPower(scaleInput(forward + strafe + turn, multiplier, scaled));
+            rearRightMotor.setPower(scaleInput(forward + strafe - turn, multiplier, scaled));
         }
 
     }
 
     /**
-     * Drives the robot using joystick input.
+     * Drives the robot using joystick input. Uses the default values for field centric and scaling.
+     *
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
-     * @param turn The amount to turn
+     * @param turn The amount to turn left and right
      */
-    public void drive(double forward, double strafe, double turn) {
-        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED);
+    public void drive(double forward, double strafe, double turn, double speedMultiplier) {
+        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
-    /**
-     * Unused method
-     */
-    public void drive() {
-//        drive(forward() ? AUTO_DRIVE_SPEED : -AUTO_DRIVE_SPEED, 0, 0);
-
+    public void drive(GamepadEx gamepad, double speedMultiplier) {
+        drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
-    public boolean forward() {
-        return frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition();
+    // Starts the robot moving forward, you MUST call isFinishedMoving() repeatedly
+    // to check if the robot has made it
+    public void driveByDistanceAsync(double inches) {
+        driveState = DriveState.MOVING_TO_POSITION;
+        Arrays.stream(motors).forEach(motor ->
+                motor.setTargetPosition(motor.getCurrentPosition() + toPulses(inches)));
+        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+        drive(AUTO_DRIVE_SPEED, 0, 0, false, false, 1);
     }
 
-    // Auto strafe
-    public void strafe() {
-
+    // Moves the robot inches forward and then stops it
+    public void driveByDistance(double inches) {
+        driveByDistanceAsync(inches);
+        while (!isFinishedMoving()) {}
     }
 
-    public void setForwardTarget(int target) {
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + target);
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + target);
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + target);
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + target);
-        forwardTarget = target;
-        atForwardTarget = false;
+    // Strafe the robot inches, you MUST call isFinishedMoving() repeatedly
+    // to check if the robot has made it
+    public void strafeByDistanceAsync(double inches) {
+        driveState = DriveState.MOVING_TO_POSITION;
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - toPulses(inches));
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - toPulses(inches));
+        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
+        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + toPulses(inches));
+        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+        drive(0, AUTO_STRAFE_SPEED, 0, false, false, 1);
     }
 
-    public double getForwardTarget() {
-        return forwardTarget;
+    // Strafes the robot inches and stops it when it gets there
+    public void strafeByDistance(double inches) {
+        strafeByDistanceAsync(inches);
+        while (!isFinishedMoving()) {}
     }
 
-//    public double forwardPID() {
-//        if (!atForwardTarget)
-//        {
-//            forwardPIDController.setPID(fP, fI, fD);
-//            double wheelPositions = getAveragePosition();
-//            double power = forwardPIDController.calculate(wheelPositions, forwardTarget);
-//            frontLeftMotor.setPower(power);
-//            frontRightMotor.setPower(power);
-//            rearLeftMotor.setPower(power);
-//            rearRightMotor.setPower(power);
-//            atForwardTarget = Math.abs(power) <= 0.1;
-//            return power;
-//        }
-//        return 0;
-//    }
-
-    public boolean isAtForwardTarget() {
-        return atForwardTarget;
+    public void turnAsync(double angle, double speed) {
+        driveState = DriveState.TURNING_TO_POSITION;
+        targetHeading = getHeading() + angle;
+        // Counter clockwise is positive
+        // If the angle is positive, we want to turn negative (counterclockwise)
+        drive(0, 0, getAutoTurnSpeed(speed), false, false, 1);
     }
 
-    public void autoDrive(double position) {
+    public void turn(double angle) {
+        turnAsync(angle, AUTO_TURN_SPEED);
+        while (!isFinishedTurning()) {}
 
+        // Wait for a bit
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.milliseconds() <= 500) {}
+
+        angle = targetHeading - getHeading();
+        turnAsync(angle, AUTO_TURN_SPEED / 2);
+        while (!isFinishedTurning()) {}
+
+        telemetry.addLine("Turning complete! :)");
+        telemetry.update();
     }
 
-    public void autoSnap() {
-        // Our snap target is a predetermined angle
-        snapTarget = SNAP_TARGET;
-        if (getNormalizedAngle() >= -90) drive(0, 0, AUTO_SNAP_POWER);
-        if (getNormalizedAngle() <= -90) drive(0, 0, -AUTO_SNAP_POWER);
+    public double getAutoTurnSpeed(double speed) {
+        double angle = targetHeading - getHeading();
+        return angle > 0 ? -speed : speed;
     }
 
-    public void autoSnap(Telemetry t) {
-        snapTarget = SNAP_TARGET;
-        if (getNormalizedAngle() >= -90) {
-            t.addData("Would be turning", AUTO_SNAP_POWER);
-            drive(0, 0, AUTO_SNAP_POWER);
-        };
-        if (getNormalizedAngle() <= -90) {
-            t.addData("Would be turning", -AUTO_SNAP_POWER);
-            drive(0, 0, -AUTO_SNAP_POWER);
+    public double getAutoTurnSpeed() {
+        return getAutoTurnSpeed(AUTO_TURN_SPEED);
+    }
 
+
+
+    private boolean motorsBusy() {
+        return frontLeftMotor.isBusy() && frontRightMotor.isBusy() && rearRightMotor.isBusy() && rearLeftMotor.isBusy();
+    }
+
+    public boolean isFinishedMoving() {
+        if (!motorsBusy()) {
+            stopMotors();
+            setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            driveState = DriveState.MANUAL;
+            return true;
         }
-    }
-
-    public boolean isFinishedSnapping() {
-        // Checks if we are within the tolerance to auto snap
-        return isWithinTolerance(getNormalizedAngle(), snapTarget, AUTO_SNAP_TOLERANCE);
-    }
-
-    public void centerWithTag() {
-
-    }
-
-    public boolean isCentered() {
         return false;
     }
 
-    public void halfStepLeft() {
-        // Add or subtract the half step value to strafe to the left
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        drive(0, -AUTO_STEP_POWER, 0);
+    public boolean isFinishedTurning() {
+        if (Math.abs(getHeading() - targetHeading) <= AUTO_HEADING_TOLERANCE) {
+            stopMotors();
+            driveState = DriveState.MANUAL;
+            return true;
+        }
+        return false;
     }
 
-    public void halfStepRight() {
-        // Add or subtract the half step value to strafe to the right
-        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + HALF_STEP_VALUE);
-        rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() - HALF_STEP_VALUE);
-        drive(0, AUTO_STEP_POWER, 0);
-    }
-
-    public boolean areMotorsAtPositions() {
-        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-    }
-
-    public boolean isFinishedSteppingLeft() {
-        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-    }
-
-    public boolean isFinishedSteppingRight() {
-        return isWithinTolerance(frontLeftMotor.getCurrentPosition(), frontLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(frontRightMotor.getCurrentPosition(), frontRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearLeftMotor.getCurrentPosition(), rearLeftMotor.getTargetPosition(), AUTO_STEP_TOLERANCE) &&
-                isWithinTolerance(rearRightMotor.getCurrentPosition(), rearRightMotor.getTargetPosition(), AUTO_STEP_TOLERANCE);
-    }
-
-    // Used for autonomous driving
-    public void driveToPosition() {
-
-    }
-
-    // Stop all of the motors
-    public void stop() {
+    /** Stop all of the drive motors */
+    public void stopMotors() {
         Arrays.stream(motors).forEach(motor -> motor.setPower(0));
     }
 
-    public void setMotorPositions(int position) {
-        Arrays.stream(motors).forEach(motor -> motor.setTargetPosition(position));
-    }
-
-    public int getNormalizedAngle() {
-        return (int) AngleUnit.normalizeDegrees(imu.getAngularOrientation().firstAngle);
-    }
-
-    public void printData(Telemetry telemetry) {
-        telemetry.addLine("--- Drive base ---");
-    }
-
-    //Define lower-level methods here. (Methods that are private or work behind the scenes)
-
+    /**
+     * Sets the mode of all the drive motors to the specified run mode.
+     *
+     * @param runMode The new run mode for the motors
+     */
     private void setMotorMode(DcMotor.RunMode runMode) {
         Arrays.stream(motors).forEach(motor -> motor.setMode(runMode));
     }
 
-    // Take the input and scale it if needed, while also clipping it to between -1 and 1
+    /** @return The heading of the robot */
+    public double getHeading() {
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    }
+
+    /** Reset the gyro by setting the offset to the current heading */
+    public void resetGyro() {
+        imu.resetYaw();
+    }
+
+    /** Prints data from the motors to the telemetry */
+    @Override
+    public void printData() {
+        telemetry.addLine("--- Drive base ---");
+
+        telemetry.addData("Position", frontLeftMotor.getCurrentPosition());
+        telemetry.addData("Power", frontLeftMotor.getPower());
+        telemetry.addData("Velocity", frontLeftMotor.getVelocity());
+        telemetry.addData("Current (amps)", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Is over current?", frontLeftMotor.isOverCurrent());
+    }
+
+    public Telemetry getTelemetry() {
+        return telemetry;
+    }
 
     /**
      * Takes a joystick input and clips it.
+     *
      * @param input The input to scale
      * @param isScaled If we want to scale the input
      * @return The input clipped between -1 and 1
      */
-    private double scaleInput(double input, boolean isScaled) {
+    private double scaleInput(double input, double multiplier, boolean isScaled) {
         if (isScaled) {
             // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
             // Current formula just cubes the input and multiplies it by the multiplier
-            return  Range.clip(Math.pow(input, 3) * INPUT_MULTIPLIER, -1, 1);
+            return Range.clip(Math.pow(input, 3) * multiplier, -1, 1);
         }
         else {
             // Otherwise, we just multiply the input by the multiplier
-            return Range.clip(input * INPUT_MULTIPLIER, -1, 1);
+            return Range.clip(input * multiplier, -1, 1);
         }
     }
 
-    private double scaleInput(double input) {
-        return scaleInput(input, SCALED);
-    }
-
+    /**
+     * Checks if a value is close enough to the target.
+     *
+     * @param input Input value
+     * @param target Target value
+     * @param tolerance How far away we can be
+     * @return Whether the input value is within tolerance away from target
+     */
     private boolean isWithinTolerance(double input, double target, double tolerance) {
         return Math.abs(input - target) <= tolerance;
-    }
-
-    private double getHeading() {
-        return imu.getAngularOrientation().firstAngle;
-    }
-
-    //Define getter/setter's here.
-
-    public BNO055IMU getGyro() {
-        return imu;
-    }
-
-    private double getAveragePosition() {
-        return (double) (
-                frontLeftMotor.getCurrentPosition() + frontRightMotor.getCurrentPosition() +
-                rearLeftMotor.getCurrentPosition() + rearRightMotor.getCurrentPosition()
-                ) / 4;
     }
 }

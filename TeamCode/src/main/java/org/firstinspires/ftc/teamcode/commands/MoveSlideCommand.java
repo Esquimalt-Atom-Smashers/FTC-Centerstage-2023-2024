@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
 public class MoveSlideCommand extends CommandBase {
@@ -18,7 +16,11 @@ public class MoveSlideCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        linearSlideSubsystem.setTarget(target);
+        if (target == -1) {
+            cancel();
+            return;
+        }
+        linearSlideSubsystem.setTarget(target, 1.5);
     }
 
     @Override
@@ -28,7 +30,7 @@ public class MoveSlideCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        linearSlideSubsystem.stop();
+        linearSlideSubsystem.stopMotor();
     }
 
     @Override

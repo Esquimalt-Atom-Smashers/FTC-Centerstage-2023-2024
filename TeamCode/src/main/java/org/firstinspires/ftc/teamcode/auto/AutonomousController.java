@@ -1,368 +1,271 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
-import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
-import org.firstinspires.ftc.teamcode.opmodes.AutoOpMode;
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.commands.CommandManager;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.subsystems.CameraSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+/**
+ * A controller that controls the drive base and arm during autonomous.
+ */
+@Deprecated
 public class AutonomousController {
+    enum AutonomousState {
+        PICKING_UP_PIXELS,
+        MOVING_TO_SPIKE_MARKS,
+        MOVING_TO_CORRECT_SPIKE_MARK,
+        MOVING_FROM_SPIKE_MARKS,
+        PLACING_PURPLE,
+        MOVING_TO_BACKDROP,
+        PLACING_YELLOW,
+        HIDING,
+        IDLE
+    }
 
-    /*
-    TODO after scrimmage: Implement a finite state machine like
-        https://github.com/NoahBres/road-runner-quickstart/blob/advanced-examples/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/drive/advanced/AsyncFollowingFSM.java
-        so we can move PID controlled subsystem while we are moving
-    */
-    private AutoOpMode opMode;
+    enum SpikeMark {
+        LEFT,
+        RIGHT,
+        MIDDLE
+    }
+
+    /** The hardware map of the robot */
     private final HardwareMap hardwareMap;
+    /** The telemetry on the driver station */
     private final Telemetry telemetry;
 
-    // Positional things and trajectories
+    /** The collection of subsystems that make up the robot */
+    private final Robot robot;
+    /** Used to get commands used in auto */
+    private final CommandManager commandManager;
+    /** Used to build the trajectories used in auto */
+    private final TrajectoryManager trajectoryManager;
+
+    /** Starting position */
     private Pose2d startPosition;
-    private TrajectorySequence pushMovementPreOuttake;
-    private TrajectorySequence pushMovementPostOuttake;
-    private TrajectorySequence driveToBackdrop;
 
-    // Trajectory variables
-    private boolean isBlueAlliance;
-    private int aprilTagID;
-    private int gameElementPosition;
-    private double extraMovement;
-    private boolean goToBackDrop;
-    private double aprilTagLateralDistance;
-    private double aprilTagLateralTarget = -4;
-    private double aprilTagForwardDistance;
-    private double aprilTagForwardTarget = 14;
-
-    // Subsystems used by the autonomous
+    /** Drive base of the robot */
     private final SampleMecanumDrive drive;
-    private final ClawSubsystem claw;
-    private final IntakeSubsystem intake;
-    private final ElbowSubsystem elbow;
-    private final LinearSlideSubsystem slide;
 
     // Camera things
-    private OpenCVPipeline pipeline;
-    private OpenCvWebcam webcam;
+//    private OpenCVPipeline pipeline;
+//    private OpenCvWebcam webcam;
 
-    public AutonomousController(AutoOpMode autoOpMode) {
-        this(autoOpMode.hardwareMap, autoOpMode.telemetry);
-        this.opMode = autoOpMode;
-    }
+    /** Whether we are on the blue alliance */
+    private boolean isBlueAlliance;
+    /** Whether we are upstage (closer to the backdrop) or downstage */
+    private boolean isUpstage;
+    /** Whether we are going to place a yellow pixel on the backdrop */
+    private boolean isPlacingYellow;
 
-    public AutonomousController(HardwareMap hardwareMap, Telemetry telemetry) {
-        this.hardwareMap = hardwareMap;
-        this.telemetry = telemetry;
+    // Operators used to easily convert positions and angles between red and blue
+    private float positionMultiplier;
+    private float rotationalOffset;
+
+    /** The current state of the controller */
+    private AutonomousState currentState = AutonomousState.IDLE;
+
+    /** Where the game element is and where we need to place the pixels */
+    public SpikeMark spikeMarkPosition;
+
+    /** The current command we are running */
+    private WaitCommand currentCommand;
+
+    /**
+     * Creates a new AutonomousController, initializing the subsystems using the HardwareMap from the provided LinearOpMode.
+     *
+     * @param opMode The LinearOpMode that created the controller.
+     * @param isBlueAlliance If we are on the blue alliance.
+     * @param isUpstage If we are upstage (closer to the backdrop).
+     * @param isPlacingYellow Whether we want to place the yellow pixel on the backdrop.
+     */
+    public AutonomousController(LinearOpMode opMode, boolean isBlueAlliance, boolean isUpstage, boolean isPlacingYellow) {
+        hardwareMap = opMode.hardwareMap;
+        telemetry = opMode.telemetry;
+        setSettings(isBlueAlliance, isUpstage, isPlacingYellow);
+
         drive = new SampleMecanumDrive(hardwareMap);
-        claw = new ClawSubsystem(hardwareMap);
-        intake = new IntakeSubsystem(hardwareMap);
-        elbow = new ElbowSubsystem(hardwareMap);
-        slide = new LinearSlideSubsystem(hardwareMap);
-        updateStatus("Not Ready (Starting OpenCVPipeline)");
-        startOpenCV();
-        while (!pipeline.cameraReady && canContinue()) updateStatus("Not Ready (Waiting for camera)");
-        updateStatus("Ready");
+        robot = new Robot(opMode, true, true);
+        commandManager = new CommandManager(robot);
+        trajectoryManager = new TrajectoryManager(this);
+
+//        startOpenCV();
     }
 
-    public void run() {
-        while (!pipeline.cameraReady && canContinue()) updateStatus("Waiting for camera");
-        gameElementPosition = pipeline.findGameElement(isBlueAlliance);
-        webcam.closeCameraDevice();
+    /**
+     * Sets the settings for the AutonomousController, controlling where we start and if we want to place a yellow pixel on the backdrop
+     *
+     * @param isBlue If we are on the blue alliance.
+     * @param isUpstage If we are upstage (closer to the backdrop).
+     * @param isPlacingYellow Whether we want to place the yellow pixel on the backdrop.
+     */
+    public void setSettings(boolean isBlue, boolean isUpstage, boolean isPlacingYellow) {
+        this.isBlueAlliance = isBlue;
+        this.isUpstage = isUpstage;
+        this.isPlacingYellow = isPlacingYellow;
 
-        // Initial subsystem movements
-        MoveElbowCommand elbowCommand = new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION);
-        SequentialCommandGroup autoStartCommand = new SequentialCommandGroup(
-//                new MoveElbowCommand(elbow, Constants.ElbowConstants.INTAKE_POSITION),
-                new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
-                new InstantCommand(claw::closeClawSingle),
-                new WaitCommand(500),
-                new InstantCommand(intake::mediumPosition),
-                new WaitCommand(1000),
-                elbowCommand
-        );
-        autoStartCommand.schedule();
-        while (!elbowCommand.isFinished() && canContinue()) {
-            CommandScheduler.getInstance().run();
-            updateStatus("Running commands");
+        positionMultiplier = isBlueAlliance ? 1 : -1;
+        rotationalOffset = isBlueAlliance ? 0 : 180;
+        startPosition = new Pose2d(isUpstage ? 11.5 : -35.5, 62 * positionMultiplier, Math.toRadians(isBlue ? 270 : 90));
+    }
+
+    /** Starts the state machine by starting the first command and setting the state to picking up pixels. */
+    public void start() {
+        currentState = AutonomousState.PICKING_UP_PIXELS;
+        drive.setPoseEstimate(startPosition);
+        scheduleCommand(commandManager.getAutoSetupCommand());
+    }
+
+    /** Runs the state machine. Switches states if needed, runs commands, and updates the drive and telemetry. */
+    public void run() {
+        switch (currentState) {
+            // Picking up the pixel from the ground
+            case PICKING_UP_PIXELS:
+                if (canContinue()) {
+//                    int gameElementPosition = pipeline.findGameElement(isBlueAlliance);
+//                    spikeMarkPosition = gameElementPosition == -1 ? SpikeMark.LEFT : gameElementPosition == 0 ? SpikeMark.MIDDLE : SpikeMark.RIGHT;
+//                    webcam.closeCameraDevice();
+                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToSpikeMarksTrajectory());
+                    currentState = AutonomousState.MOVING_TO_SPIKE_MARKS;
+                }
+                break;
+            // Carrying the pixels, moving to the center of the spike marks
+            case MOVING_TO_SPIKE_MARKS:
+                if (canContinue()) {
+//                    currentState = AutonomousState.PLACING_PURPLE;
+//                    currentCommand = scheduleCommand(commandManager.getAutoPlacePurpleCommand());
+
+                    // Find where the correct spike mark is
+                    if (robot.getDistanceSensorSubsystem().isRightBlocked()) spikeMarkPosition = SpikeMark.RIGHT;
+                    else if (robot.getDistanceSensorSubsystem().isLeftBlocked()) spikeMarkPosition = SpikeMark.LEFT;
+                    else spikeMarkPosition = SpikeMark.MIDDLE;
+
+                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToCorrectSpikeMarkTrajectory());
+                    currentState = AutonomousState.MOVING_TO_CORRECT_SPIKE_MARK;
+                }
+                break;
+            case MOVING_TO_CORRECT_SPIKE_MARK:
+                if (canContinue()) {
+//                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToCorrectSpikeMarkTrajectory());
+//                    scheduleCommand(commandManager.getAutoPlacePurpleCommand());
+                    currentState = AutonomousState.PLACING_PURPLE;
+                }
+                break;
+            // Placing the purple pixel on the spike mark using the intake
+            case PLACING_PURPLE:
+                if (canContinue()) {
+                    if (isUpstage && isPlacingYellow) {
+                        currentState = AutonomousState.MOVING_FROM_SPIKE_MARKS;
+//                        scheduleCommand(commandManager.getAutoMoveArmCommand());
+                        drive.followTrajectorySequenceAsync(trajectoryManager.driveFromSpikeMarksTrajectory());
+                    }
+                    else {
+                        currentState = AutonomousState.HIDING;
+                        drive.followTrajectorySequenceAsync(trajectoryManager.finalTrajectory());
+                    }
+                }
+                break;
+            // Moving out of the way of the pixel and game element
+            case MOVING_FROM_SPIKE_MARKS:
+                if (canContinue()) {
+                    currentState = AutonomousState.MOVING_TO_BACKDROP;
+                    drive.followTrajectorySequenceAsync(trajectoryManager.driveToBackdropTrajectory());
+                }
+                break;
+            // Moving to the correct spot to place the yellow pixel
+            case MOVING_TO_BACKDROP:
+                if (canContinue()) {
+                    currentState = AutonomousState.PLACING_YELLOW;
+//                    scheduleCommand(commandManager.getAutoPlaceYellowCommand());
+                }
+                break;
+            // Placing the yellow pixel on the backstage
+            case PLACING_YELLOW:
+                if (canContinue()) {
+                    currentState = AutonomousState.HIDING;
+                    drive.followTrajectorySequenceAsync(trajectoryManager.finalTrajectory());
+                }
+                break;
+            // Moving to the corner to take up the least amount of room
+            case HIDING:
+                if (canContinue()) {
+                    currentState = AutonomousState.IDLE;
+                    // We are done, idle
+                }
+                break;
+            case IDLE:
+                break;
         }
 
-
-        // Sets robot position in Road Runner
-        drive.setPoseEstimate(startPosition);
-        telemetry.addData("Start Position", startPosition.getX());
+        CommandScheduler.getInstance().run();
+        drive.update();
+        telemetry.addData("Spike mark position", spikeMarkPosition);
+        telemetry.addData("State", currentState);
         telemetry.update();
 
-        // Do push movement
-        updateStatus("Pushing pixel to: " + gameElementPosition + " position");
-        setPrePushMovement(gameElementPosition);
-        drive.followTrajectorySequence(pushMovementPreOuttake);
-
-        // Place purple pixel
-        WaitCommand finalCommand = new WaitCommand(1);
-        new SequentialCommandGroup(
-                new InstantCommand(intake::downPosition, intake),
-                new WaitCommand(250),
-                new InstantCommand(intake::intake, intake),
-                new WaitCommand(250),
-                new InstantCommand(intake::stop, intake),
-                new InstantCommand(intake::mediumPosition, intake),
-                finalCommand
-        ).schedule();
-        while (!finalCommand.isFinished()){
-            CommandScheduler.getInstance().run();
-        }
-
-        setPostPushMovement(gameElementPosition);
-        drive.followTrajectorySequence(pushMovementPostOuttake);
-
-        if (goToBackDrop) {
-            // Driving to backdrop
-            updateStatus("Driving to backdrop");
-            if (isBlueAlliance) { // Blue side movement
-                driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToSplineHeading(new Pose2d(46, 35, Math.toRadians(0)))
-                        .strafeRight(extraMovement)
-                        .build();
-            } else { // Red side movement
-                driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToSplineHeading(new Pose2d(46, -35, 0))
-                        .strafeRight(extraMovement)
-                        .build();
-            }
-            drive.followTrajectorySequence(driveToBackdrop);
-
-            // Scoring yellow pixel
-            updateStatus("Moving slide");
-            finalCommand = new WaitCommand(1);
-            SequentialCommandGroup placeYellowPixel = new SequentialCommandGroup(
-                    new InstantCommand(intake::downPosition),
-                    new MoveElbowCommand(elbow, Constants.ElbowConstants.LOW_SCORING_POSITION),
-                    new MoveSlideCommand(slide, Constants.LinearSlideConstants.LOW_SCORING_POSITION),
-                    new WaitCommand(750),
-                    new InstantCommand(claw::openClaw, claw),
-                    new WaitCommand(750),
-                    new MoveSlideCommand(slide, Constants.LinearSlideConstants.IN_POSITION),
-                    finalCommand
-            );
-            placeYellowPixel.schedule();
-            while (!finalCommand.isFinished() && canContinue()) {
-                CommandScheduler.getInstance().run();
-            }
-            if (isBlueAlliance) {
-                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .back(3)
-                        .turn(Math.toRadians(-90))
-                        .lineTo(new Vector2d(49, 60))
-                        .build());
-            } else {
-                drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .back(3)
-                        .turn(Math.toRadians(90))
-                        .lineTo(new Vector2d(49, -60))
-                        .build());
-            }
-
-            updateStatus("Finished");
-        }
     }
 
-    public void redLeft(){
-        startPosition = new Pose2d(-35.3, -62, Math.toRadians(90));
-        isBlueAlliance = false;
-        run();
+    /**
+     * Schedules a command to be run. Adds a 1 ms wait commands to the end of the provided command and sets current command to it.
+     * (Calling isFinished on a SequentialCommandGroup doesn't seem to work as expected)
+     *
+     * @param command The command to be scheduled.
+     */
+    private void scheduleCommand(Command command) {
+        WaitCommand waitCommand = new WaitCommand(1);
+        new SequentialCommandGroup(command, waitCommand).schedule();
+        currentCommand = waitCommand;
     }
 
-    public void blueRight(){
-        startPosition = new Pose2d(-35.3, 62, Math.toRadians(270));
-        isBlueAlliance = true;
-        run();
+    /**
+     * Checks our current command and trajectory to see if we are done moving.
+     *
+     * @return true if the current command has finished and the drive base isn't busy, false otherwise
+     */
+    private boolean canContinue() {
+        return currentCommand.isFinished() && !drive.isBusy();
     }
 
-    public void redRight(){
-        goToBackDrop = true;
-        startPosition = new Pose2d(11.5, -62, Math.toRadians(90));
-        isBlueAlliance = false;
-
-//        // Building Movement to backdrop
-//        driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                .splineToSplineHeading(new Pose2d(34, -60, 0), 0)
-//                .splineToConstantHeading(new Vector2d(35, -35), 0)
-//                .build();
-
-        // Determine April Tag to line up with
-        if (gameElementPosition == -1){
-            aprilTagID = 4;
-        }
-        if (gameElementPosition == 0){
-            aprilTagID = 5;
-        }
-        if (gameElementPosition == 1){
-            aprilTagID = 6;
-        }
-        run();
-    }
-
-    public void blueLeft(){
-        goToBackDrop = true;
-        startPosition = new Pose2d(11.5, 62, Math.toRadians(270));
-        isBlueAlliance = true;
-
-//        // Building Movement to backdrop
-//        driveToBackdrop = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-//                .splineToSplineHeading(new Pose2d(35, 59, 0), 0)
-//                .splineToConstantHeading(new Vector2d(25, 35), 0)
-//                .build();
-
-        // Determine April Tag to line up with
-        if (gameElementPosition == -1){
-            aprilTagID = 1;
-        }
-        if (gameElementPosition == 0){
-            aprilTagID = 2;
-        }
-        if (gameElementPosition == 1){
-            aprilTagID = 3;
-        }
-        run();
-    }
-
-    private void setPrePushMovement(int gameElementPosition){
-        if (gameElementPosition == -1){
-            pushMovementPreOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .forward(24)
-                    .turn(Math.toRadians(90))
-                    .strafeRight(5)
-                    .back(2)
-                    .build();
-            extraMovement = -6;
-        }
-        if (gameElementPosition == 0){
-            pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-                    .forward(25)
-                    .strafeLeft(8)
-                    .build();
-            extraMovement = 0.1;
-        }
-        if (gameElementPosition == 1){
-            pushMovementPreOuttake = drive.trajectorySequenceBuilder(startPosition)
-                    .forward(24)
-                    .turn(Math.toRadians(-90))
-                    .strafeLeft(5)
-                    .back(2)
-                    .build();
-            extraMovement = 9;
-        }
-    }
-
-    private void setPostPushMovement(int gameElementPosition){
-        if(gameElementPosition == -1) {
-            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .strafeLeft(30)
-                    .build();
-        } else if (gameElementPosition == 0) {
-            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .strafeRight(6)
-                    .back(11)
-                    .build();
-        } else if (gameElementPosition == 1) {
-            pushMovementPostOuttake = drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .strafeRight(30)
-                    .build();
-        }
-    }
-
-    private void lineUpWithAprilTag(){
-        CameraSubsystem cameraSubsystem = new CameraSubsystem(hardwareMap);
-        updateStatus("Lining up with april tag ID: " + aprilTagID);
-
-        // Get to the correct distance away from the backdrop
-        do {
-            // Re-check distance to april tag
-            cameraSubsystem.detect();
-            aprilTagForwardDistance = cameraSubsystem.getDistance(aprilTagID);
-
-            telemetry.addData("Distance", aprilTagForwardDistance);
-
-            if (aprilTagForwardDistance != -1) {
-                // Move robot closer to april tag
-                if (aprilTagForwardDistance < aprilTagForwardTarget) {
-                        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).back(aprilTagForwardTarget - aprilTagForwardDistance).build());
-                }
-                if (aprilTagForwardDistance > aprilTagForwardTarget) {
-                        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(aprilTagForwardDistance - aprilTagForwardTarget).build());
-                }
-            }
-            telemetry.update();
-
-        } while (Math.abs(aprilTagForwardDistance - aprilTagForwardTarget) >= 0.25 && canContinue()); // +-1/4" tolerance
-
-//         Line up with april tag
-        do {
-            // Re-check lateral distance to april tag
-            aprilTagLateralDistance = cameraSubsystem.getLateralDistance(aprilTagID);
-//
-            // Move robot closer to april tag
-            if (aprilTagLateralDistance < 0) {
-                telemetry.addData("Should be going left", aprilTagLateralDistance);
-                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeLeft(-aprilTagLateralDistance).build());
-            }
-            if (aprilTagLateralDistance > 0) {
-                telemetry.addData("Should be going right", aprilTagLateralDistance);
-                    drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).strafeRight(aprilTagLateralDistance).build());
-            }
-            telemetry.update();
-        } while (Math.abs(aprilTagLateralTarget - aprilTagLateralDistance) >= 1 && canContinue()); // +-1" tolerance
-    }
-
-    private void startOpenCV(){
-        pipeline = new OpenCVPipeline();
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, Constants.CameraConstants.CAMERA_NAME), cameraMonitorViewId);
-        webcam.setPipeline(pipeline);
-        webcam.setMillisecondsPermissionTimeout(5000);
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
-            }
-            @Override
-            public void onError(int errorCode)
-            {
-            }
-        });
-    }
-
+    @Deprecated
     private void updateStatus(String text) {
         telemetry.addData("Status", text);
         telemetry.update();
     }
 
-    private boolean canContinue() {
-        // TODO: figure out a way to check if there is a stop requested from opmode, to stop the controller from crashing when the robot stops its auto routine earlier
-        return true;
-//        return opMode.canContinue();
+    public SampleMecanumDrive getDriveBase() {
+        return drive;
     }
 
+    public SpikeMark getSpikeMarkPosition() {
+        return spikeMarkPosition;
+    }
+
+    public float getPositionMultiplier() {
+        return positionMultiplier;
+    }
+
+    public boolean isBlueAlliance() {
+        return isBlueAlliance;
+    }
+
+    public boolean isPlacingYellow() {
+        return isPlacingYellow;
+    }
+
+    public boolean isUpstage() {
+        return isUpstage;
+    }
 }

@@ -8,25 +8,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Robot;
 
 /**
- * OpMode used after autonomous.
+ * OpMode that isn't used after autonomous.
  */
-@TeleOp(name="Main", group = "Real")
-public class MainOpMode extends LinearOpMode {
+@TeleOp(name = "Tele OpMode", group = "Real")
+public class TeleOpMode extends LinearOpMode {
+
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Robot robot = new Robot(this, false, false);
-
-
-        int c = 0;
-        while (opModeInInit()) {
-            c++;
-            telemetry.addLine(c % 100 == 0 ? "-  -" : "0  0");
-            telemetry.addLine(" u ");
-            telemetry.update();
-        }
+        Robot robot = new Robot(this, false, true);
 
         robot.start();
+
+        waitForStart();
+
         while (opModeIsActive() && !isStopRequested()) {
             robot.run();
         }
