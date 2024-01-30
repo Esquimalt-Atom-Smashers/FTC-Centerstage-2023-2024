@@ -20,12 +20,6 @@ public class NewAutonomousController {
         IDLE
     }
 
-    public enum SpikeMark {
-        UPSTAGE,
-        MIDDLE,
-        DOWNSTAGE
-    }
-
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final Robot robot;
@@ -39,10 +33,11 @@ public class NewAutonomousController {
     public NewAutonomousController(LinearOpMode opMode, boolean isBlueAlliance, boolean isUpstage, boolean isPlacingYellow) {
         this.hardwareMap = opMode.hardwareMap;
         this.telemetry = opMode.telemetry;
+
         robot = new Robot(opMode, true, true);
         commandManager = new CommandManager(robot);
-
         autoPosition = new AutoPosition(isBlueAlliance, isPlacingYellow, isUpstage);
+
         if (isBlueAlliance) robot.getLedSubsystem().setBlue();
         else robot.getLedSubsystem().setRed();
     }
@@ -57,11 +52,11 @@ public class NewAutonomousController {
             case MOVING_TO_SPIKE_MARKS:
                 if (canContinue()) {
                     if (robot.getDistanceSensorSubsystem().isLeftBlocked())
-                        autoPosition.setSpikeMark(autoPosition.isBlue ? SpikeMark.UPSTAGE : SpikeMark.DOWNSTAGE);
+                        autoPosition.setSpikeMark(autoPosition.isBlue ? AutoPosition.SpikeMark.UPSTAGE : AutoPosition.SpikeMark.DOWNSTAGE);
                     else if (robot.getDistanceSensorSubsystem().isRightBlocked())
-                        autoPosition.setSpikeMark(autoPosition.isBlue ? SpikeMark.DOWNSTAGE : SpikeMark.UPSTAGE);
+                        autoPosition.setSpikeMark(autoPosition.isBlue ? AutoPosition.SpikeMark.DOWNSTAGE : AutoPosition.SpikeMark.UPSTAGE);
                     else
-                        autoPosition.setSpikeMark(SpikeMark.MIDDLE);
+                        autoPosition.setSpikeMark(AutoPosition.SpikeMark.MIDDLE);
                     state = AutonomousState.PLACING_PURPLE;
                     scheduleCommand(commandManager.getAutoDriveAndPlacePurpleCommand(autoPosition));
                 }
@@ -90,7 +85,7 @@ public class NewAutonomousController {
         CommandScheduler.getInstance().run();
     }
 
-    public SpikeMark getSpikeMark() {
+    public AutoPosition.SpikeMark getSpikeMark() {
         return autoPosition.spikeMark;
     }
 

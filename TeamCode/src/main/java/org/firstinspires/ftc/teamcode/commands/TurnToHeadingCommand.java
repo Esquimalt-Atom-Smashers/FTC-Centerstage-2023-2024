@@ -24,19 +24,4 @@ public class TurnToHeadingCommand extends TurnByAngleCommand {
         angle = targetHeading - driveSubsystem.getHeading();
         super.initialize();
     }
-
-    @Override
-    public void execute() {
-        super.execute();
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        super.end(interrupted);
-    }
-
-    @Override
-    public boolean isFinished() {
-        return super.isFinished();
-    }
 }

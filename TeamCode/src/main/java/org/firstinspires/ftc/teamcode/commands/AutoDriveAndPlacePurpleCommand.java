@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.auto.AutoPosition;
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
@@ -14,7 +13,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
     public AutoDriveAndPlacePurpleCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem, AutoPosition autoPosition) {
         int multiplier = autoPosition.isBlue ? 1 : -1;
         // This is if we are upstage and the team prop is upstage
-        if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
+        if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
             addCommands(
                     // Driving to the correct position
                     new DriveCommand(driveSubsystem, -18),
@@ -26,7 +25,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
             );
         }
         // This is if we are downstage and the team prop is upstage
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
                     new StrafeCommand(driveSubsystem, 7 * multiplier),
                     new WaitCommand(250),
@@ -40,13 +39,13 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE) {
             addCommands(
                     new DriveCommand(driveSubsystem, -7),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.DOWNSTAGE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE) {
             addCommands(
                     new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),

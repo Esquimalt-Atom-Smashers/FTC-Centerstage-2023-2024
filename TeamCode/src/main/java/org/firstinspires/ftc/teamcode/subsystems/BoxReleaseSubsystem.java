@@ -27,7 +27,7 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
     private final LED greenLeftLED;
 
     /**
-     * Constructs a new boxReleaseSubsystem.
+     * Constructs a new BoxReleaseSubsystem.
      *
      * @param hardwareMap The hardware map of the robot
      * @param telemetry The telemetry of the robot
@@ -74,7 +74,7 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
     }
 
     // I hate this
-    // The green are red and the red are green
+    // The green are red and the red are green, but whatever
     private void enableRedLights() {
         greenLeftLED.enable(true);
         redLeftLED.enable(false);

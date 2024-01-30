@@ -25,18 +25,15 @@ import java.util.Arrays;
  * @author Esquimalt Atom Smashers
  */
 public class DriveSubsystem extends CustomSubsystemBase {
-    /** The DC motors on the robot. */
     private final DcMotorEx frontLeftMotor;
     private final DcMotorEx frontRightMotor;
     private final DcMotorEx rearLeftMotor;
     private final DcMotorEx rearRightMotor;
+    /** The DC motors on the robot. */
     private final DcMotorEx[] motors;
 
     /** The built-in IMU(gyro) on the control hub. */
     private final BHI260IMU imu; // Counter clockwise is positive
-    private double offset;
-
-    private double headingError = 0;
 
     private enum DriveState {
         MANUAL,
@@ -47,11 +44,6 @@ public class DriveSubsystem extends CustomSubsystemBase {
     private DriveState driveState = DriveState.MANUAL;
 
     private double targetHeading;
-
-//    private double snapTarget;
-
-//    public static double forwardTarget;
-//    private boolean atForwardTarget;
 
     /**
      * Constructs a new DriveSubsystem.
@@ -156,8 +148,13 @@ public class DriveSubsystem extends CustomSubsystemBase {
         drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
     }
 
-    // Starts the robot moving forward, you MUST call isFinishedMoving() repeatedly
-    // to check if the robot has made it
+    /**
+     * Start moving the robot some number of inches forwards/backwards using the encoders. Sets the target position of
+     * the motors and starts them moving. {@link #isFinishedMoving()} must be called to check if
+     * the robot has made it.
+     *
+     * @param inches The distance in inches to drive forwards/backwards
+     */
     public void driveByDistanceAsync(double inches) {
         driveState = DriveState.MOVING_TO_POSITION;
         Arrays.stream(motors).forEach(motor ->
@@ -167,6 +164,12 @@ public class DriveSubsystem extends CustomSubsystemBase {
     }
 
     // Moves the robot inches forward and then stops it
+
+    /**
+     * Drive the robot some number of inches forwards/backwards.
+     *
+     * @param inches The distance in inches to drive forwards/backwards
+     */
     public void driveByDistance(double inches) {
         driveByDistanceAsync(inches);
         while (!isFinishedMoving()) {}
@@ -174,6 +177,14 @@ public class DriveSubsystem extends CustomSubsystemBase {
 
     // Strafe the robot inches, you MUST call isFinishedMoving() repeatedly
     // to check if the robot has made it
+
+    /**
+     * Start moving the robot some number of inches right/left using the encoders. Sets the target position of the
+     * motors and starts them moving. {@link #isFinishedMoving()} must be called to
+     * check if the robot has made it.
+     *
+     * @param inches The distance in inches to drive right/left
+     */
     public void strafeByDistanceAsync(double inches) {
         driveState = DriveState.MOVING_TO_POSITION;
         frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - toPulses(inches));
@@ -185,11 +196,24 @@ public class DriveSubsystem extends CustomSubsystemBase {
     }
 
     // Strafes the robot inches and stops it when it gets there
+
+    /**
+     * Strafes the robot some number of inches right/left.
+     *
+     * @param inches The number of inches to strafe right/left
+     */
     public void strafeByDistance(double inches) {
         strafeByDistanceAsync(inches);
         while (!isFinishedMoving()) {}
     }
 
+    /**
+     * Turn the robot some angle using the gyro. Sets the target heading and starts moving the motors.
+     * {@link #isFinishedTurning()} must be called to check if the robot has made it.
+     *
+     * @param angle The angle to rotate the robot by
+     * @param speed The speed at which the robot rotates (0-1)
+     */
     public void turnAsync(double angle, double speed) {
         driveState = DriveState.TURNING_TO_POSITION;
         targetHeading = getHeading() + angle;
@@ -198,6 +222,11 @@ public class DriveSubsystem extends CustomSubsystemBase {
         drive(0, 0, getAutoTurnSpeed(speed), false, false, 1);
     }
 
+    /**
+     * Turns the robot some angle using the gyro. Waits half a second and corrects a little bit
+     *
+     * @param angle The angle to turn the robot by
+     */
     public void turn(double angle) {
         turnAsync(angle, AUTO_TURN_SPEED);
         while (!isFinishedTurning()) {}
@@ -209,26 +238,35 @@ public class DriveSubsystem extends CustomSubsystemBase {
         angle = targetHeading - getHeading();
         turnAsync(angle, AUTO_TURN_SPEED / 2);
         while (!isFinishedTurning()) {}
-
-        telemetry.addLine("Turning complete! :)");
-        telemetry.update();
     }
 
+    /**
+     * Gets the speed we should be turning.
+     *
+     * @param speed The absolute values of the speed
+     * @return What speed we should turn
+     */
     public double getAutoTurnSpeed(double speed) {
         double angle = targetHeading - getHeading();
         return angle > 0 ? -speed : speed;
     }
 
+    /** @return What speed we should turn, assumes we are using the default auto turn speed */
     public double getAutoTurnSpeed() {
         return getAutoTurnSpeed(AUTO_TURN_SPEED);
     }
 
-
-
+    /** @return True is all of the motors are busy, false otherwise */
     private boolean motorsBusy() {
         return frontLeftMotor.isBusy() && frontRightMotor.isBusy() && rearRightMotor.isBusy() && rearLeftMotor.isBusy();
     }
 
+    /**
+     * Checks if we are done driving or strafing, and if we are done, stops the motors and
+     * sets the state back to manual.
+     *
+     * @return True if we are done moving, false otherwise
+     */
     public boolean isFinishedMoving() {
         if (!motorsBusy()) {
             stopMotors();
@@ -239,6 +277,12 @@ public class DriveSubsystem extends CustomSubsystemBase {
         return false;
     }
 
+    /**
+     * Checks if we are done turning, and if we are done, stops the motors and sets the
+     * state back to manual.
+     *
+     * @return True if we are done moving, false otherwise
+     */
     public boolean isFinishedTurning() {
         if (Math.abs(getHeading() - targetHeading) <= AUTO_HEADING_TOLERANCE) {
             stopMotors();

@@ -19,7 +19,7 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
             );
             return;
         }
-        if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE) {
+        if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
                     new TurnCommand(driveSubsystem, 90 * multiplier),
                     new WaitCommand(250),
@@ -28,7 +28,7 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
                     new StrafeCommand(driveSubsystem, 8 * multiplier)
             );
         }
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE) {
             addCommands(
                     new TurnCommand(driveSubsystem, 90 * multiplier),
                     new WaitCommand(250),
@@ -39,7 +39,7 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
                     new TurnToHeadingCommand(driveSubsystem, 90 * multiplier)
             );
         }
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.DOWNSTAGE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE) {
             addCommands(
                     new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),

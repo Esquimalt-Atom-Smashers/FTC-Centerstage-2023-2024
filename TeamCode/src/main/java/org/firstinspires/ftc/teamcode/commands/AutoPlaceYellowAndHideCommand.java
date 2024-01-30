@@ -16,7 +16,7 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
     public AutoPlaceYellowAndHideCommand(DriveSubsystem driveSubsystem, ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem, AutoPosition autoPosition) {
         int multiplier = autoPosition.isBlue ? 1 : -1;
         lastCommand = new WaitCommand(1);
-        if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE)
+        if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE)
             addCommands(
                     new TurnToHeadingCommand(driveSubsystem, 90 * multiplier),
                     new WaitCommand(250),
@@ -29,7 +29,7 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
                     new WaitCommand(250),
                     new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
             );
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE)
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE)
             addCommands(
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
                     new TurnCommand(driveSubsystem, -90 * multiplier),
@@ -40,7 +40,7 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
                     new WaitCommand(250),
                     new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
             );
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.DOWNSTAGE)
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE)
             addCommands(
                     new StrafeCommand(driveSubsystem, 8 * multiplier),
                     new WaitCommand(250),

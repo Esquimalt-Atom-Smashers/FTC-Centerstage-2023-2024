@@ -1,7 +1,18 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+/**
+ * Represents all of the variables for an auto position. Contains whether we are on the blue
+ * alliance, whether we want to place a yellow, whether we are upstage (closer to the backdrop), and
+ * where the spike mark is.
+ */
 public class AutoPosition {
-    public NewAutonomousController.SpikeMark spikeMark;
+    public enum SpikeMark {
+        UPSTAGE,
+        MIDDLE,
+        DOWNSTAGE
+    }
+
+    public SpikeMark spikeMark;
     public boolean isBlue;
     public boolean isPlacingYellow;
     public boolean isUpstage;
@@ -12,12 +23,12 @@ public class AutoPosition {
         this.isUpstage = isUpstage;
     }
 
-    public AutoPosition(NewAutonomousController.SpikeMark spikeMark, boolean isBlue, boolean isPlacingYellow, boolean isUpstage) {
+    public AutoPosition(SpikeMark spikeMark, boolean isBlue, boolean isPlacingYellow, boolean isUpstage) {
         this(isBlue, isPlacingYellow, isUpstage);
         this.spikeMark = spikeMark;
     }
 
-    public void setSpikeMark(NewAutonomousController.SpikeMark spikeMark) {
+    public void setSpikeMark(SpikeMark spikeMark) {
         this.spikeMark = spikeMark;
     }
 }

@@ -22,12 +22,15 @@ public class CommandManager {
     private final Command closeBoxCommand;
     /** Default command for DriveSubsystem */
     private final Command defaultDriveCommand;
+    /** Command that resets the gyro */
     private final Command resetGyroCommand;
-//    /** Command for DriveSubsystem */
-//    private final Command driveCommand;
+    /** Command that rotates the robot to face the right */
     private final Command snapRightCommand;
+    /** Command that rotates the robot to face the left */
     private final Command snapLeftCommand;
+    /** Command that rotates the robot to face away */
     private final Command snapUpCommand;
+    /** Command that rotate the robot to face back */
     private final Command snapDownCommand;
     /** Command that moves the arm up and enters launching drone mode */
     private final Command droneModeCommand;
@@ -43,10 +46,9 @@ public class CommandManager {
     private final Command defaultWinchCommand;
     /** Command that lowers arm and intake and enters intake mode */
     private final Command intakeModeCommand;
-    ///** Command that spits out pixels */
-    //private final Command outtakeModeCommand;
     /** Command that exits intake mode */
     private final Command intakeCancelCommand;
+    /** Command that starts outtaking pixels */
     private final Command outtakeCommand;
     /** Command that picks pixels up and exits intake mode */
     private final Command pickupPixelsCommand;
@@ -60,10 +62,6 @@ public class CommandManager {
     private final Command homePostionCommand;
     /** Command run at the start of driver controlled */
     private final Command setupCommand;
-
-//    /** Command run at the start of autonomous */
-//    private final Command autoSetupCommand;
-//    private final Command autoDriveToSpikeMarksCommand;
 
     public CommandManager(Robot robot) {
         this.robot = robot;
@@ -280,26 +278,6 @@ public class CommandManager {
     public Command getSetupCommand() {
         return setupCommand;
     }
-
-//    public Command getAutoSetupCommand() {
-//        return autoSetupCommand;
-//    }
-
-//    public Command getAutoDriveToSpikeMarksCommand() {
-//        return autoDriveToSpikeMarksCommand;
-//    }
-
-//    public Command getAutoDriveLeftCommand() {
-//        return autoDriveLeftCommand;
-//    }
-
-//    public Command getAutoDriveMiddleCommand() {
-//        return autoDriveMiddleCommand;
-//    }
-
-//    public Command getAutoDriveRightCommand() {
-//        return autoDriveRightCommand;
-//    }
 
     public Command getAutoSetupCommand() {
         return new AutoSetupCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem());
