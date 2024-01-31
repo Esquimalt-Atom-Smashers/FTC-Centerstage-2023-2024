@@ -71,9 +71,9 @@ public class PIDTestingOpMode extends LinearOpMode {
             CommandScheduler.getInstance().run();
 
             robot.getElbowSubsystem().printData();
-            telemetry.addData("Elbow target", ElbowSubsystem.target);
+//            telemetry.addData("Elbow target", ElbowSubsystem.target);
             robot.getLinearSlideSubsystem().printData();
-            telemetry.addData("Slide target", LinearSlideSubsystem.target);
+//            telemetry.addData("Slide target", LinearSlideSubsystem.target);
             telemetry.update();
         }
     }

@@ -18,13 +18,6 @@ import org.firstinspires.ftc.teamcode.subsystems.LEDSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
 
-/*
-    TODO:
-        Write conversions of angles for red side autonomous
-        Test red side autonomous
-        Test right spike mark more
-        Make some of the arm movements and driving happen at the same time (low unless we start running out of time in auto)
- */
 /**
  * Represents all of the subsystems that make up the robot
  *

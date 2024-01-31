@@ -32,11 +32,10 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        // TODO: Re-final these constants
         // As the angle increases, the hinge closes
         // 270 degrees is inside the box
-        public static  double OPEN_POSITION = 180;
-        public static  double CLOSE_POSITION = 240;
+        public static final double OPEN_POSITION = 180;
+        public static final double CLOSE_POSITION = 240;
 
         public static final String RED_RIGHT_LED_NAME = "redRight";
         public static final String GREEN_RIGHT_LED_NAME = "greenRight";
@@ -48,7 +47,6 @@ public class Constants {
         public static final String LEFT_DISTANCE_SENSOR_NAME = "leftDistanceSensor";
         public static final String RIGHT_DISTANCE_SENSOR_NAME = "rightDistanceSensor";
 
-        // TODO: Find value
         public static double DISTANCE_THRESHOLD = 7;
     }
 
@@ -95,9 +93,7 @@ public class Constants {
         public static final double MIN_ANGLE = 0;
         public static final double MAX_ANGLE = 270;
 
-        // TODO: Find new value
         public static final double START_POSITION = 0;
-        // TODO: Find new value
         public static final double RELEASE_ANGLE = 180;
     }
 
@@ -115,7 +111,6 @@ public class Constants {
         public static  int LOW_SCORING_POSITION = 7600;
         public static  int AUTO_SCORING_POSITION = 7000;
 
-        // TODO: Raise this a bit more
         public static  int LEVEL_POSITION = 3500;
         public static  int DRIVING_POSITION = 1100;
 
@@ -161,7 +156,6 @@ public class Constants {
 
         // The motor is reversed so we can have positive values higher up, meaning these have to be negative
         public static double SLIDE_MANUAL_POWER_MULTIPLIER = -.8;
-//        public static double RETRACT_POWER = .8;
 
         // PID values for the PID controller
         public static  double P = 0.003, I = 0, D = 0;
@@ -190,7 +184,6 @@ public class Constants {
         public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
         public static final double WINCH_SPEED = 1;
-        /** @noinspection SpellCheckingInspection*/
         public static final double UNWINCH_SPEED = -.5;
     }
 }

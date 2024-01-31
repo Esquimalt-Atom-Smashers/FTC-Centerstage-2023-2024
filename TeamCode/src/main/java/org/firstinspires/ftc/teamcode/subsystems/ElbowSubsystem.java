@@ -25,8 +25,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
 
     private final PIDController controller;
 
-    // TODO: Hide this
-    public static double target = 0;
+    private static double target = 0;
     private double lastPower;
 
     private ElapsedTime timer;
@@ -186,6 +185,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         telemetry.addData("Elbow Position", elbowMotor.getCurrentPosition());
         telemetry.addData("Elbow last power", lastPower);
         telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
+        telemetry.addData("Target", target);
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
     }
