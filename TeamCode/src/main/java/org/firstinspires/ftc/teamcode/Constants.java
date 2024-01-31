@@ -168,7 +168,7 @@ public class Constants {
 
         // Min and max values for the arm, don't change them
         public static final int MIN_POSITION = 0;
-        public static final int MAX_POSITION = 2800;
+        public static final int MAX_POSITION = 2900;
 
         public static  int IN_POSITION = MIN_POSITION;
         public static  int LOW_SCORING_POSITION = 2600;

@@ -6,15 +6,26 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
+/**
+ * Command that takes over turning from the driver to rotate the robot to a
+ * heading while the driver drives.
+ */
 public class SnapCommand extends CommandBase {
     private final DriveSubsystem driveSubsystem;
     private final GamepadEx driver;
     private final double heading;
 
-    public SnapCommand(DriveSubsystem driveSubsystem, GamepadEx gamepad, double heading) {
+    /**
+     * Creates a command that rotates the robot to a specified angle while the driver is driving.
+     *
+     * @param driveSubsystem Reference to the driveSubsystem
+     * @param gamepad Reference to the driver gamepad
+     * @param targetHeading The target heading in degrees
+     */
+    public SnapCommand(DriveSubsystem driveSubsystem, GamepadEx gamepad, double targetHeading) {
         this.driveSubsystem = driveSubsystem;
         this.driver = gamepad;
-        this.heading = heading;
+        this.heading = targetHeading;
     }
 
     @Override

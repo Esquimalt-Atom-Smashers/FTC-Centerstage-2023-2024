@@ -11,8 +11,23 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
+/**
+ * Command that drives to the correct position on the backdrop, places the yellow pixel on the (hopefully)
+ * correct position, and drives into the corner.
+ */
 public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
     private final Command lastCommand;
+
+    /**
+     * Creates a command that drives to the correct position on the backdrop, places the yellow pixel on the (hopefully)
+     *  * correct position, and drives into the corner.
+     *
+     * @param driveSubsystem Reference to the driveSubsystem
+     * @param elbowSubsystem Reference to the elbowSubsystem
+     * @param linearSlideSubsystem Reference to the linearSlideSubsystem
+     * @param boxReleaseSubsystem Reference to the boxReleaseSubsystem
+     * @param autoPosition The starting auto position
+     */
     public AutoPlaceYellowAndHideCommand(DriveSubsystem driveSubsystem, ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem, AutoPosition autoPosition) {
         int multiplier = autoPosition.isBlue ? 1 : -1;
         lastCommand = new WaitCommand(1);

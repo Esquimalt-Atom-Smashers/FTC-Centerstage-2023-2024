@@ -17,15 +17,6 @@ public class MainOpMode extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Robot robot = new Robot(this, false, false);
 
-
-        int c = 0;
-        while (opModeInInit()) {
-            c++;
-            telemetry.addLine(c % 100 == 0 ? "-  -" : "0  0");
-            telemetry.addLine(" u ");
-            telemetry.update();
-        }
-
         robot.start();
         while (opModeIsActive() && !isStopRequested()) {
             robot.run();

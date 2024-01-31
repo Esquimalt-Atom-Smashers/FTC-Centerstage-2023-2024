@@ -9,8 +9,19 @@ import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
+/**
+ * Command that moves the arm to place the yellow pixel on the backdrop.
+ */
 public class AutoPlaceYellowCommand extends SequentialCommandGroup {
     private final Command lastCommand;
+
+    /**
+     * Creates a command that places the yellow pixel on the backdrop.
+     *
+     * @param elbowSubsystem Reference to the elbowSubsystem
+     * @param linearSlideSubsystem Reference to the linearSlideSubsystem
+     * @param boxReleaseSubsystem Reference to the boxReleaseSubsystem
+     */
     public AutoPlaceYellowCommand(ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem) {
         lastCommand = new WaitCommand(1);
         addCommands(

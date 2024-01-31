@@ -8,7 +8,19 @@ import org.firstinspires.ftc.teamcode.auto.AutoPosition;
 import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
+/**
+ * Command that drives from where we placed the purple pixel to the next spot,
+ * either the backdrop or just facing the correct direction.
+ */
 public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
+
+    /**
+     * Creates a command that drives from where we placed the purple pixel to the next spot,
+     * either the backdrop or just facing the correct direction.
+     *
+     * @param driveSubsystem A reference to the driveSubsystem
+     * @param autoPosition The starting auto position
+     */
     public AutoDriveFromPurpleCommand(DriveSubsystem driveSubsystem, AutoPosition autoPosition) {
         int multiplier = autoPosition.isBlue ? 1 : -1;
         if (!autoPosition.isPlacingYellow) {

@@ -9,8 +9,17 @@ import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
+/**
+ * Command that uses the intakeSubsystem to place the purple pixel during autonomous.
+ */
 public class AutoPlacePurpleCommand extends SequentialCommandGroup {
     private final Command lastCommand;
+
+    /**
+     * Creates the command that places the purple pixel during autonomous.
+     *
+     * @param intakeSubsystem Reference to the intakeSubsystem
+     */
     public AutoPlacePurpleCommand(IntakeSubsystem intakeSubsystem) {
         lastCommand = new WaitCommand(1);
         addCommands(

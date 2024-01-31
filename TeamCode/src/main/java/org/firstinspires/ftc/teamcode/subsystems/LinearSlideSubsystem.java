@@ -77,6 +77,10 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
      */
     public void moveManually(double input) {
         state = PIDSubsystemState.MANUAL;
+        if (slideMotor.getCurrentPosition() >= MAX_POSITION && input < 0) {
+            stopMotor();
+            return;
+        }
         if (input > 0 && isLimitSwitchPressed()) {
             stopMotor();
             resetEncoder();

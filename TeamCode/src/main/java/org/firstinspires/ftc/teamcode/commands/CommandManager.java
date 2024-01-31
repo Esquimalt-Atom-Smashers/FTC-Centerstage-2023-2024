@@ -88,7 +88,7 @@ public class CommandManager {
         snapUpCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 0);
         // Snap down
         snapDownCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 180);
-
+// :]
         droneModeCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.setState(Robot.RobotState.SHOOTING_DRONE)),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDroneLaunchPosition())
@@ -103,15 +103,11 @@ public class CommandManager {
 
 
         defaultElbowCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().moveManually(1);
-            else if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().moveManually(-1);
-            else robot.getElbowSubsystem().stopMotor();
+            robot.getElbowSubsystem().moveManually(Math.abs(robot.getOperatorGamepad().getLeftY()) >= 0.1 ? robot.getOperatorGamepad().getLeftY() : 0);
         }, robot.getElbowSubsystem());
 
         defaultSlideCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().moveManually(1);
-            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().moveManually(-1);
-            else robot.getLinearSlideSubsystem().stopMotor();
+            robot.getLinearSlideSubsystem().moveManually(Math.abs(robot.getOperatorGamepad().getRightY()) >= 0.1 ? robot.getOperatorGamepad().getRightY() : 0);
         }, robot.getLinearSlideSubsystem());
 
         defaultWinchCommand = new RunCommand(() -> {

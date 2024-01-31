@@ -108,13 +108,9 @@ public class Robot {
     /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
         // --- BoxReleaseSubsystem ---
-        // Press driver B to open the box
-        Trigger openBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B));
+        // Press operator X to open the box
+        Trigger openBoxTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X));
         openBoxTrigger.whenActive(commandManager.getOpenBoxCommand());
-
-        // Press driver A to close the box
-        Trigger closeBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.A));
-        closeBoxTrigger.whenActive(commandManager.getCloseBoxCommand());
 
         // --- DriveSubsystem ---
         driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
@@ -140,12 +136,11 @@ public class Robot {
 
         // --- DroneSubsystem ---
         // Press operator A to raise the arm and enter shooting drone mode
-        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A));
+        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
         droneLaunchModeTrigger.whenActive(commandManager.getDroneModeCommand());
 
         // Press operator B to launch the drone
-        // We must be in shooting mode
-        Trigger droneLaunchTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && state == RobotState.SHOOTING_DRONE);
+        Trigger droneLaunchTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state == RobotState.SHOOTING_DRONE);
         droneLaunchTrigger.whenActive(commandManager.getDroneLaunchCommand());
 
         // Press operator Y to exit shooting drone mode
@@ -162,17 +157,12 @@ public class Robot {
         winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
 
         // --- IntakeSubsystem ---
-        // Press operator RT to enter intake mode
+        // Press operator A to enter intake mode, when in intake mode, press operator A to pick up the pixels
         // We don't want to be in shooting drone mode, but anything else is fine
-        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state != RobotState.SHOOTING_DRONE);
-        intakeTrigger.whenActive(commandManager.getIntakeModeCommand());
+        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A) && state != RobotState.SHOOTING_DRONE);
+        intakeTrigger.toggleWhenActive(commandManager.getIntakeModeCommand(), commandManager.getPickupPixelsCommand());
 
-        // Press operator RB to pickup the pixels while the arm is down
-        // We must be in intake mode
-        Trigger pickupPixelsTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && state == RobotState.INTAKE);
-        pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
-
-        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X) && state == RobotState.INTAKE);
+        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && state == RobotState.INTAKE);
         outtakeTrigger.whenActive(commandManager.getOuttakeCommand());
 
         // --- Complex Commands (commands that use more than one subsystem) ---
@@ -214,6 +204,7 @@ public class Robot {
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
+        opMode.telemetry.addData("Right Y", operatorGamepad.getRightY());
         opMode.telemetry.addData("Scoring state", state);
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();
@@ -255,8 +246,8 @@ public class Robot {
 
         // Box release Subsystem (driver)
         // B -> Open/Red, A -> Close/Green
-        if (driverGamepad.getButton(GamepadKeys.Button.B) && !driverGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.openBox();
-        if (driverGamepad.getButton(GamepadKeys.Button.A) && !driverGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.closeBox();
+        if (operatorGamepad.getButton(GamepadKeys.Button.B) && !operatorGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.openBox();
+        if (operatorGamepad.getButton(GamepadKeys.Button.A) && !operatorGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.closeBox();
 /*        if (driverGamepad.getButton(GamepadKeys.Button.A)) {
             if (boxReleaseSubsystem.boxOpen){
                 boxReleaseSubsystem.closeBox();
