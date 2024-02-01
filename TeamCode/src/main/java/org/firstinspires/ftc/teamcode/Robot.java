@@ -112,19 +112,19 @@ public class Robot {
         resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
 
         // Press driver left dpad while in driving mode to snap to left side of field
-        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
+        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(-0.5, 0));
         snapLeftTrigger.whenActive(commandManager.getSnapLeftCommand());
 
         // Press driver up dpad while in driving mode to snap to forward (far edge) side of field
-        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP));
+        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(0, 0.5));
         snapUpTrigger.whenActive(commandManager.getSnapUpCommand());
 
         // Press driver right dpad while in driving mode to snap to right side of field
-        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
+        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(0.5, 0));
         snapRightTrigger.whenActive(commandManager.getSnapRightCommand());
 
         // Press driver down dpad while in driving mode to snap to back (near edge) side of field
-        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
+        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(0, -0.5));
         snapDownTrigger.whenActive(commandManager.getSnapDownCommand());
 
         // --- DroneSubsystem ---
@@ -281,6 +281,22 @@ public class Robot {
 
     public RobotState getState() {
         return state;
+    }
+
+    public boolean isJoystickClose(double x, double y) {
+        if (y == 0) {
+            if (x < 0)
+                return driverGamepad.getRightX() < x && Math.abs(driverGamepad.getRightY()) <= Constants.DriveConstants.DEADZONE;
+            else
+                return driverGamepad.getRightX() > x && Math.abs(driverGamepad.getRightY()) <= Constants.DriveConstants.DEADZONE;
+        }
+        else if (x == 0) {
+            if (y < 0)
+                return -driverGamepad.getRightY() < y && Math.abs(driverGamepad.getRightX()) <= Constants.DriveConstants.DEADZONE;
+            else
+                return -driverGamepad.getRightY() > y && Math.abs(driverGamepad.getRightX()) <= Constants.DriveConstants.DEADZONE;
+        }
+        return false;
     }
 
     public GamepadEx getOperatorGamepad() {

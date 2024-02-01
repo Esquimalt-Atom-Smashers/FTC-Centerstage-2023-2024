@@ -14,6 +14,7 @@ public class SnapCommand extends CommandBase {
     private final DriveSubsystem driveSubsystem;
     private final GamepadEx driver;
     private final double heading;
+    private double turningSpeed;
 
     /**
      * Creates a command that rotates the robot to a specified angle while the driver is driving.
@@ -31,11 +32,12 @@ public class SnapCommand extends CommandBase {
     @Override
     public void initialize() {
         driveSubsystem.turnAsync(heading - driveSubsystem.getHeading(), Constants.DriveConstants.AUTO_TURN_SPEED);
+        turningSpeed = driveSubsystem.getAutoTurnSpeed(Constants.DriveConstants.AUTO_TURN_SPEED);
     }
 
     @Override
     public void execute() {
-        driveSubsystem.drive(driver.getLeftY(), driver.getLeftX(), driveSubsystem.getAutoTurnSpeed(), true, false, 1);
+        driveSubsystem.drive(driver.getLeftY(), driver.getLeftX(), turningSpeed, true, false, 1);
     }
 
     @Override
