@@ -107,65 +107,28 @@ public class Robot {
 
     /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
-
         customDriverController
                 .onAPressed().whenActive(commandManager.getHomePostionCommand())
                 .onRightPressed().whenActive(commandManager.getSnapRightCommand())
+                .onLeftPressed().whenActive(commandManager.getSnapLeftCommand())
                 .onUpPressed().whenActive(commandManager.getSnapUpCommand())
                 .onDownPressed().whenActive(commandManager.getSnapDownCommand())
                 .onBackPressed().whenActive(commandManager.getResetGyroCommand());
 
         customOperatorController
                 .onAPressed().toggleWhenActive(commandManager.getIntakeModeCommand(), commandManager.getPickupPixelsCommand())
-                .onBPressed().whenActive(commandManager.getOuttakeCommand())
+                .onBPressed().toggleWhenActive(commandManager.getOuttakeCommand(), commandManager.getIntakeCommand())
                 .onXPressed().whenActive(commandManager.getOpenBoxCommand())
                 .onYPressed().and(() -> isState(RobotState.SHOOTING_DRONE)).whenActive(commandManager.getDroneCancelCommand())
                 .onLeftPressed().whenActive(commandManager.getLowScoringPositionCommand())
                 .onUpPressed().whenActive(commandManager.getMediumScoringPositionCommand())
                 .onRightPressed().whenActive(commandManager.getHighScoringPositionCommand())
-                .onDownPressed().whenActive(commandManager.getHomePostionCommand());
-
-
-
-        // --- BoxReleaseSubsystem ---
-        // Press operator X to open the box
-        Trigger openBoxTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X));
-        openBoxTrigger.whenActive(commandManager.getOpenBoxCommand());
+                .onDownPressed().whenActive(commandManager.getHomePostionCommand())
+                .onRightBumperPressed().whenActive(commandManager.getDroneModeCommand())
+                .onRightTrigger(0.1).and(() -> isState(RobotState.SHOOTING_DRONE)).whenActive(commandManager.getDroneLaunchCommand());
 
         // --- DriveSubsystem ---
         driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
-
-//        Trigger resetGyroTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.BACK));
-//        resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
-//
-//        // Press driver left dpad while in driving mode to snap to left side of field
-//        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
-//        snapLeftTrigger.whenActive(commandManager.getSnapLeftCommand());
-//
-//        // Press driver up dpad while in driving mode to snap to forward (far edge) side of field
-//        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP));
-//        snapUpTrigger.whenActive(commandManager.getSnapUpCommand());
-//
-//        // Press driver right dpad while in driving mode to snap to right side of field
-//        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
-//        snapRightTrigger.whenActive(commandManager.getSnapRightCommand());
-//
-//        // Press driver down dpad while in driving mode to snap to back (near edge) side of field
-//        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
-//        snapDownTrigger.whenActive(commandManager.getSnapDownCommand());
-
-        // --- DroneSubsystem ---
-        // Press operator A to raise the arm and enter shooting drone mode
-        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
-        droneLaunchModeTrigger.whenActive(commandManager.getDroneModeCommand());
-
-        // Press operator B to launch the drone
-        Trigger droneLaunchTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state == RobotState.SHOOTING_DRONE);
-        droneLaunchTrigger.whenActive(commandManager.getDroneLaunchCommand());
-
-        // Press operator Y to exit shooting drone mode
-        Trigger cancelDroneModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.Y) && state == RobotState.SHOOTING_DRONE);
-        cancelDroneModeTrigger.whenActive(commandManager.getDroneCancelCommand());
 
         // --- ElbowSubsystem ---
         elbowSubsystem.setDefaultCommand(commandManager.getDefaultElbowCommand());
@@ -175,32 +138,6 @@ public class Robot {
 
         // --- WinchSubsystem ---
         winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
-
-        // --- IntakeSubsystem ---
-        // Press operator A to enter intake mode, when in intake mode, press operator A to pick up the pixels
-        // We don't want to be in shooting drone mode, but anything else is fine
-        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A) && state != RobotState.SHOOTING_DRONE);
-        intakeTrigger.toggleWhenActive(commandManager.getIntakeModeCommand(), commandManager.getPickupPixelsCommand());
-
-        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && state == RobotState.INTAKE);
-        outtakeTrigger.whenActive(commandManager.getOuttakeCommand());
-
-        // --- Complex Commands (commands that use more than one subsystem) ---
-        // Press operator left dpad while in driving mode to move the arm to low preset scoring position
-        Trigger lowScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
-        lowScoringPositionTrigger.whenActive(commandManager.getLowScoringPositionCommand());
-
-        // Press operator up dpad while in driving mode to move the arm to medium scoring position
-        Trigger mediumScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_UP));
-        mediumScoringPositionTrigger.whenActive(commandManager.getMediumScoringPositionCommand());
-
-        // Press operator right dpad while in driving mode to move the arm to high scoring position
-        Trigger highScoringPositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
-        highScoringPositionTrigger.whenActive(commandManager.getHighScoringPositionCommand());
-
-        // Press operator down dpad while in driving mode to move the arm to home position (used while driving)
-        Trigger homePositionTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
-        homePositionTrigger.whenActive(commandManager.getHomePostionCommand());
     }
 
     /** Resets the encoders on the subsystems that use them. */

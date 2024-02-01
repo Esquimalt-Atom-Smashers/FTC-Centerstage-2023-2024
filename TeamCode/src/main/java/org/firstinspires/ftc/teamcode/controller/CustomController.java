@@ -59,4 +59,12 @@ public class CustomController {
     public ControllerCondition onLeftBumperPressed() {
         return onButtonPressed(GamepadKeys.Button.LEFT_BUMPER);
     }
+
+    public ControllerCondition onRightTrigger(double threshold) {
+        return new ControllerCondition(this, new Trigger(() -> Math.abs(gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) >= threshold));
+    }
+
+    public ControllerCondition onLeftTrigger(double threshold) {
+        return new ControllerCondition(this, new Trigger(() -> Math.abs(gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) >= threshold));
+    }
 }

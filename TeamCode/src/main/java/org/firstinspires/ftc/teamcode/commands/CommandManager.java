@@ -50,6 +50,7 @@ public class CommandManager {
     private final Command intakeCancelCommand;
     /** Command that starts outtaking pixels */
     private final Command outtakeCommand;
+    private final Command intakeCommand;
     /** Command that picks pixels up and exits intake mode */
     private final Command pickupPixelsCommand;
     /** Command that moves the arm to low scoring position */
@@ -135,6 +136,8 @@ public class CommandManager {
         });
 
         outtakeCommand = new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem());
+
+        intakeCommand = new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem());
 
         pickupPixelsCommand = new SequentialCommandGroup(
                 // Set the scoring state to loading pixels
@@ -269,6 +272,10 @@ public class CommandManager {
 
     public Command getOuttakeCommand() {
         return outtakeCommand;
+    }
+
+    public Command getIntakeCommand() {
+        return intakeCommand;
     }
 
     public Command getSetupCommand() {

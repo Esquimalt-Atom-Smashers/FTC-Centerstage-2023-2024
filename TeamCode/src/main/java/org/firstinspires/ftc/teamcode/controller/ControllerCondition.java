@@ -28,7 +28,7 @@ public class ControllerCondition {
     }
 
     public ControllerCondition and(BooleanSupplier booleanSupplier) {
-        return and(new Trigger(booleanSupplier::getAsBoolean));
+        return and(new Trigger(booleanSupplier));
     }
 
     public CustomController whenActive(Command command) {
