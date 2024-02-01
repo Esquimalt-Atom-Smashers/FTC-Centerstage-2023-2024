@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.commands.CommandManager;
+import org.firstinspires.ftc.teamcode.controller.CustomController;
 import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DistanceSensorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
@@ -57,6 +58,9 @@ public class Robot {
 
     private RobotState state = RobotState.DRIVING;
 
+    private final CustomController customDriverController;
+    private final CustomController customOperatorController;
+
     public enum RobotState {
         DRIVING,
         INTAKE,
@@ -94,12 +98,35 @@ public class Robot {
         CommandScheduler.getInstance().reset();
         CommandScheduler.getInstance().cancelAll();
 
+        customDriverController = new CustomController(driverGamepad);
+        customOperatorController = new CustomController(operatorGamepad);
+
         if (!manualMode) bindCommands();
         if (resetEncoders) resetEncoders();
     }
 
     /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
+
+        customDriverController
+                .onAPressed().whenActive(commandManager.getHomePostionCommand())
+                .onRightPressed().whenActive(commandManager.getSnapRightCommand())
+                .onUpPressed().whenActive(commandManager.getSnapUpCommand())
+                .onDownPressed().whenActive(commandManager.getSnapDownCommand())
+                .onBackPressed().whenActive(commandManager.getResetGyroCommand());
+
+        customOperatorController
+                .onAPressed().toggleWhenActive(commandManager.getIntakeModeCommand(), commandManager.getPickupPixelsCommand())
+                .onBPressed().whenActive(commandManager.getOuttakeCommand())
+                .onXPressed().whenActive(commandManager.getOpenBoxCommand())
+                .onYPressed().and(() -> isState(RobotState.SHOOTING_DRONE)).whenActive(commandManager.getDroneCancelCommand())
+                .onLeftPressed().whenActive(commandManager.getLowScoringPositionCommand())
+                .onUpPressed().whenActive(commandManager.getMediumScoringPositionCommand())
+                .onRightPressed().whenActive(commandManager.getHighScoringPositionCommand())
+                .onDownPressed().whenActive(commandManager.getHomePostionCommand());
+
+
+
         // --- BoxReleaseSubsystem ---
         // Press operator X to open the box
         Trigger openBoxTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X));
@@ -108,24 +135,24 @@ public class Robot {
         // --- DriveSubsystem ---
         driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
 
-        Trigger resetGyroTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.BACK));
-        resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
-
-        // Press driver left dpad while in driving mode to snap to left side of field
-        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
-        snapLeftTrigger.whenActive(commandManager.getSnapLeftCommand());
-
-        // Press driver up dpad while in driving mode to snap to forward (far edge) side of field
-        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP));
-        snapUpTrigger.whenActive(commandManager.getSnapUpCommand());
-
-        // Press driver right dpad while in driving mode to snap to right side of field
-        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
-        snapRightTrigger.whenActive(commandManager.getSnapRightCommand());
-
-        // Press driver down dpad while in driving mode to snap to back (near edge) side of field
-        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
-        snapDownTrigger.whenActive(commandManager.getSnapDownCommand());
+//        Trigger resetGyroTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.BACK));
+//        resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
+//
+//        // Press driver left dpad while in driving mode to snap to left side of field
+//        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
+//        snapLeftTrigger.whenActive(commandManager.getSnapLeftCommand());
+//
+//        // Press driver up dpad while in driving mode to snap to forward (far edge) side of field
+//        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP));
+//        snapUpTrigger.whenActive(commandManager.getSnapUpCommand());
+//
+//        // Press driver right dpad while in driving mode to snap to right side of field
+//        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
+//        snapRightTrigger.whenActive(commandManager.getSnapRightCommand());
+//
+//        // Press driver down dpad while in driving mode to snap to back (near edge) side of field
+//        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
+//        snapDownTrigger.whenActive(commandManager.getSnapDownCommand());
 
         // --- DroneSubsystem ---
         // Press operator A to raise the arm and enter shooting drone mode
@@ -281,6 +308,10 @@ public class Robot {
 
     public RobotState getState() {
         return state;
+    }
+
+    public boolean isState(RobotState state) {
+        return this.state == state;
     }
 
     public GamepadEx getOperatorGamepad() {
