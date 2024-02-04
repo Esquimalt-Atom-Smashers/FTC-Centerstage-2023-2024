@@ -152,7 +152,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
                 lastPower = power;
                 elbowMotor.setPower(power);
                 // If the power we are setting is basically none, we are close enough to the target
-                if (Math.abs(power) <= POWER_TOLERANCE || isTimeoutPassed()) {
+                if (Math.abs(power) <= PID_POWER_TOLERANCE || isTimeoutPassed()) {
                     state = PIDSubsystemState.AT_TARGET;
                     stopMotor();
                 }

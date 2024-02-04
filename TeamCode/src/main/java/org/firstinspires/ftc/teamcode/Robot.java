@@ -242,13 +242,6 @@ public class Robot {
         // B -> Open/Red, A -> Close/Green
         if (operatorGamepad.getButton(GamepadKeys.Button.B) && !operatorGamepad.getButton(GamepadKeys.Button.START)) boxSubsystem.openBox();
         if (operatorGamepad.getButton(GamepadKeys.Button.A) && !operatorGamepad.getButton(GamepadKeys.Button.START)) boxSubsystem.closeBox();
-/*        if (driverGamepad.getButton(GamepadKeys.Button.A)) {
-            if (boxReleaseSubsystem.boxOpen){
-                boxReleaseSubsystem.closeBox();
-            } else {
-                boxReleaseSubsystem.openBox();
-            }
-        }*/
 
         // Drone subsystem (operator)
         // X -> Release, Y -> Go to start position
@@ -290,6 +283,12 @@ public class Robot {
         return state;
     }
 
+    // TODO: Test this, need to normalize one of the angles
+    public boolean isJoystickClose(double angle) {
+        double currentAngle = Math.toDegrees(Math.atan2(driverGamepad.getRightY(), driverGamepad.getRightX()));
+        return Math.abs(currentAngle - angle) <= 10;
+    }
+
     /**
      * Checks if the right joystick on the driver gamepad is close enough to the specified position.
      *
@@ -322,7 +321,7 @@ public class Robot {
         return driverGamepad;
     }
 
-    public BoxSubsystem getBoxReleaseSubsystem() {
+    public BoxSubsystem getBoxSubsystem() {
         return boxSubsystem;
     }
 

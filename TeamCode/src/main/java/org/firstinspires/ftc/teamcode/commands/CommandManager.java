@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -66,14 +65,12 @@ public class CommandManager {
         this.robot = robot;
 
         openBoxCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().openBox(), robot.getBoxReleaseSubsystem()),
+                new InstantCommand(() -> robot.getBoxSubsystem().openBox(), robot.getBoxSubsystem()),
                 new WaitCommand(1000),
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().closeBox(), robot.getBoxReleaseSubsystem())
+                new InstantCommand(() -> robot.getBoxSubsystem().closeBox(), robot.getBoxSubsystem())
         );
 
-        closeBoxCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().closeBox(), robot.getBoxReleaseSubsystem())
-        );
+        closeBoxCommand = new InstantCommand(() -> robot.getBoxSubsystem().closeBox(), robot.getBoxSubsystem());
 
         defaultDriveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad(), robot.isPressed(robot.getDriverGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1.0), robot.getDriveSubsystem());
 
@@ -93,10 +90,10 @@ public class CommandManager {
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDroneLaunchPosition())
         );
 
-        droneLaunchCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING)),
-                new InstantCommand(robot.getDroneSubsystem()::release, robot.getDroneSubsystem())
-        );
+        droneLaunchCommand = new InstantCommand(() -> {
+            robot.setState(Robot.RobotState.DRIVING);
+            robot.getDroneSubsystem().release();
+        });
 
         droneCancelCommand = new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING));
 
@@ -115,13 +112,14 @@ public class CommandManager {
         }, robot.getWinchSubsystem());
 
         intakeModeCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setState(Robot.RobotState.INTAKE)),
-                new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+                new InstantCommand(() -> {
+                    robot.setState(Robot.RobotState.INTAKE);
+                    robot.getBoxSubsystem().closeBox();
+                    robot.getIntakeSubsystem().downPosition();
+                }),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
                 new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem())
-                // Start the intake to be redundant
         );
 
         outtakeCommand = new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem());
@@ -133,8 +131,10 @@ public class CommandManager {
                 new InstantCommand(() -> robot.setState(Robot.RobotState.LOADING_PIXELS)),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
                 // Stop the intake and move it up
-                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::upPosition, robot.getIntakeSubsystem()),
+                new InstantCommand(() -> {
+                    robot.getIntakeSubsystem().stopMotor();
+                    robot.getIntakeSubsystem().upPosition();
+                }),
                 // Move the elbow to level position
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLevelPosition()),
 //              // Set the state to driving again
@@ -161,10 +161,10 @@ public class CommandManager {
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         );
 
-        setupCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getDroneSubsystem()::startPosition, robot.getDroneSubsystem()),
-                new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem())
-        );
+        setupCommand = new InstantCommand(() -> {
+            robot.getDroneSubsystem().startPosition();
+            robot.getBoxSubsystem().closeBox();
+        });
     }
 
     public Command getOpenBoxCommand() {
@@ -182,10 +182,6 @@ public class CommandManager {
     public Command getResetGyroCommand() {
         return resetGyroCommand;
     }
-
-//    public Command getDriveCommand() {
-//        return driveCommand;
-//    }
 
     public Command getSnapRightCommand() {
         return snapRightCommand;
@@ -230,10 +226,6 @@ public class CommandManager {
     public Command getIntakeModeCommand () {
         return intakeModeCommand;
     }
-
-//    public Command getOuttakeModeCommand () {
-//        return outtakeModeCommand;
-//    }
 
     public Command getPickupPixelsCommand () {
         return pickupPixelsCommand;
@@ -280,6 +272,6 @@ public class CommandManager {
     }
 
     public Command getAutoPlaceYellowAndHideCommand(AutoPosition autoPosition) {
-        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), autoPosition);
+        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxSubsystem(), autoPosition);
     }
 }

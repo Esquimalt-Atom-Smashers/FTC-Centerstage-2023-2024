@@ -40,14 +40,13 @@ public class Constants {
         public static final String LEFT_DISTANCE_SENSOR_NAME = "leftDistanceSensor";
         public static final String RIGHT_DISTANCE_SENSOR_NAME = "rightDistanceSensor";
 
-        /** The threshold (in) for the distance sensors to be blocked */
+        /** The threshold (in inches) for the distance sensors to be blocked */
         public static double DISTANCE_THRESHOLD = 7;
     }
 
     /** Constants for the DriveSubsystem. */
     @Config
     public static class DriveConstants {
-
         public static final String FRONT_LEFT_MOTOR_NAME = "frontLeftMotor";
         public static final String FRONT_RIGHT_MOTOR_NAME = "frontRightMotor";
         public static final String REAR_LEFT_MOTOR_NAME = "rearLeftMotor";
@@ -99,6 +98,8 @@ public class Constants {
         public static final String ELBOW_DC_MOTOR_NAME = "elbowMotor";
         public static final DcMotorSimple.Direction ELBOW_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD;
 
+        public static final String ELBOW_LIMIT_SWITCH_NAME = "elbowLimit";
+
         public static final double MANUAL_MOTOR_SPEED_MULTIPLIER = 0.8;
 
         // PID values for the PID controller
@@ -120,9 +121,8 @@ public class Constants {
         // TODO: Find new value
         public static  int HIGH_SCORING_POSITION = 12400;
 
-        public static final double POWER_TOLERANCE = 0.1;
-
-        public static final String ELBOW_LIMIT_SWITCH_NAME = "elbowLimit";
+        /** The tolerance for the PID controller for the elbow. */
+        public static final double PID_POWER_TOLERANCE = 0.1;
     }
 
     /** Constants for the IntakeSubsystem. */
@@ -179,7 +179,7 @@ public class Constants {
         // TODO: Find new value
         public static  int HIGH_SCORING_POSITION = -1; //2800;
 
-        /** The tolerance for the  */
+        /** The tolerance for the PID controller for the slide. */
         public static final double PID_POWER_TOLERANCE = .3;
     }
 
