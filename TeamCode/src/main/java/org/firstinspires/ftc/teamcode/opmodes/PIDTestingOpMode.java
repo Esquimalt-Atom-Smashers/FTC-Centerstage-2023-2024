@@ -4,17 +4,13 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.commands.MoveElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
-import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
 @Config
 @TeleOp(name = "Testing PID", group = "Testing")
@@ -25,9 +21,7 @@ public class PIDTestingOpMode extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Robot robot = new Robot(this, true, false);
-
         Gamepad gamepad = gamepad2;
-
 
         waitForStart();
 

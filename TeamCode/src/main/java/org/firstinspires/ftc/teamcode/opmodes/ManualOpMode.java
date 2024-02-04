@@ -20,6 +20,7 @@ public class ManualOpMode extends LinearOpMode {
 
         waitForStart();
         robot.startManual();
+
         while (opModeIsActive() && !isStopRequested()) {
             robot.runManually();
         }

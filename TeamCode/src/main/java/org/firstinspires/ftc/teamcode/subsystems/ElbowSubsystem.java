@@ -134,7 +134,6 @@ public class ElbowSubsystem extends CustomSubsystemBase {
                     stopMotor();
                     if (isLimitSwitchPressed()) resetEncoder();
                     state = PIDSubsystemState.AT_TARGET;
-                    return;
                 }
             }
             else {
@@ -225,10 +224,12 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         return INTAKE_POSITION;
     }
 
+    @Deprecated
     public int getAutoScoringPosition() {
         return AUTO_SCORING_POSITION;
     }
 
+    /** @return True if the limit switch is being held down */
     private boolean isLimitSwitchPressed() {
         return !elbowLimitSwitch.getState();
     }

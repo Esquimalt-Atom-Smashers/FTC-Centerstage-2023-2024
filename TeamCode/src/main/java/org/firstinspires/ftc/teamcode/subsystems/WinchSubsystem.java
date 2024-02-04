@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.WinchConstants.*;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;

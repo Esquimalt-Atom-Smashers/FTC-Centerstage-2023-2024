@@ -12,15 +12,16 @@ import com.qualcomm.robotcore.hardware.LED;
 import static org.firstinspires.ftc.teamcode.Constants.BoxConstants.*;
 
 /**
- * A subsystem that represents the box release door on the end of the arm.
- * Uses a servo to open and close the door and LEDs to indicate when open/closed.
+ * A subsystem that represents the servo on the door at the end of the arm and the LEDs
+ * on the back of the robot. Uses the servo to open and close the door and the LEDs to indicate
+ * when open/closed.
  *
  * @author Esquimalt Atom Smashers
  */
-public class BoxReleaseSubsystem extends CustomSubsystemBase {
+public class BoxSubsystem extends CustomSubsystemBase {
+    /** Servo on the back of the box. */
     private final ServoEx boxReleaseServo;
 
-    // Left and right side of robot LED channels for red and green LEDs
     private final LED redRightLED;
     private final LED greenRightLED;
     private final LED redLeftLED;
@@ -32,7 +33,7 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
      * @param hardwareMap The hardware map of the robot
      * @param telemetry The telemetry of the robot
      */
-    public BoxReleaseSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public BoxSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         super(hardwareMap, telemetry);
 
         boxReleaseServo = new SimpleServo(hardwareMap, BOX_SERVO_NAME, MIN_ANGLE, MAX_ANGLE);
@@ -43,27 +44,18 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
         greenRightLED = hardwareMap.get(LED.class, GREEN_RIGHT_LED_NAME);
     }
 
-    /** Turns the servo for the box release to a position which opens it. */
+    /** Turns the servo on the box door to a position which opens it. */
     public void openBox() {
         boxReleaseServo.turnToAngle(OPEN_POSITION);
 
         enableRedLights();
     }
 
-    /** Turns the box release to a position which closes it. */
+    /** Turns the servo on the box door to a position which closes it. */
     public void closeBox() {
         boxReleaseServo.turnToAngle(CLOSE_POSITION);
 
         enableGreenLights();
-    }
-
-    /** Prints data from the subsystem. */
-    @Override
-    public void printData() {
-        telemetry.addLine("--- Box Release ---");
-        telemetry.addData("Angle", boxReleaseServo.getAngle());
-        telemetry.addData("Angle (degrees)", boxReleaseServo.getAngle(AngleUnit.DEGREES));
-        telemetry.addData("Position", boxReleaseServo.getPosition());
     }
 
     public void disableLights() {
@@ -73,6 +65,7 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
         redRightLED.enable(false);
     }
 
+    // TODO: Figure these out
     // I hate this
     // The green are red and the red are green, but whatever
     private void enableRedLights() {
@@ -87,5 +80,14 @@ public class BoxReleaseSubsystem extends CustomSubsystemBase {
         redLeftLED.enable(true);
         greenRightLED.enable(false);
         redRightLED.enable(true);
+    }
+
+    /** Prints data from the subsystem. */
+    @Override
+    public void printData() {
+        telemetry.addLine("--- Box Release ---");
+        telemetry.addData("Angle", boxReleaseServo.getAngle());
+        telemetry.addData("Angle (degrees)", boxReleaseServo.getAngle(AngleUnit.DEGREES));
+        telemetry.addData("Position", boxReleaseServo.getPosition());
     }
 }

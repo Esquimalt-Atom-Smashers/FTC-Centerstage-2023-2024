@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-//import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,7 +9,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-//import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import static org.firstinspires.ftc.teamcode.Constants.LinearSlideConstants.*;
 import org.firstinspires.ftc.teamcode.Constants.PIDSubsystemState;
@@ -153,7 +151,6 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
                     if (isLimitSwitchPressed()) resetEncoder();
                     stopMotor();
                     state = PIDSubsystemState.AT_TARGET;
-                    return;
                 }
             }
             else {
@@ -172,7 +169,7 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
                 // If the power isn't much, we are about as close to the target as we are going to get,
                 // so we don't update anymore
                 // Or, if the timer is over the timeout, we also stop
-                if (Math.abs(power) <= POWER_TOLERANCE || isTimeoutDone()) {
+                if (Math.abs(power) <= PID_POWER_TOLERANCE || isTimeoutDone()) {
                     state = PIDSubsystemState.AT_TARGET;
     //                lastLastPower = power;
                     stopMotor();
@@ -181,10 +178,12 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         }
     }
 
+    /** @return If the timeout has passed */
     private boolean isTimeoutDone() {
         return timeout > 0 && timer.seconds() >= timeout;
     }
 
+    /** @return The current position of the slide motor */
     public int getPosition() {
         return slideMotor.getCurrentPosition();
     }
@@ -197,8 +196,8 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         telemetry.addData("Slide last power", lastPower);
         telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
         telemetry.addData("Target", target);
-        telemetry.addLine("Comparing " + Math.abs(lastPower) + " and " + POWER_TOLERANCE);
-        telemetry.addData("Result", Math.abs(lastPower) <= POWER_TOLERANCE);
+        telemetry.addLine("Comparing " + Math.abs(lastPower) + " and " + PID_POWER_TOLERANCE);
+        telemetry.addData("Result", Math.abs(lastPower) <= PID_POWER_TOLERANCE);
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
 //        telemetry.addData("Power", slideMotor.getPower());
@@ -232,10 +231,12 @@ public class LinearSlideSubsystem extends CustomSubsystemBase {
         return IN_POSITION;
     }
 
+    @Deprecated
     public int getAutoScoringPosition() {
         return AUTO_SCORING_POSITION;
     }
 
+    /** @return True if the limit switch is being pressed down */
     private boolean isLimitSwitchPressed() {
         return !slideLimitSwitch.getState();
     }

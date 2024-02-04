@@ -18,9 +18,8 @@ public class TeleOpMode extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Robot robot = new Robot(this, false, true);
 
-        robot.start();
-
         waitForStart();
+        robot.start();
 
         while (opModeIsActive() && !isStopRequested()) {
             robot.run();

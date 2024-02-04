@@ -55,4 +55,9 @@ public class AutoPosition {
     public void setSpikeMark(SpikeMark spikeMark) {
         this.spikeMark = spikeMark;
     }
+
+    /** @return The input negated if we are red, or the input if we are blue */
+    public double flipMovement(double input) {
+        return isBlue ? input : -input;
+    }
 }

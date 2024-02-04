@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
-import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.BoxSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
 
@@ -20,9 +20,9 @@ public class AutoPlaceYellowCommand extends SequentialCommandGroup {
      *
      * @param elbowSubsystem Reference to the elbowSubsystem
      * @param linearSlideSubsystem Reference to the linearSlideSubsystem
-     * @param boxReleaseSubsystem Reference to the boxReleaseSubsystem
+     * @param boxSubsystem Reference to the boxSubsystem
      */
-    public AutoPlaceYellowCommand(ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem) {
+    public AutoPlaceYellowCommand(ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxSubsystem boxSubsystem) {
         lastCommand = new WaitCommand(1);
         addCommands(
                 // TODO: Make this happen somewhere else (maybe while placing the purple pixel?)
@@ -33,16 +33,16 @@ public class AutoPlaceYellowCommand extends SequentialCommandGroup {
                 new MoveElbowCommand(elbowSubsystem, elbowSubsystem.getLowScoringPosition()),
                 new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getLowScoringPosition()),
                 // Open then close the box
-                new InstantCommand(boxReleaseSubsystem::openBox, boxReleaseSubsystem),
+                new InstantCommand(boxSubsystem::openBox, boxSubsystem),
                 new WaitCommand(500),
-                new InstantCommand(boxReleaseSubsystem::closeBox, boxReleaseSubsystem),
+                new InstantCommand(boxSubsystem::closeBox, boxSubsystem),
                 // Move the arm back down
                 // TODO: Make this happen somewhere else (maybe while hiding)
                 new MoveSlideCommand(linearSlideSubsystem, linearSlideSubsystem.getInPosition()),
                 new MoveElbowCommand(elbowSubsystem, elbowSubsystem.getLevelPosition()),
                 lastCommand
         );
-        addRequirements(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem);
+        addRequirements(elbowSubsystem, linearSlideSubsystem, boxSubsystem);
     }
 
     @Override

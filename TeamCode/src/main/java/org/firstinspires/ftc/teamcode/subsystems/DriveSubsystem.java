@@ -17,10 +17,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import static org.firstinspires.ftc.teamcode.Constants.DriveConstants.*;
 
 import java.util.Arrays;
-//import java.util.function.DoubleSupplier;
 
 /**
- * A subsystem that represents the drive base of the robot. Uses four motors and a gyro to drive.
+ * A subsystem that represents the drive base of the robot. This includes four motors and a
+ * gyro. Uses the four motors and the gyro to drive.
  *
  * @author Esquimalt Atom Smashers
  */
@@ -33,7 +33,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
     private final DcMotorEx[] motors;
 
     /** The built-in IMU(gyro) on the control hub. */
-    private final BHI260IMU imu; // Counter clockwise is positive
+    private final BHI260IMU imu;
 
     private enum DriveState {
         MANUAL,
@@ -102,11 +102,11 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn
-     * @param fieldCentric If we want this drive to be field centric
-     * @param scaled If we want the inputs to be scaled
+     * @param fieldCentric If we want these movements to be field centric
+     * @param multiplier The speed multiplier
      */
-    // TODO: Go through the overloads and check to see if they are needed
-    public void drive(double forward, double strafe, double turn, boolean fieldCentric, boolean scaled, double multiplier) {
+    public void drive(double forward, double strafe, double turn, boolean fieldCentric, double multiplier) {
+        // Dead zone for the joysticks
         forward = Math.abs(forward) >= DEADZONE ? forward : 0;
         strafe = Math.abs(strafe) >= DEADZONE ? strafe : 0;
         turn = Math.abs(turn) >= DEADZONE ? turn : 0;
@@ -115,43 +115,49 @@ public class DriveSubsystem extends CustomSubsystemBase {
         if (fieldCentric) {
             // Field centric drive
             double gyroRadians = Math.toRadians(-getHeading());
-            double rotateX = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
-            double rotateY = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
+            double fieldCentricStrafe = strafe * Math.cos(gyroRadians) - forward * Math.sin(gyroRadians);
+            double fieldCentricDrive = strafe * Math.sin(gyroRadians) + forward * Math.cos(gyroRadians);
 
-            frontLeftMotor.setPower(scaleInput(rotateY - rotateX + turn, multiplier, scaled));
-            frontRightMotor.setPower(scaleInput(rotateY - rotateX - turn, multiplier, scaled));
-            rearLeftMotor.setPower(scaleInput(rotateY + rotateX + turn, multiplier, scaled));
-            rearRightMotor.setPower(scaleInput(rotateY + rotateX - turn, multiplier, scaled));
+            frontLeftMotor.setPower(scaleInput(fieldCentricDrive - fieldCentricStrafe + turn, multiplier));
+            frontRightMotor.setPower(scaleInput(fieldCentricDrive - fieldCentricStrafe - turn, multiplier));
+            rearLeftMotor.setPower(scaleInput(fieldCentricDrive + fieldCentricStrafe + turn, multiplier));
+            rearRightMotor.setPower(scaleInput(fieldCentricDrive + fieldCentricStrafe - turn, multiplier));
         }
         else {
             // Robot centric drive
-            frontLeftMotor.setPower(scaleInput(forward - strafe + turn, multiplier, scaled));
-            frontRightMotor.setPower(scaleInput(forward - strafe - turn, multiplier, scaled));
-            rearLeftMotor.setPower(scaleInput(forward + strafe + turn, multiplier, scaled));
-            rearRightMotor.setPower(scaleInput(forward + strafe - turn, multiplier, scaled));
+            frontLeftMotor.setPower(scaleInput(forward - strafe + turn, multiplier));
+            frontRightMotor.setPower(scaleInput(forward - strafe - turn, multiplier));
+            rearLeftMotor.setPower(scaleInput(forward + strafe + turn, multiplier));
+            rearRightMotor.setPower(scaleInput(forward + strafe - turn, multiplier));
         }
 
     }
 
     /**
-     * Drives the robot using joystick input. Uses the default values for field centric and scaling.
+     * Drives the robot using joystick input. Uses the default value for field centric and full power.
      *
      * @param forward The amount to move forward
      * @param strafe The amount to move left and right
      * @param turn The amount to turn left and right
      */
-    public void drive(double forward, double strafe, double turn, double speedMultiplier) {
-        drive(forward, strafe, turn, FIELD_CENTRIC, SCALED, speedMultiplier);
-    }
-
-    public void drive(GamepadEx gamepad, double speedMultiplier) {
-        drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, SCALED, speedMultiplier);
+    public void drive(double forward, double strafe, double turn) {
+        drive(forward, strafe, turn, FIELD_CENTRIC, 1);
     }
 
     /**
+     * Drives the robot using a gamepad. Uses the default value for field centric.
+     *
+     * @param gamepad The gamepad controlling the robot
+     * @param speedMultiplier The speed multiplier
+     */
+    public void drive(GamepadEx gamepad, double speedMultiplier) {
+        drive(gamepad.getLeftY(), gamepad.getLeftX(), gamepad.getRightX(), FIELD_CENTRIC, speedMultiplier);
+    }
+
+
+    /**
      * Start moving the robot some number of inches forwards/backwards using the encoders. Sets the target position of
-     * the motors and starts them moving. {@link #isFinishedMoving()} must be called to check if
-     * the robot has made it.
+     * the motors and starts them moving. {@link #isFinishedMoving()} must be called to check if the robot has made it.
      *
      * @param inches The distance in inches to drive forwards/backwards
      */
@@ -160,10 +166,8 @@ public class DriveSubsystem extends CustomSubsystemBase {
         Arrays.stream(motors).forEach(motor ->
                 motor.setTargetPosition(motor.getCurrentPosition() + toPulses(inches)));
         setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
-        drive(AUTO_DRIVE_SPEED, 0, 0, false, false, 1);
+        drive(AUTO_DRIVE_SPEED, 0, 0, false, 1);
     }
-
-    // Moves the robot inches forward and then stops it
 
     /**
      * Drive the robot some number of inches forwards/backwards.
@@ -172,16 +176,12 @@ public class DriveSubsystem extends CustomSubsystemBase {
      */
     public void driveByDistance(double inches) {
         driveByDistanceAsync(inches);
-        while (!isFinishedMoving()) {}
+        while (!isFinishedMoving()) {doNothing("Driving");}
     }
-
-    // Strafe the robot inches, you MUST call isFinishedMoving() repeatedly
-    // to check if the robot has made it
 
     /**
      * Start moving the robot some number of inches right/left using the encoders. Sets the target position of the
-     * motors and starts them moving. {@link #isFinishedMoving()} must be called to
-     * check if the robot has made it.
+     * motors and starts them moving. {@link #isFinishedMoving()} must be called to check if the robot has made it.
      *
      * @param inches The distance in inches to drive right/left
      */
@@ -192,10 +192,8 @@ public class DriveSubsystem extends CustomSubsystemBase {
         rearLeftMotor.setTargetPosition(rearLeftMotor.getCurrentPosition() + toPulses(inches));
         rearRightMotor.setTargetPosition(rearRightMotor.getCurrentPosition() + toPulses(inches));
         setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
-        drive(0, AUTO_STRAFE_SPEED, 0, false, false, 1);
+        drive(0, AUTO_STRAFE_SPEED, 0, false, 1);
     }
-
-    // Strafes the robot inches and stops it when it gets there
 
     /**
      * Strafes the robot some number of inches right/left.
@@ -204,7 +202,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
      */
     public void strafeByDistance(double inches) {
         strafeByDistanceAsync(inches);
-        while (!isFinishedMoving()) {}
+        while (!isFinishedMoving()) {doNothing("Strafing");}
     }
 
     /**
@@ -219,7 +217,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
         targetHeading = getHeading() + angle;
         // Counter clockwise is positive
         // If the angle is positive, we want to turn negative (counterclockwise)
-        drive(0, 0, getAutoTurnSpeed(speed), false, false, 1);
+        drive(0, 0, getAutoTurnSpeed(speed), false, 1);
     }
 
     /**
@@ -229,21 +227,21 @@ public class DriveSubsystem extends CustomSubsystemBase {
      */
     public void turn(double angle) {
         turnAsync(angle, AUTO_TURN_SPEED);
-        while (!isFinishedTurning()) {}
+        while (!isFinishedTurning()) {doNothing("Turning");}
 
         // Wait for a bit
         ElapsedTime timer = new ElapsedTime();
-        while (timer.milliseconds() <= 500) {}
+        while (timer.milliseconds() <= 500) {doNothing("Waiting");}
 
         angle = targetHeading - getHeading();
         turnAsync(angle, AUTO_TURN_SPEED / 2);
-        while (!isFinishedTurning()) {}
+        while (!isFinishedTurning()) {doNothing("Correcting turn");}
     }
 
     /**
-     * Gets the speed we should be turning.
+     * Gets the speed we should be turning. Used while turning automatically.
      *
-     * @param speed The absolute values of the speed
+     * @param speed The absolute value of the speed
      * @return What speed we should turn
      */
     public double getAutoTurnSpeed(double speed) {
@@ -311,7 +309,7 @@ public class DriveSubsystem extends CustomSubsystemBase {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
-    /** Reset the gyro by setting the offset to the current heading */
+    /** Reset the gyro by resetting the yaw. */
     public void resetGyro() {
         imu.resetYaw();
     }
@@ -328,6 +326,11 @@ public class DriveSubsystem extends CustomSubsystemBase {
         telemetry.addData("Is over current?", frontLeftMotor.isOverCurrent());
     }
 
+    private void doNothing(String str) {
+        telemetry.addLine("Waiting, current task: " + str);
+        telemetry.update();
+    }
+
     public Telemetry getTelemetry() {
         return telemetry;
     }
@@ -336,30 +339,9 @@ public class DriveSubsystem extends CustomSubsystemBase {
      * Takes a joystick input and clips it.
      *
      * @param input The input to scale
-     * @param isScaled If we want to scale the input
      * @return The input clipped between -1 and 1
      */
-    private double scaleInput(double input, double multiplier, boolean isScaled) {
-        if (isScaled) {
-            // Take the input (forward, strafe, turn) and scale it so that moving the joystick halfway doesn't use half power
-            // Current formula just cubes the input and multiplies it by the multiplier
-            return Range.clip(Math.pow(input, 3) * multiplier, -1, 1);
-        }
-        else {
-            // Otherwise, we just multiply the input by the multiplier
-            return Range.clip(input * multiplier, -1, 1);
-        }
-    }
-
-    /**
-     * Checks if a value is close enough to the target.
-     *
-     * @param input Input value
-     * @param target Target value
-     * @param tolerance How far away we can be
-     * @return Whether the input value is within tolerance away from target
-     */
-    private boolean isWithinTolerance(double input, double target, double tolerance) {
-        return Math.abs(input - target) <= tolerance;
+    private double scaleInput(double input, double multiplier) {
+        return Range.clip(input * multiplier, -1, 1);
     }
 }

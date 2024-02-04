@@ -24,27 +24,26 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
      * @param autoPosition The auto position we started at
      */
     public AutoDriveAndPlacePurpleCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem, AutoPosition autoPosition) {
-        int multiplier = autoPosition.isBlue ? 1 : -1;
         // This is if we are upstage and the team prop is upstage
         if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
             addCommands(
                     // Driving to the correct position
                     new DriveCommand(driveSubsystem, -18),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, -8 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-8)),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0)),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
         // This is if we are downstage and the team prop is upstage
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
-                    new StrafeCommand(driveSubsystem, 7 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(7)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, 90 * multiplier),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(90)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, 3),
                     new WaitCommand(250),
@@ -62,7 +61,7 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
             addCommands(
                     new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, -90 * multiplier),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, -2),
                     new WaitCommand(250),

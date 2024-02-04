@@ -12,7 +12,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.auto.AutoPosition;
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 
 public class CommandManager {
     private final Robot robot;
@@ -46,10 +45,10 @@ public class CommandManager {
     private final Command defaultWinchCommand;
     /** Command that lowers arm and intake and enters intake mode */
     private final Command intakeModeCommand;
-    /** Command that exits intake mode */
-    private final Command intakeCancelCommand;
     /** Command that starts outtaking pixels */
     private final Command outtakeCommand;
+    /** Command that starts intaking again */
+    private final Command intakeCommand;
     /** Command that picks pixels up and exits intake mode */
     private final Command pickupPixelsCommand;
     /** Command that moves the arm to low scoring position */
@@ -101,7 +100,6 @@ public class CommandManager {
 
         droneCancelCommand = new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING));
 
-
         defaultElbowCommand = new RunCommand(() -> {
             robot.getElbowSubsystem().moveManually(Math.abs(robot.getOperatorGamepad().getLeftY()) >= 0.1 ? robot.getOperatorGamepad().getLeftY() : 0);
         }, robot.getElbowSubsystem());
@@ -126,15 +124,9 @@ public class CommandManager {
                 // Start the intake to be redundant
         );
 
-        // Emergency stop trying to pick up the pixels
-        intakeCancelCommand = new InstantCommand(() -> {
-            CommandScheduler.getInstance().cancel(getPickupPixelsCommand());
-            robot.getIntakeSubsystem().stopMotor();
-            robot.getIntakeSubsystem().upPosition();
-            robot.setState(Robot.RobotState.DRIVING);
-        });
-
         outtakeCommand = new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem());
+
+        intakeCommand = new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem());
 
         pickupPixelsCommand = new SequentialCommandGroup(
                 // Set the scoring state to loading pixels
@@ -243,10 +235,6 @@ public class CommandManager {
 //        return outtakeModeCommand;
 //    }
 
-    public Command getIntakeCancelCommand () {
-        return intakeCancelCommand;
-    }
-
     public Command getPickupPixelsCommand () {
         return pickupPixelsCommand;
     }
@@ -269,6 +257,10 @@ public class CommandManager {
 
     public Command getOuttakeCommand() {
         return outtakeCommand;
+    }
+
+    public Command getIntakeCommand() {
+        return intakeCommand;
     }
 
     public Command getSetupCommand() {

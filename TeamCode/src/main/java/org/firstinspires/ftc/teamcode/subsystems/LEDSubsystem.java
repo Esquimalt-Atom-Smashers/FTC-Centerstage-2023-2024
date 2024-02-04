@@ -8,7 +8,7 @@ import static org.firstinspires.ftc.teamcode.Constants.LEDConstants.*;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
- * A subsystem that represents the LEDs inside the frame of the robot.
+ * A subsystem that represents the LEDs inside the frame of the robot. Uses them to look cool.
  *
  * @author Esquimalt Atom Smashers
  */

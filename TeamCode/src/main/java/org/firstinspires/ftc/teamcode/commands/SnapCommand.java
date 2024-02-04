@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 public class SnapCommand extends CommandBase {
     private final DriveSubsystem driveSubsystem;
     private final GamepadEx driver;
-    private final double heading;
+    private double heading;
     private double turningSpeed;
 
     /**
@@ -31,13 +31,14 @@ public class SnapCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        correctTargetHeading();
         driveSubsystem.turnAsync(heading - driveSubsystem.getHeading(), Constants.DriveConstants.AUTO_TURN_SPEED);
         turningSpeed = driveSubsystem.getAutoTurnSpeed(Constants.DriveConstants.AUTO_TURN_SPEED);
     }
 
     @Override
     public void execute() {
-        driveSubsystem.drive(driver.getLeftY(), driver.getLeftX(), turningSpeed, true, false, 1);
+        driveSubsystem.drive(driver.getLeftY(), driver.getLeftX(), turningSpeed, true, 1);
     }
 
     @Override
@@ -48,5 +49,13 @@ public class SnapCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         return driveSubsystem.isFinishedTurning();
+    }
+
+    private void correctTargetHeading() {
+        double currentHeading = driveSubsystem.getHeading();
+        // Move the heading to the same "frame" as the current heading
+        // This is done to prevent the robot rotating an extra or two 360 degrees
+        while (heading < currentHeading - 180) heading += 360;
+        while (heading > currentHeading + 180) heading -= 360;
     }
 }

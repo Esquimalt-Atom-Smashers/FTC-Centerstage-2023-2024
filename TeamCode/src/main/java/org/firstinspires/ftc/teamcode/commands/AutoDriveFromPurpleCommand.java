@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.auto.AutoPosition;
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
 /**
@@ -22,7 +21,6 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
      * @param autoPosition The starting auto position
      */
     public AutoDriveFromPurpleCommand(DriveSubsystem driveSubsystem, AutoPosition autoPosition) {
-        int multiplier = autoPosition.isBlue ? 1 : -1;
         if (!autoPosition.isPlacingYellow) {
             addCommands(
                     new TurnToHeadingCommand(driveSubsystem, 0),
@@ -33,29 +31,29 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
         }
         if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
-                    new TurnCommand(driveSubsystem, 90 * multiplier),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(90)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, 25),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, 8 * multiplier)
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(8))
             );
         }
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE) {
             addCommands(
-                    new TurnCommand(driveSubsystem, 90 * multiplier),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(90)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, 32),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, 6 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(6)),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 90 * multiplier)
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(90))
             );
         }
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE) {
             addCommands(
                     new DriveCommand(driveSubsystem, -4),
                     new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, 180 * multiplier, 0.3),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(180), 0.3),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, 26)
             );

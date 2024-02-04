@@ -5,8 +5,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.auto.AutoPosition;
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
-import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.BoxSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
@@ -25,52 +24,51 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
      * @param driveSubsystem Reference to the driveSubsystem
      * @param elbowSubsystem Reference to the elbowSubsystem
      * @param linearSlideSubsystem Reference to the linearSlideSubsystem
-     * @param boxReleaseSubsystem Reference to the boxReleaseSubsystem
+     * @param boxSubsystem Reference to the boxReleaseSubsystem
      * @param autoPosition The starting auto position
      */
-    public AutoPlaceYellowAndHideCommand(DriveSubsystem driveSubsystem, ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxReleaseSubsystem boxReleaseSubsystem, AutoPosition autoPosition) {
-        int multiplier = autoPosition.isBlue ? 1 : -1;
+    public AutoPlaceYellowAndHideCommand(DriveSubsystem driveSubsystem, ElbowSubsystem elbowSubsystem, LinearSlideSubsystem linearSlideSubsystem, BoxSubsystem boxSubsystem, AutoPosition autoPosition) {
         lastCommand = new WaitCommand(1);
         if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE)
             addCommands(
-                    new TurnToHeadingCommand(driveSubsystem, 90 * multiplier),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(90)),
                     new WaitCommand(250),
-                    new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
-                    new TurnCommand(driveSubsystem, -90 * multiplier, 0.3),
+                    new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxSubsystem),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90), 0.3),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, -15),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, -4 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-4)),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0))
             );
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE)
             addCommands(
-                    new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
-                    new TurnCommand(driveSubsystem, -90 * multiplier),
+                    new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxSubsystem),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, -24),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, -4 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-4)),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0))
             );
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE)
             addCommands(
-                    new StrafeCommand(driveSubsystem, 8 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(8)),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 90 * multiplier),
-                    new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem),
-                    new TurnCommand(driveSubsystem, -90 * multiplier),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(90)),
+                    new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxSubsystem),
+                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90)),
                     new WaitCommand(250),
                     new DriveCommand(driveSubsystem, -30),
                     new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, -8 * multiplier),
+                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-8)),
                     new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier)
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0))
             );
         addCommands(lastCommand);
-        addRequirements(driveSubsystem, elbowSubsystem, linearSlideSubsystem, boxReleaseSubsystem);
+        addRequirements(driveSubsystem, elbowSubsystem, linearSlideSubsystem, boxSubsystem);
     }
 
     @Override
