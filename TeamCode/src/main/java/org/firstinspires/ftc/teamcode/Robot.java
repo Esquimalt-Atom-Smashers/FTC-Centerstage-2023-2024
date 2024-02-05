@@ -50,9 +50,9 @@ public class Robot {
     /** The LED subsystem of the robot */
     private final LEDSubsystem ledSubsystem;
 
-    private final boolean manualMode;
-
     private final CommandManager commandManager;
+
+    private final boolean manualMode;
 
     private RobotState state = RobotState.DRIVING;
 
@@ -64,10 +64,10 @@ public class Robot {
     }
 
     /**
-     * Initializes all gamepads, subsystems, and if necessary, initializes the commands through {@link #bindCommands()}
+     * Initializes all gamepads, subsystems, and if necessary, initializes the commands through {@link #bindCommands()}.
      *
      * @param opMode The opMode that created the Robot
-     * @param manualMode Whether we are using commands or not, default is false
+     * @param manualMode Whether we are using commands or not
      * @param resetEncoders Whether we reset the encoders on the slide, elbow and drive subsystems
      */
     public Robot(OpMode opMode, boolean manualMode, boolean resetEncoders) {
@@ -89,16 +89,21 @@ public class Robot {
         winchSubsystem = new WinchSubsystem(opMode.hardwareMap, opMode.telemetry);
         ledSubsystem = new LEDSubsystem(opMode.hardwareMap, opMode.telemetry);
 
+        // Initialize the command manager
         commandManager = new CommandManager(this);
-        CommandScheduler.getInstance().reset();
-        CommandScheduler.getInstance().cancelAll();
 
+        // If we should, then bind the commands
         if (!manualMode) bindCommands();
+
+        // If we should reset the encoders
         if (resetEncoders) resetEncoders();
     }
 
     /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
+        CommandScheduler.getInstance().reset();
+        CommandScheduler.getInstance().cancelAll();
+
         // --- BoxReleaseSubsystem ---
         // Press operator X to open the box
         Trigger openBoxTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X));
@@ -198,10 +203,7 @@ public class Robot {
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
-        opMode.telemetry.addData("Scoring state", state);
-        elbowSubsystem.printData();
-        linearSlideSubsystem.printData();
-        distanceSensorSubsystem.printData();
+        printData();
         opMode.telemetry.update();
     }
 
@@ -258,15 +260,19 @@ public class Robot {
 
         if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) boxSubsystem.disableLights();
 
-        opMode.telemetry.addData("Gyro heading: ",  driveSubsystem.getHeading());
+        printData();
+        opMode.telemetry.update();
+    }
 
+    public void printData() {
+        opMode.telemetry.addData("Robot state", state);
+        opMode.telemetry.addData("Gyro heading: ",  driveSubsystem.getHeading());
 
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();
         distanceSensorSubsystem.printData();
         boxSubsystem.printData();
         intakeSubsystem.printData();
-        opMode.telemetry.update();
     }
 
     /**

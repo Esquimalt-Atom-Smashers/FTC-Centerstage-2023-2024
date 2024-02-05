@@ -14,9 +14,9 @@ import org.firstinspires.ftc.teamcode.auto.AutoPosition;
 
 public class CommandManager {
     private final Robot robot;
-    /** Command that opens the box release*/
+    /** Command that opens the box, lets the pixels drop and closes the box */
     private final Command openBoxCommand;
-    /** Command that opens the box release */
+    /** Command that closes the box release */
     private final Command closeBoxCommand;
     /** Default command for DriveSubsystem */
     private final Command defaultDriveCommand;
@@ -44,11 +44,11 @@ public class CommandManager {
     private final Command defaultWinchCommand;
     /** Command that lowers arm and intake and enters intake mode */
     private final Command intakeModeCommand;
-    /** Command that starts outtaking pixels */
+    /** Command that starts outtaking */
     private final Command outtakeCommand;
     /** Command that starts intaking again */
     private final Command intakeCommand;
-    /** Command that picks pixels up and exits intake mode */
+    /** Command that moves the arm up and exits intake mode */
     private final Command pickupPixelsCommand;
     /** Command that moves the arm to low scoring position */
     private final Command highScoringPositionCommand;
@@ -127,17 +127,13 @@ public class CommandManager {
         intakeCommand = new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem());
 
         pickupPixelsCommand = new SequentialCommandGroup(
-                // Set the scoring state to loading pixels
                 new InstantCommand(() -> robot.setState(Robot.RobotState.LOADING_PIXELS)),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                // Stop the intake and move it up
                 new InstantCommand(() -> {
                     robot.getIntakeSubsystem().stopMotor();
                     robot.getIntakeSubsystem().upPosition();
                 }),
-                // Move the elbow to level position
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLevelPosition()),
-//              // Set the state to driving again
                 new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING))
         );
 
