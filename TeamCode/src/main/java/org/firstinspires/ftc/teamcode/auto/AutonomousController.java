@@ -25,7 +25,7 @@ public class AutonomousController {
     private final Robot robot;
     private final CommandManager commandManager;
 
-    private WaitCommand currentCommand;
+    private Command currentCommand;
     private AutonomousState state;
 
     private final AutoPosition autoPosition;
@@ -44,7 +44,7 @@ public class AutonomousController {
 
     public void start() {
         state = AutonomousState.MOVING_TO_SPIKE_MARKS;
-        scheduleCommand(commandManager.getAutoSetupCommand(), 1000);
+        scheduleCommand(commandManager.getAutoSetupCommand());
     }
 
     public void run() {
@@ -97,14 +97,8 @@ public class AutonomousController {
         return currentCommand.isFinished();
     }
 
-    private void scheduleCommand(Command command, int waitTime) {
-        SequentialCommandGroup group = new SequentialCommandGroup(command);
-        currentCommand = new WaitCommand(waitTime);
-        group.addCommands(currentCommand);
-        group.schedule();
-    }
-
     private void scheduleCommand(Command command) {
-        scheduleCommand(command, 1);
+        currentCommand = command;
+        command.schedule();
     }
 }

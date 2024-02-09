@@ -31,31 +31,24 @@ public class AutoDriveFromPurpleCommand extends SequentialCommandGroup {
         }
         if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(90)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, 25),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(8))
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, 25),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(8))
             );
         }
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE) {
             addCommands(
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(90)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, 32),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(6)),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(90))
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, 32),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(6)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(90))
             );
         }
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE) {
             addCommands(
-                    new DriveCommand(driveSubsystem, -4),
-                    new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(180), 0.3),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, 26)
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -4),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(180)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, 26)
             );
         }
     }

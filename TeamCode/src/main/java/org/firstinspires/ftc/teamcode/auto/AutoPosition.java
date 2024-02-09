@@ -57,7 +57,7 @@ public class AutoPosition {
     }
 
     /** @return The input negated if we are red, or the input if we are blue */
-    public double flipMovement(double input) {
+    public double flip(double input) {
         return isBlue ? input : -input;
     }
 }

@@ -28,44 +28,33 @@ public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
         if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
             addCommands(
                     // Driving to the correct position
-                    new DriveCommand(driveSubsystem, -18),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-8)),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -18),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(-8)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(0)),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
         // This is if we are downstage and the team prop is upstage
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(7)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -4),
-                    new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(90)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, 3),
-                    new WaitCommand(250),
-                    // Placing purple
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(7)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -4),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, 3),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE) {
             addCommands(
-                    new DriveCommand(driveSubsystem, -7),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -7),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE) {
             addCommands(
-                    new DriveCommand(driveSubsystem, -4),
-                    new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -2),
-                    new WaitCommand(250),
-                    // Placing purple
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -4),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(-90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -2),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }

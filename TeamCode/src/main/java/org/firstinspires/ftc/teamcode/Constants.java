@@ -16,6 +16,10 @@ public class Constants {
         AT_TARGET
     }
 
+    public static class AutoConstants {
+        public static long DEFAULT_AUTO_WAIT = 250;
+    }
+
     /** Constants for the BoxSubsystem. */
     @Config
     public static class BoxConstants {

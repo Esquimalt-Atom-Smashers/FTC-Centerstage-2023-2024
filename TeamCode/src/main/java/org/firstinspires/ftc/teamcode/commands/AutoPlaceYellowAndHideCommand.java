@@ -31,41 +31,31 @@ public class AutoPlaceYellowAndHideCommand extends SequentialCommandGroup {
         lastCommand = new WaitCommand(1);
         if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE)
             addCommands(
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(90)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(90)),
                     new WaitCommand(250),
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxSubsystem),
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90), 0.3),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -15),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-4)),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0))
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(-90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -15),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(-4)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(0))
             );
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE)
             addCommands(
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxSubsystem),
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -24),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-4)),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0))
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(-90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -24),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(-4)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(0))
             );
         else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE)
             addCommands(
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(8)),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(8)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(90)),
                     new AutoPlaceYellowCommand(elbowSubsystem, linearSlideSubsystem, boxSubsystem),
-                    new TurnCommand(driveSubsystem, autoPosition.flipMovement(-90)),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -30),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, autoPosition.flipMovement(-8)),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flipMovement(0))
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.TURN, autoPosition.flip(-90)),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -30),
+                    new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, autoPosition.flip(-8)),
+                    new TurnToHeadingCommand(driveSubsystem, autoPosition.flip(0))
             );
         addCommands(lastCommand);
         addRequirements(driveSubsystem, elbowSubsystem, linearSlideSubsystem, boxSubsystem);
