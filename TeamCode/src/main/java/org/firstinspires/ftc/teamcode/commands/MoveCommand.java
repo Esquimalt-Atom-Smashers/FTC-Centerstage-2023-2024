@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
 import static org.firstinspires.ftc.teamcode.Constants.AutoConstants.*;
@@ -17,7 +18,9 @@ public class MoveCommand extends SequentialCommandGroup {
     public enum MovementType {
         DRIVE,
         STRAFE,
-        TURN
+        TURN,
+        TURN_TO_HEADING,
+        SLOW_TURN_TO_HEADING
     }
 
     /**
@@ -40,6 +43,14 @@ public class MoveCommand extends SequentialCommandGroup {
                 break;
             case TURN:
                 lastCommand = new TurnCommand(driveSubsystem, value);
+                addCommands(lastCommand);
+                break;
+            case TURN_TO_HEADING:
+                lastCommand = new TurnToHeadingCommand(driveSubsystem, value);
+                addCommands(lastCommand);
+                break;
+            case SLOW_TURN_TO_HEADING:
+                lastCommand = new TurnToHeadingCommand(driveSubsystem, value, Constants.DriveConstants.AUTO_TURN_SPEED / 2);
                 addCommands(lastCommand);
                 break;
         }

@@ -7,6 +7,8 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
+import org.firstinspires.ftc.teamcode.commands.MoveCommand.MovementType;
+
 /**
  * Command that drives the robot forwards to sense for the team prop.
  */
@@ -22,7 +24,7 @@ public class AutoSetupCommand extends SequentialCommandGroup {
     public AutoSetupCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem) {
         addCommands(
                 new InstantCommand(intakeSubsystem::upPosition, intakeSubsystem),
-                lastCommand = new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, 32, 1000)
+                lastCommand = new MoveCommand(driveSubsystem, MovementType.DRIVE, 32, 1000)
         );
     }
 
