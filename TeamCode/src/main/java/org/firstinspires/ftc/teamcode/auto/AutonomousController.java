@@ -17,6 +17,7 @@ public class AutonomousController {
         PLACING_PURPLE,
         MOVING_TO_BACKDROP,
         MOVING_TO_PLACE_YELLOW,
+        TURNING_CORRECT_DIRECTION,
         IDLE
     }
 
@@ -49,6 +50,7 @@ public class AutonomousController {
 
     public void run() {
         switch (state) {
+
             case MOVING_TO_SPIKE_MARKS:
                 if (canContinue()) {
                     if (robot.getDistanceSensorSubsystem().isLeftBlocked())
@@ -69,18 +71,18 @@ public class AutonomousController {
                 break;
             case MOVING_TO_BACKDROP:
                 if (canContinue()) {
-                    scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(autoPosition));
                     state = AutonomousState.MOVING_TO_PLACE_YELLOW;
+                    scheduleCommand(commandManager.getAutoPlaceYellowAndHideCommand(autoPosition));
                 }
                 break;
             case MOVING_TO_PLACE_YELLOW:
+            case TURNING_CORRECT_DIRECTION:
                 if (canContinue()) {
                     state = AutonomousState.IDLE;
                 }
                 break;
             case IDLE:
                 break;
-
         }
         CommandScheduler.getInstance().run();
     }

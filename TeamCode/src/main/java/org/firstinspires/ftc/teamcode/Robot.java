@@ -56,6 +56,9 @@ public class Robot {
 
     private RobotState state = RobotState.DRIVING;
 
+    // This for debugging, will remove later
+    public static GamepadEx gamepadEx;
+
     public enum RobotState {
         DRIVING,
         INTAKE,
@@ -77,6 +80,8 @@ public class Robot {
         // Initialize the gamepads
         driverGamepad = new GamepadEx(opMode.gamepad1);
         operatorGamepad = new GamepadEx(opMode.gamepad2);
+
+        gamepadEx = driverGamepad;
 
         // Initialize the subsystems
         boxSubsystem = new BoxSubsystem(opMode.hardwareMap, opMode.telemetry);

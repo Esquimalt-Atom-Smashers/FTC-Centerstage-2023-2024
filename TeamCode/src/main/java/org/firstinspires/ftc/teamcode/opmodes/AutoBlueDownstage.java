@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 public class AutoBlueDownstage extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        AutonomousController autonomousController = new AutonomousController(this, true, false, false);
+        AutonomousController autonomousController = new AutonomousController(this, true, false, true);
 
         waitForStart();
         autonomousController.start();
