@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.commands.MoveSlideCommand;
 
 @Config
-@TeleOp(name = "Testing PID", group = "Testing")
+@TeleOp(name = "PID Testing", group = "Testing")
 public class PIDTestingOpMode extends LinearOpMode {
     public static int slideTarget = 0;
     public static int elbowTarget = 0;

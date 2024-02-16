@@ -190,8 +190,15 @@ public class Constants {
     /** Constants for the WinchSubsystem. */
     public static class WinchConstants {
         public static final String WINCH_MOTOR_NAME = "winchMotor";
+        public static final String HOOK_SERVO_NAME = "hookServo";
 
         public static final DcMotorSimple.Direction WINCH_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
+
+        public static final double MIN_ANGLE = 0;
+        public static final double MAX_ANGLE = 270;
+
+        public static final double UP_POSITION = -1;
+        public static final double DOWN_POSITION = -1;
 
         public static final double WINCH_SPEED = 1;
         public static final double UNWINCH_SPEED = -.5;

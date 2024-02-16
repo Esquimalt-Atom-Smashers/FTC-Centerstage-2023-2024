@@ -40,8 +40,8 @@ public class CommandManager {
     private final Command defaultElbowCommand;
     /** Default command for LinearSlideSubsystem */
     private final Command defaultSlideCommand;
-    /** Default command for WinchSubsystem */
-    private final Command defaultWinchCommand;
+    /** Default command for HangingSubsystem */
+    private final Command defaultHangingCommand;
     /** Command that lowers arm and intake and enters intake mode */
     private final Command intakeModeCommand;
     /** Command that starts outtaking */
@@ -105,11 +105,12 @@ public class CommandManager {
             robot.getLinearSlideSubsystem().moveManually(Math.abs(robot.getOperatorGamepad().getRightY()) >= 0.1 ? robot.getOperatorGamepad().getRightY() : 0);
         }, robot.getLinearSlideSubsystem());
 
-        defaultWinchCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.LEFT_BUMPER)) robot.getWinchSubsystem().winch();
-            else if (robot.isPressed(robot.getOperatorGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) robot.getWinchSubsystem().unwinch();
-            else robot.getWinchSubsystem().stopMotor();
-        }, robot.getWinchSubsystem());
+        defaultHangingCommand = new RunCommand(() -> {
+            robot.getHangingSubsystem().levelServo(robot.getElbowSubsystem());
+            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.LEFT_BUMPER)) robot.getHangingSubsystem().winch();
+            else if (robot.isPressed(robot.getOperatorGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) robot.getHangingSubsystem().unwinch();
+            else robot.getHangingSubsystem().stopMotor();
+        }, robot.getHangingSubsystem());
 
         intakeModeCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> {
@@ -215,8 +216,8 @@ public class CommandManager {
         return defaultSlideCommand;
     }
 
-    public Command getDefaultWinchCommand () {
-        return defaultWinchCommand;
+    public Command getDefaultHangingCommand() {
+        return defaultHangingCommand;
     }
 
     public Command getIntakeModeCommand () {

@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LEDSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.HangingSubsystem;
 
 /**
  * Represents all of the subsystems that make up the robot
@@ -46,7 +46,7 @@ public class Robot {
     /** The linear slide subsystem of the robot */
     private final LinearSlideSubsystem linearSlideSubsystem;
     /** The winch subsystem of the robot */
-    private final WinchSubsystem winchSubsystem;
+    private final HangingSubsystem hangingSubsystem;
     /** The LED subsystem of the robot */
     private final LEDSubsystem ledSubsystem;
 
@@ -91,7 +91,7 @@ public class Robot {
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
-        winchSubsystem = new WinchSubsystem(opMode.hardwareMap, opMode.telemetry);
+        hangingSubsystem = new HangingSubsystem(opMode.hardwareMap, opMode.telemetry);
         ledSubsystem = new LEDSubsystem(opMode.hardwareMap, opMode.telemetry);
 
         // Initialize the command manager
@@ -157,7 +157,7 @@ public class Robot {
         linearSlideSubsystem.setDefaultCommand(commandManager.getDefaultSlideCommand());
 
         // --- WinchSubsystem ---
-        winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
+        hangingSubsystem.setDefaultCommand(commandManager.getDefaultHangingCommand());
 
         // --- IntakeSubsystem ---
         // Press operator A to enter intake mode, when in intake mode, press operator A to pick up the pixels
@@ -257,9 +257,9 @@ public class Robot {
 
         // Winch subsystem (operator)
         // left trigger -> Winch in, left bumper -> Winch out
-        if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) winchSubsystem.unwinch();
-        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) winchSubsystem.winch();
-        else winchSubsystem.stopMotor();
+        if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) hangingSubsystem.unwinch();
+        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) hangingSubsystem.winch();
+        else hangingSubsystem.stopMotor();
 
         if (operatorGamepad.getButton(GamepadKeys.Button.BACK)) resetEncoders();
 
@@ -360,8 +360,8 @@ public class Robot {
         return linearSlideSubsystem;
     }
 
-    public WinchSubsystem getWinchSubsystem() {
-        return winchSubsystem;
+    public HangingSubsystem getHangingSubsystem() {
+        return hangingSubsystem;
     }
 
     public LEDSubsystem getLedSubsystem() {
