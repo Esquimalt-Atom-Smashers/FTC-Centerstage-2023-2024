@@ -118,7 +118,7 @@ public class Constants {
         public static  int DRIVING_POSITION = 1100;
 
 
-        public static  int DRONE_LAUNCH_POSITION = 6900;
+        public static  int DRONE_LAUNCH_POSITION = 7500;
 
         // TODO: Find new value
         public static  int MEDIUM_SCORING_POSITION = 10400;
