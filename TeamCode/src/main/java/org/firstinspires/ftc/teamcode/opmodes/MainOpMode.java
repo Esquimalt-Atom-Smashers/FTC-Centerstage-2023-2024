@@ -17,6 +17,11 @@ public class MainOpMode extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Robot robot = new Robot(this, false, false);
 
+        telemetry.addLine("This op mode is the main op mode used for controlling the robot.");
+        telemetry.addLine("While enabled, use the two controllers to control the drive base, intake, elbow, slide, box, and hanging subsystems through a mixture of manual and scheduled commands.");
+        telemetry.addLine("The main difference from TeleOpMode is that this does not reset the encoders.");
+        telemetry.update();
+
         waitForStart();
         robot.start();
 

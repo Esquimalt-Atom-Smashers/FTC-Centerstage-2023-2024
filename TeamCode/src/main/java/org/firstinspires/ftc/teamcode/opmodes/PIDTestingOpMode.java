@@ -23,6 +23,11 @@ public class PIDTestingOpMode extends LinearOpMode {
         Robot robot = new Robot(this, true, false);
         Gamepad gamepad = gamepad2;
 
+        telemetry.addLine("This op mode is used to test the two PID controllers on the elbow and slide.");
+        telemetry.addLine("While enabled, press Y and X to move the elbow to different positions using the command scheduler.");
+        telemetry.addLine("Hold A and B to move the elbow and slide, respectively, to their target positions");
+        telemetry.update();
+
         waitForStart();
 
         Trigger moveTrigger = new Trigger(() -> gamepad.y);

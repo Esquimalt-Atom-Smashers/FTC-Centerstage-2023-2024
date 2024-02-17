@@ -90,7 +90,7 @@ public class Constants {
         public static final String DRONE_SERVO_NAME = "droneServo";
 
         public static final double MIN_ANGLE = 0;
-        public static final double MAX_ANGLE = 270;
+        public static final double MAX_ANGLE = 95;
 
         public static final double START_POSITION = 0;
         public static final double RELEASE_ANGLE = 180;

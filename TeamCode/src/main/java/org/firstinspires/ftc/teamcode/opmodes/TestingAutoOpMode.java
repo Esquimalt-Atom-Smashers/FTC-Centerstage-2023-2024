@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.commands.MoveCommand;
 import org.firstinspires.ftc.teamcode.commands.StrafeCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
@@ -17,16 +18,16 @@ public class TestingAutoOpMode extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         DriveSubsystem driveSubsystem = new DriveSubsystem(hardwareMap, telemetry);
 
+        telemetry.addLine("This op mode is used to test the autonomous driving.");
+        telemetry.addLine("When you start this, it will drive and strafe in a square.");
+        telemetry.update();
+
         waitForStart();
         new SequentialCommandGroup(
-                new DriveCommand(driveSubsystem, 10),
-                new WaitCommand(250),
-                new StrafeCommand(driveSubsystem, -10),
-                new WaitCommand(250),
-                new DriveCommand(driveSubsystem, -10),
-                new WaitCommand(250),
-                new StrafeCommand(driveSubsystem, 10),
-                new WaitCommand(250)
+                new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, 10),
+                new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, -10),
+                new MoveCommand(driveSubsystem, MoveCommand.MovementType.DRIVE, -10),
+                new MoveCommand(driveSubsystem, MoveCommand.MovementType.STRAFE, 10)
         ).schedule();
 
         while (opModeIsActive() && !isStopRequested()) {
