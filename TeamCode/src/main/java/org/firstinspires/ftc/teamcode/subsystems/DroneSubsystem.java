@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -10,7 +9,8 @@ import static org.firstinspires.ftc.teamcode.Constants.DroneConstants.*;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
- * A subsystem that represents the servo on the arm that releases the paper drone.
+ * A subsystem that represents the servo on the arm. Uses the servo to hold and release
+ * an elastic to shoot the drone.
  *
  * @author Esquimalt Atom Smashers
  */

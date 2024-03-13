@@ -2,18 +2,19 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
-import org.firstinspires.ftc.teamcode.subsystems.DistanceSensorSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 
 @Autonomous(name = "BlueUpstage", group = "Auto")
 public class AutoBlueUpstage extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        NewAutonomousController autonomousController = new NewAutonomousController(this, true, true, true);
+        AutonomousController autonomousController = new AutonomousController(this, true, true, true);
+
+        telemetry.addLine("This autonomous mode is used for when we start on the blue alliance, closer from the backdrop.");
+        telemetry.addLine("In autonomous, this mode drives forward, places a purple pixel on the correct spike mark, drives to the backdrop, and places a yellow pixel in the correct spot.");
+        telemetry.addLine("To finish, it rotates to face away from the drivers for field-centric to work properly, then drives into the corner to let other robots access the backdrop");
+        telemetry.update();
 
         waitForStart();
         autonomousController.start();

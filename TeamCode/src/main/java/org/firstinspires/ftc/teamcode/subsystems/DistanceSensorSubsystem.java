@@ -9,7 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import static org.firstinspires.ftc.teamcode.Constants.DistanceSensorConstants.*;
 
 /**
- * A subsystem that represents the two distance sensors on the sides of the robot.
+ * A subsystem that represents the two distance sensors on the sides of the robot. They are used
+ * to detect the team prop during autonomous.
  *
  * @author Esquimalt Atom Smashers
  */
@@ -30,12 +31,12 @@ public class DistanceSensorSubsystem extends CustomSubsystemBase {
         rightDistanceSensor = hardwareMap.get(DistanceSensor.class, RIGHT_DISTANCE_SENSOR_NAME);
     }
 
-    /** @return If the left sensor is blocked by something. */
+    /** @return True if there is something blocking the left sensor less than the threshold inches away */
     public boolean isLeftBlocked() {
         return leftDistanceSensor.getDistance(DistanceUnit.INCH) <= DISTANCE_THRESHOLD;
     }
 
-    /** @return If the right sensor is blocked by something. */
+    /** @return True if there is something blocking the right sensor less than the threshold inches away */
     public boolean isRightBlocked() {
         return rightDistanceSensor.getDistance(DistanceUnit.INCH) <= DISTANCE_THRESHOLD;
     }
@@ -46,7 +47,5 @@ public class DistanceSensorSubsystem extends CustomSubsystemBase {
         telemetry.addLine("--- Distance ---");
         telemetry.addData("Left (in)", leftDistanceSensor.getDistance(DistanceUnit.INCH));
         telemetry.addData("Right (in)", rightDistanceSensor.getDistance(DistanceUnit.INCH));
-//        telemetry.addData("Right blocked", isRightBlocked());
-//        telemetry.addData("Left blocked", isLeftBlocked());
     }
 }

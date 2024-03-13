@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -8,7 +7,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.commands.CommandManager;
-import org.firstinspires.ftc.teamcode.subsystems.BoxReleaseSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.BoxSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DistanceSensorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DroneSubsystem;
@@ -16,15 +15,8 @@ import org.firstinspires.ftc.teamcode.subsystems.ElbowSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LEDSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LinearSlideSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.WinchSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.HangingSubsystem;
 
-/*
-    TODO:
-        Write conversions of angles for red side autonomous
-        Test red side autonomous
-        Test right spike mark more
-        Make some of the arm movements and driving happen at the same time (low unless we start running out of time in auto)
- */
 /**
  * Represents all of the subsystems that make up the robot
  *
@@ -34,35 +26,38 @@ public class Robot {
     /** The op mode that created the robot */
     private final OpMode opMode;
 
-    /** The gamepad used by the driver to drive the robot around and open/close box*/
+    /** The gamepad that controls driving */
     private final GamepadEx driverGamepad;
-    /** The gamepad used by the operator to control the arm */
+    /** The gamepad that controls the arm and intake */
     private final GamepadEx operatorGamepad;
 
-    /** The box release door of the robot */
-    private final BoxReleaseSubsystem boxReleaseSubsystem;
-    /** The distance sensors of the robot */
+    /** The box subsystem of the robot */
+    private final BoxSubsystem boxSubsystem;
+    /** The distance sensor subsystem of the robot */
     private final DistanceSensorSubsystem distanceSensorSubsystem;
-    /** The drive base of the robot */
+    /** The drive base subsystem of the robot */
     private final DriveSubsystem driveSubsystem;
-    /** The drone holder and launcher of the robot */
+    /** The drone holder and launcher subsystem of the robot */
     private final DroneSubsystem droneSubsystem;
-    /** The elbow of the robot */
+    /** The elbow subsystem of the robot */
     private final ElbowSubsystem elbowSubsystem;
-    /** The intake of the robot */
+    /** The intake subsystem of the robot */
     private final IntakeSubsystem intakeSubsystem;
-    /** The linear slide of the robot */
+    /** The linear slide subsystem of the robot */
     private final LinearSlideSubsystem linearSlideSubsystem;
-    /** The winch of the robot */
-    private final WinchSubsystem winchSubsystem;
-    /** The LED's on the side of the robot */
+    /** The winch subsystem of the robot */
+    private final HangingSubsystem hangingSubsystem;
+    /** The LED subsystem of the robot */
     private final LEDSubsystem ledSubsystem;
-
-    private final boolean manualMode;
 
     private final CommandManager commandManager;
 
+    private final boolean manualMode;
+
     private RobotState state = RobotState.DRIVING;
+
+    // This for debugging, will remove later
+    public static GamepadEx gamepadEx;
 
     public enum RobotState {
         DRIVING,
@@ -72,10 +67,10 @@ public class Robot {
     }
 
     /**
-     * Initializes all gamepads, subsystems, and if necessary, initializes the commands through {@link #bindCommands()}
+     * Initializes all gamepads, subsystems, and if necessary, initializes the commands through {@link #bindCommands()}.
      *
      * @param opMode The opMode that created the Robot
-     * @param manualMode Whether we are using commands or not, default is false
+     * @param manualMode Whether we are using commands or not
      * @param resetEncoders Whether we reset the encoders on the slide, elbow and drive subsystems
      */
     public Robot(OpMode opMode, boolean manualMode, boolean resetEncoders) {
@@ -86,66 +81,69 @@ public class Robot {
         driverGamepad = new GamepadEx(opMode.gamepad1);
         operatorGamepad = new GamepadEx(opMode.gamepad2);
 
+        gamepadEx = driverGamepad;
+
         // Initialize the subsystems
-        boxReleaseSubsystem = new BoxReleaseSubsystem(opMode.hardwareMap, opMode.telemetry);
+        boxSubsystem = new BoxSubsystem(opMode.hardwareMap, opMode.telemetry);
         distanceSensorSubsystem = new DistanceSensorSubsystem(opMode.hardwareMap, opMode.telemetry);
         driveSubsystem = new DriveSubsystem(opMode.hardwareMap, opMode.telemetry);
         droneSubsystem = new DroneSubsystem(opMode.hardwareMap, opMode.telemetry);
         elbowSubsystem = new ElbowSubsystem(opMode.hardwareMap, opMode.telemetry);
         intakeSubsystem = new IntakeSubsystem(opMode.hardwareMap, opMode.telemetry);
         linearSlideSubsystem = new LinearSlideSubsystem(opMode.hardwareMap, opMode.telemetry);
-        winchSubsystem = new WinchSubsystem(opMode.hardwareMap, opMode.telemetry);
+        hangingSubsystem = new HangingSubsystem(opMode.hardwareMap, opMode.telemetry);
         ledSubsystem = new LEDSubsystem(opMode.hardwareMap, opMode.telemetry);
 
+        // Initialize the command manager
         commandManager = new CommandManager(this);
-        CommandScheduler.getInstance().reset();
-        CommandScheduler.getInstance().cancelAll();
 
+        // If we should, then bind the commands
         if (!manualMode) bindCommands();
+
+        // If we should reset the encoders
         if (resetEncoders) resetEncoders();
     }
 
     /** Binds the ftclib commands that control the robot. */
     private void bindCommands() {
-        // --- BoxReleaseSubsystem ---
-        // Press driver B to open the box
-        Trigger openBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.B));
-        openBoxTrigger.whenActive(commandManager.getOpenBoxCommand());
+        CommandScheduler.getInstance().reset();
+        CommandScheduler.getInstance().cancelAll();
 
-        // Press driver A to close the box
-        Trigger closeBoxTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.A));
-        closeBoxTrigger.whenActive(commandManager.getCloseBoxCommand());
+        // --- BoxReleaseSubsystem ---
+        // Press operator X to open the box
+        Trigger openBoxTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X));
+        openBoxTrigger.whenActive(commandManager.getOpenBoxCommand());
 
         // --- DriveSubsystem ---
         driveSubsystem.setDefaultCommand(commandManager.getDefaultDriveCommand());
 
+        // Press driver BACK to reset gyro
         Trigger resetGyroTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.BACK));
         resetGyroTrigger.whenActive(commandManager.getResetGyroCommand());
 
-        // Press driver left dpad while in driving mode to snap to left side of field
-        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_LEFT));
+        // Hold right bumper and press driver left dpad while in driving mode to snap to facing left side of field
+        Trigger snapLeftTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(-0.5, 0));
         snapLeftTrigger.whenActive(commandManager.getSnapLeftCommand());
 
-        // Press driver up dpad while in driving mode to snap to forward (far edge) side of field
-        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_UP));
+        // Hold right bumper and press driver up dpad while in driving mode to snap to facing forward (far edge) side of field
+        Trigger snapUpTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(0, 0.5));
         snapUpTrigger.whenActive(commandManager.getSnapUpCommand());
 
-        // Press driver right dpad while in driving mode to snap to right side of field
-        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_RIGHT));
+        // Hold right bumper and press driver right dpad while in driving mode to snap to facing right side of field
+        Trigger snapRightTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(0.5, 0));
         snapRightTrigger.whenActive(commandManager.getSnapRightCommand());
 
-        // Press driver down dpad while in driving mode to snap to back (near edge) side of field
-        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.DPAD_DOWN));
+        // Hold right bumper and press driver down dpad while in driving mode to snap to facing back (near edge) side of field
+        Trigger snapDownTrigger = new Trigger(() -> driverGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && isJoystickClose(0, -0.5));
         snapDownTrigger.whenActive(commandManager.getSnapDownCommand());
 
         // --- DroneSubsystem ---
-        // Press operator A to raise the arm and enter shooting drone mode
-        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A));
+        // Press operator right bumper to raise the arm and enter shooting drone mode
+        Trigger droneLaunchModeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER));
         droneLaunchModeTrigger.whenActive(commandManager.getDroneModeCommand());
 
-        // Press operator B to launch the drone
-        // We must be in shooting mode
-        Trigger droneLaunchTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && state == RobotState.SHOOTING_DRONE);
+        // Press operator right trigger to launch the drone
+        Trigger droneLaunchTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state == RobotState.SHOOTING_DRONE);
         droneLaunchTrigger.whenActive(commandManager.getDroneLaunchCommand());
 
         // Press operator Y to exit shooting drone mode
@@ -159,21 +157,17 @@ public class Robot {
         linearSlideSubsystem.setDefaultCommand(commandManager.getDefaultSlideCommand());
 
         // --- WinchSubsystem ---
-        winchSubsystem.setDefaultCommand(commandManager.getDefaultWinchCommand());
+        hangingSubsystem.setDefaultCommand(commandManager.getDefaultHangingCommand());
 
         // --- IntakeSubsystem ---
-        // Press operator RT to enter intake mode
+        // Press operator A to enter intake mode, when in intake mode, press operator A to pick up the pixels
         // We don't want to be in shooting drone mode, but anything else is fine
-        Trigger intakeTrigger = new Trigger(() -> isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) && state != RobotState.SHOOTING_DRONE);
-        intakeTrigger.whenActive(commandManager.getIntakeModeCommand());
+        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.A) && state != RobotState.SHOOTING_DRONE);
+        intakeTrigger.toggleWhenActive(commandManager.getIntakeModeCommand(), commandManager.getPickupPixelsCommand());
 
-        // Press operator RB to pickup the pixels while the arm is down
-        // We must be in intake mode
-        Trigger pickupPixelsTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER) && state == RobotState.INTAKE);
-        pickupPixelsTrigger.whenActive(commandManager.getPickupPixelsCommand());
-
-        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.X) && state == RobotState.INTAKE);
-        outtakeTrigger.whenActive(commandManager.getOuttakeCommand());
+        // Press operator B to toggle between outtaking to intaking
+        Trigger outtakeTrigger = new Trigger(() -> operatorGamepad.getButton(GamepadKeys.Button.B) && state == RobotState.INTAKE);
+        outtakeTrigger.toggleWhenActive(commandManager.getOuttakeCommand(), commandManager.getIntakeCommand());
 
         // --- Complex Commands (commands that use more than one subsystem) ---
         // Press operator left dpad while in driving mode to move the arm to low preset scoring position
@@ -207,29 +201,27 @@ public class Robot {
 
     /**
      * Run the robot, including calling CommandScheduler.getInstance().run(), which polls the gamepad inputs and performs scheduled commands.
-     * Also prints data from the subsystems and calls telemetry.update()
+     * Also prints data from the subsystems and updates the telemetry.
      */
     public void run() {
-        // Run the command scheduler, which polls the gamepad inputs, and performs the commands created in initCommands
+        // Run the command scheduler, which polls the gamepad inputs, and performs the commands created in bindCommands
         if (!manualMode)
             CommandScheduler.getInstance().run();
 
-        opMode.telemetry.addData("Scoring state", state);
-        elbowSubsystem.printData();
-        linearSlideSubsystem.printData();
-        distanceSensorSubsystem.printData();
+        printData();
         opMode.telemetry.update();
     }
 
+    /** Perform things that happen at the start of manual. */
     public void startManual() {
-
+        droneSubsystem.startPosition();
     }
 
-    /**
-     * Controls the elbow, intake, slide, box, drone and drive subsystem manually, without any commands running or PID controllers.
-     */
+    /** Controls the elbow, intake, slide, box, drone and drive subsystem manually, without any commands running or PID controllers. */
     public void runManually() {
-        driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX(), !isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)), false, isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1);
+        boolean usingFieldCentric = !isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
+        double speedMultiplier = isPressed(driverGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1;
+        driveSubsystem.drive(driverGamepad.getLeftY(), driverGamepad.getLeftX(), driverGamepad.getRightX(), usingFieldCentric, speedMultiplier);
 
         if (driverGamepad.getButton(GamepadKeys.Button.BACK)) driveSubsystem.resetGyro();
 
@@ -255,15 +247,8 @@ public class Robot {
 
         // Box release Subsystem (driver)
         // B -> Open/Red, A -> Close/Green
-        if (driverGamepad.getButton(GamepadKeys.Button.B) && !driverGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.openBox();
-        if (driverGamepad.getButton(GamepadKeys.Button.A) && !driverGamepad.getButton(GamepadKeys.Button.START)) boxReleaseSubsystem.closeBox();
-/*        if (driverGamepad.getButton(GamepadKeys.Button.A)) {
-            if (boxReleaseSubsystem.boxOpen){
-                boxReleaseSubsystem.closeBox();
-            } else {
-                boxReleaseSubsystem.openBox();
-            }
-        }*/
+        if (operatorGamepad.getButton(GamepadKeys.Button.B) && !operatorGamepad.getButton(GamepadKeys.Button.START)) boxSubsystem.openBox();
+        if (operatorGamepad.getButton(GamepadKeys.Button.A) && !operatorGamepad.getButton(GamepadKeys.Button.START)) boxSubsystem.closeBox();
 
         // Drone subsystem (operator)
         // X -> Release, Y -> Go to start position
@@ -272,31 +257,71 @@ public class Robot {
 
         // Winch subsystem (operator)
         // left trigger -> Winch in, left bumper -> Winch out
-        if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) winchSubsystem.unwinch();
-        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) winchSubsystem.winch();
-        else winchSubsystem.stopMotor();
+        if (isPressed(operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) hangingSubsystem.unwinch();
+        else if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) hangingSubsystem.winch();
+        else hangingSubsystem.stopMotor();
 
         if (operatorGamepad.getButton(GamepadKeys.Button.BACK)) resetEncoders();
 
-        if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) boxReleaseSubsystem.disableLights();
+        if (operatorGamepad.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) boxSubsystem.disableLights();
 
+        printData();
+        opMode.telemetry.update();
+    }
+
+    public void printData() {
+        opMode.telemetry.addData("Robot state", state);
         opMode.telemetry.addData("Gyro heading: ",  driveSubsystem.getHeading());
-
 
         elbowSubsystem.printData();
         linearSlideSubsystem.printData();
         distanceSensorSubsystem.printData();
-        boxReleaseSubsystem.printData();
+        boxSubsystem.printData();
         intakeSubsystem.printData();
-        opMode.telemetry.update();
     }
 
+    /**
+     * Set the state of the robot.
+     *
+     * @param newState The new state of the robot
+     */
     public void setState(RobotState newState) {
         state = newState;
     }
 
+    /** @return The current state of the robot */
     public RobotState getState() {
         return state;
+    }
+
+    // TODO: Test this, need to normalize one of the angles
+    public boolean isJoystickClose(double angle) {
+        double currentAngle = Math.toDegrees(Math.atan2(driverGamepad.getRightY(), driverGamepad.getRightX()));
+        return Math.abs(currentAngle - angle) <= 10;
+    }
+
+    /**
+     * Checks if the right joystick on the driver gamepad is close enough to the specified position.
+     *
+     * @param x The target x-position of the joystick
+     * @param y The target y-position of the joystick
+     * @return If the joystick is close enough
+     */
+    public boolean isJoystickClose(double x, double y) {
+
+        if (y == 0) {
+            if (x < 0)
+                return driverGamepad.getRightX() < x && Math.abs(driverGamepad.getRightY()) <= Constants.DriveConstants.DEADZONE;
+            else
+                return driverGamepad.getRightX() > x && Math.abs(driverGamepad.getRightY()) <= Constants.DriveConstants.DEADZONE;
+        }
+        else if (x == 0) {
+            if (y < 0)
+                return -driverGamepad.getRightY() < y && Math.abs(driverGamepad.getRightX()) <= Constants.DriveConstants.DEADZONE;
+            else
+                return -driverGamepad.getRightY() > y && Math.abs(driverGamepad.getRightX()) <= Constants.DriveConstants.DEADZONE;
+        }
+        return false;
     }
 
     public GamepadEx getOperatorGamepad() {
@@ -307,8 +332,8 @@ public class Robot {
         return driverGamepad;
     }
 
-    public BoxReleaseSubsystem getBoxReleaseSubsystem() {
-        return boxReleaseSubsystem;
+    public BoxSubsystem getBoxSubsystem() {
+        return boxSubsystem;
     }
 
     public DistanceSensorSubsystem getDistanceSensorSubsystem() {
@@ -335,8 +360,8 @@ public class Robot {
         return linearSlideSubsystem;
     }
 
-    public WinchSubsystem getWinchSubsystem() {
-        return winchSubsystem;
+    public HangingSubsystem getHangingSubsystem() {
+        return hangingSubsystem;
     }
 
     public LEDSubsystem getLedSubsystem() {

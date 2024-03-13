@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -12,22 +11,24 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import org.firstinspires.ftc.teamcode.auto.AutonomousController;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.auto.AutoPosition;
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 
 public class CommandManager {
     private final Robot robot;
-    /** Command that opens the box release*/
+    /** Command that opens the box, lets the pixels drop and closes the box */
     private final Command openBoxCommand;
-    /** Command that opens the box release */
+    /** Command that closes the box release */
     private final Command closeBoxCommand;
     /** Default command for DriveSubsystem */
     private final Command defaultDriveCommand;
+    /** Command that resets the gyro */
     private final Command resetGyroCommand;
-//    /** Command for DriveSubsystem */
-//    private final Command driveCommand;
+    /** Command that rotates the robot to face the right */
     private final Command snapRightCommand;
+    /** Command that rotates the robot to face the left */
     private final Command snapLeftCommand;
+    /** Command that rotates the robot to face away */
     private final Command snapUpCommand;
+    /** Command that rotate the robot to face back */
     private final Command snapDownCommand;
     /** Command that moves the arm up and enters launching drone mode */
     private final Command droneModeCommand;
@@ -39,16 +40,15 @@ public class CommandManager {
     private final Command defaultElbowCommand;
     /** Default command for LinearSlideSubsystem */
     private final Command defaultSlideCommand;
-    /** Default command for WinchSubsystem */
-    private final Command defaultWinchCommand;
+    /** Default command for HangingSubsystem */
+    private final Command defaultHangingCommand;
     /** Command that lowers arm and intake and enters intake mode */
     private final Command intakeModeCommand;
-    ///** Command that spits out pixels */
-    //private final Command outtakeModeCommand;
-    /** Command that exits intake mode */
-    private final Command intakeCancelCommand;
+    /** Command that starts outtaking */
     private final Command outtakeCommand;
-    /** Command that picks pixels up and exits intake mode */
+    /** Command that starts intaking again */
+    private final Command intakeCommand;
+    /** Command that moves the arm up and exits intake mode */
     private final Command pickupPixelsCommand;
     /** Command that moves the arm to low scoring position */
     private final Command highScoringPositionCommand;
@@ -61,22 +61,16 @@ public class CommandManager {
     /** Command run at the start of driver controlled */
     private final Command setupCommand;
 
-//    /** Command run at the start of autonomous */
-//    private final Command autoSetupCommand;
-//    private final Command autoDriveToSpikeMarksCommand;
-
     public CommandManager(Robot robot) {
         this.robot = robot;
 
         openBoxCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().openBox(), robot.getBoxReleaseSubsystem()),
+                new InstantCommand(() -> robot.getBoxSubsystem().openBox(), robot.getBoxSubsystem()),
                 new WaitCommand(1000),
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().closeBox(), robot.getBoxReleaseSubsystem())
+                new InstantCommand(() -> robot.getBoxSubsystem().closeBox(), robot.getBoxSubsystem())
         );
 
-        closeBoxCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.getBoxReleaseSubsystem().closeBox(), robot.getBoxReleaseSubsystem())
-        );
+        closeBoxCommand = new InstantCommand(() -> robot.getBoxSubsystem().closeBox(), robot.getBoxSubsystem());
 
         defaultDriveCommand = new RunCommand(() -> robot.getDriveSubsystem().drive(robot.getDriverGamepad(), robot.isPressed(robot.getDriverGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) ? 0.3 : 1.0), robot.getDriveSubsystem());
 
@@ -90,68 +84,57 @@ public class CommandManager {
         snapUpCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 0);
         // Snap down
         snapDownCommand = new SnapCommand(robot.getDriveSubsystem(), robot.getDriverGamepad(), 180);
-
+// :]
         droneModeCommand = new SequentialCommandGroup(
                 new InstantCommand(() -> robot.setState(Robot.RobotState.SHOOTING_DRONE)),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDroneLaunchPosition())
         );
 
-        droneLaunchCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING)),
-                new InstantCommand(robot.getDroneSubsystem()::release, robot.getDroneSubsystem())
-        );
+        droneLaunchCommand = new InstantCommand(() -> {
+            robot.setState(Robot.RobotState.DRIVING);
+            robot.getDroneSubsystem().release();
+        });
 
         droneCancelCommand = new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING));
 
-
         defaultElbowCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getLeftY() >= 0.1) robot.getElbowSubsystem().moveManually(1);
-            else if (robot.getOperatorGamepad().getLeftY() <= -0.1) robot.getElbowSubsystem().moveManually(-1);
-            else robot.getElbowSubsystem().stopMotor();
+            robot.getElbowSubsystem().moveManually(Math.abs(robot.getOperatorGamepad().getLeftY()) >= 0.1 ? robot.getOperatorGamepad().getLeftY() : 0);
         }, robot.getElbowSubsystem());
 
         defaultSlideCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getRightY() >= 0.1) robot.getLinearSlideSubsystem().moveManually(1);
-            else if (robot.getOperatorGamepad().getRightY() <= -0.1) robot.getLinearSlideSubsystem().moveManually(-1);
-            else robot.getLinearSlideSubsystem().stopMotor();
+            robot.getLinearSlideSubsystem().moveManually(Math.abs(robot.getOperatorGamepad().getRightY()) >= 0.1 ? robot.getOperatorGamepad().getRightY() : 0);
         }, robot.getLinearSlideSubsystem());
 
-        defaultWinchCommand = new RunCommand(() -> {
-            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.LEFT_BUMPER)) robot.getWinchSubsystem().winch();
-            else if (robot.isPressed(robot.getOperatorGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) robot.getWinchSubsystem().unwinch();
-            else robot.getWinchSubsystem().stopMotor();
-        }, robot.getWinchSubsystem());
+        defaultHangingCommand = new RunCommand(() -> {
+            robot.getHangingSubsystem().levelServo(robot.getElbowSubsystem());
+            if (robot.getOperatorGamepad().getButton(GamepadKeys.Button.LEFT_BUMPER)) robot.getHangingSubsystem().winch();
+            else if (robot.isPressed(robot.getOperatorGamepad().getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) robot.getHangingSubsystem().unwinch();
+            else robot.getHangingSubsystem().stopMotor();
+        }, robot.getHangingSubsystem());
 
         intakeModeCommand = new SequentialCommandGroup(
-                new InstantCommand(() -> robot.setState(Robot.RobotState.INTAKE)),
-                new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::downPosition, robot.getIntakeSubsystem()),
+                new InstantCommand(() -> {
+                    robot.setState(Robot.RobotState.INTAKE);
+                    robot.getBoxSubsystem().closeBox();
+                    robot.getIntakeSubsystem().downPosition();
+                }),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getIntakePosition()),
                 new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem())
-                // Start the intake to be redundant
         );
-
-        // Emergency stop trying to pick up the pixels
-        intakeCancelCommand = new InstantCommand(() -> {
-            CommandScheduler.getInstance().cancel(getPickupPixelsCommand());
-            robot.getIntakeSubsystem().stopMotor();
-            robot.getIntakeSubsystem().upPosition();
-            robot.setState(Robot.RobotState.DRIVING);
-        });
 
         outtakeCommand = new InstantCommand(robot.getIntakeSubsystem()::outtake, robot.getIntakeSubsystem());
 
+        intakeCommand = new InstantCommand(robot.getIntakeSubsystem()::intake, robot.getIntakeSubsystem());
+
         pickupPixelsCommand = new SequentialCommandGroup(
-                // Set the scoring state to loading pixels
                 new InstantCommand(() -> robot.setState(Robot.RobotState.LOADING_PIXELS)),
                 new MoveSlideCommand(robot.getLinearSlideSubsystem(), robot.getLinearSlideSubsystem().getInPosition()),
-                // Stop the intake and move it up
-                new InstantCommand(robot.getIntakeSubsystem()::stopMotor, robot.getIntakeSubsystem()),
-                new InstantCommand(robot.getIntakeSubsystem()::upPosition, robot.getIntakeSubsystem()),
-                // Move the elbow to level position
+                new InstantCommand(() -> {
+                    robot.getIntakeSubsystem().stopMotor();
+                    robot.getIntakeSubsystem().upPosition();
+                }),
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getLevelPosition()),
-//              // Set the state to driving again
                 new InstantCommand(() -> robot.setState(Robot.RobotState.DRIVING))
         );
 
@@ -175,10 +158,10 @@ public class CommandManager {
                 new MoveElbowCommand(robot.getElbowSubsystem(), robot.getElbowSubsystem().getDrivingPosition())
         );
 
-        setupCommand = new SequentialCommandGroup(
-                new InstantCommand(robot.getDroneSubsystem()::startPosition, robot.getDroneSubsystem()),
-                new InstantCommand(robot.getBoxReleaseSubsystem()::closeBox, robot.getBoxReleaseSubsystem())
-        );
+        setupCommand = new InstantCommand(() -> {
+            robot.getDroneSubsystem().startPosition();
+            robot.getBoxSubsystem().closeBox();
+        });
     }
 
     public Command getOpenBoxCommand() {
@@ -196,10 +179,6 @@ public class CommandManager {
     public Command getResetGyroCommand() {
         return resetGyroCommand;
     }
-
-//    public Command getDriveCommand() {
-//        return driveCommand;
-//    }
 
     public Command getSnapRightCommand() {
         return snapRightCommand;
@@ -237,20 +216,12 @@ public class CommandManager {
         return defaultSlideCommand;
     }
 
-    public Command getDefaultWinchCommand () {
-        return defaultWinchCommand;
+    public Command getDefaultHangingCommand() {
+        return defaultHangingCommand;
     }
 
     public Command getIntakeModeCommand () {
         return intakeModeCommand;
-    }
-
-//    public Command getOuttakeModeCommand () {
-//        return outtakeModeCommand;
-//    }
-
-    public Command getIntakeCancelCommand () {
-        return intakeCancelCommand;
     }
 
     public Command getPickupPixelsCommand () {
@@ -277,29 +248,13 @@ public class CommandManager {
         return outtakeCommand;
     }
 
+    public Command getIntakeCommand() {
+        return intakeCommand;
+    }
+
     public Command getSetupCommand() {
         return setupCommand;
     }
-
-//    public Command getAutoSetupCommand() {
-//        return autoSetupCommand;
-//    }
-
-//    public Command getAutoDriveToSpikeMarksCommand() {
-//        return autoDriveToSpikeMarksCommand;
-//    }
-
-//    public Command getAutoDriveLeftCommand() {
-//        return autoDriveLeftCommand;
-//    }
-
-//    public Command getAutoDriveMiddleCommand() {
-//        return autoDriveMiddleCommand;
-//    }
-
-//    public Command getAutoDriveRightCommand() {
-//        return autoDriveRightCommand;
-//    }
 
     public Command getAutoSetupCommand() {
         return new AutoSetupCommand(robot.getDriveSubsystem(), robot.getIntakeSubsystem());
@@ -314,6 +269,6 @@ public class CommandManager {
     }
 
     public Command getAutoPlaceYellowAndHideCommand(AutoPosition autoPosition) {
-        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxReleaseSubsystem(), autoPosition);
+        return new AutoPlaceYellowAndHideCommand(robot.getDriveSubsystem(), robot.getElbowSubsystem(), robot.getLinearSlideSubsystem(), robot.getBoxSubsystem(), autoPosition);
     }
 }

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,7 +11,8 @@ import static org.firstinspires.ftc.teamcode.Constants.IntakeConstants.*;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
- * A subsystem that represents the servo and motor that control the intake.
+ * A subsystem that represents the servo and motor on the intake. Uses the servo to raise and
+ * lower the intake and the motor to spin it.
  *
  * @author Esquimalt Atom Smashers
  */
@@ -63,6 +63,11 @@ public class IntakeSubsystem extends CustomSubsystemBase {
         intakeMotor.setPower(INTAKE_SPEED);
     }
 
+    /**
+     * Intake at a set speed.
+     *
+     * @param speed Speed to intake at
+     */
     public void intake(double speed) {
         intakeMotor.setPower(speed);
     }

@@ -25,8 +25,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
 
     private final PIDController controller;
 
-    // TODO: Hide this
-    public static double target = 0;
+    private static double target = 0;
     private double lastPower;
 
     private ElapsedTime timer;
@@ -135,7 +134,6 @@ public class ElbowSubsystem extends CustomSubsystemBase {
                     stopMotor();
                     if (isLimitSwitchPressed()) resetEncoder();
                     state = PIDSubsystemState.AT_TARGET;
-                    return;
                 }
             }
             else {
@@ -154,7 +152,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
                 lastPower = power;
                 elbowMotor.setPower(power);
                 // If the power we are setting is basically none, we are close enough to the target
-                if (Math.abs(power) <= POWER_TOLERANCE || isTimeoutPassed()) {
+                if (Math.abs(power) <= PID_POWER_TOLERANCE || isTimeoutPassed()) {
                     state = PIDSubsystemState.AT_TARGET;
                     stopMotor();
                 }
@@ -186,6 +184,7 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         telemetry.addData("Elbow Position", elbowMotor.getCurrentPosition());
         telemetry.addData("Elbow last power", lastPower);
         telemetry.addData("Is limit pressed?", isLimitSwitchPressed());
+        telemetry.addData("Target", target);
 //        telemetry.addData("Target", target);
 //        telemetry.addData("State", state);
     }
@@ -225,10 +224,12 @@ public class ElbowSubsystem extends CustomSubsystemBase {
         return INTAKE_POSITION;
     }
 
+    @Deprecated
     public int getAutoScoringPosition() {
         return AUTO_SCORING_POSITION;
     }
 
+    /** @return True if the limit switch is being held down */
     private boolean isLimitSwitchPressed() {
         return !elbowLimitSwitch.getState();
     }

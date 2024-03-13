@@ -5,11 +5,21 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
+/**
+ * Command that uses the driveSubsystem to rotate by an angle.
+ */
 public class TurnByAngleCommand extends CommandBase {
     protected final DriveSubsystem driveSubsystem;
     protected final double speed;
     protected double angle;
 
+    /**
+     * Creates a command that rotates the robot a specified angle and specified speed.
+     *
+     * @param driveSubsystem Reference to the driveSubsystem
+     * @param angle The angle to rotate by in degrees
+     * @param speed The speed to rotate at
+     */
     public TurnByAngleCommand(DriveSubsystem driveSubsystem, double angle, double speed) {
         this.driveSubsystem = driveSubsystem;
         this.angle = angle;
@@ -17,6 +27,12 @@ public class TurnByAngleCommand extends CommandBase {
         addRequirements(driveSubsystem);
     }
 
+    /**
+     * Creates a command that rotates the robot a specified angle. Uses the default autonomous turn speed.
+     *
+     * @param driveSubsystem Reference to the driveSubsystem
+     * @param angle The angle to rotate by in degrees
+     */
     public TurnByAngleCommand(DriveSubsystem driveSubsystem, double angle) {
         this(driveSubsystem, angle, Constants.DriveConstants.AUTO_TURN_SPEED);
     }

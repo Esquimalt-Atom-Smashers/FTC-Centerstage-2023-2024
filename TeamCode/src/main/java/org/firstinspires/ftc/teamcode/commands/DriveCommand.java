@@ -4,10 +4,19 @@ import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 
+/**
+ * Command that uses the driveSubsystem to drive forwards and backwards.
+ */
 public class DriveCommand extends CommandBase {
     private final DriveSubsystem driveSubsystem;
     private final double distance;
 
+    /**
+     * Creates a command that drives the robot specified inches forwards or backwards.
+     *
+     * @param driveSubsystem Reference to the driveSubsystem
+     * @param distance The distance in inches we wish to drive
+     */
     public DriveCommand(DriveSubsystem driveSubsystem, double distance) {
         this.driveSubsystem = driveSubsystem;
         this.distance = distance;

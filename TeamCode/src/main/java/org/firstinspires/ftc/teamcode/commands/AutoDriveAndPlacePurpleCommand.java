@@ -5,56 +5,57 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.auto.AutoPosition;
-import org.firstinspires.ftc.teamcode.auto.NewAutonomousController;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.commands.MoveCommand.MovementType;
 
+/**
+ * Command that drives from where we sensed the distance sensors to the correct spot to place the
+ * purple pixel, then places the purple pixel.
+ */
 public class AutoDriveAndPlacePurpleCommand extends SequentialCommandGroup {
     private final Command lastCommand;
+
+    /**
+     * Creates the command that drives from where we sensed the distance sensors to the correct spot to place the
+     * purple pixel, then places the purple pixel.
+     *
+     * @param driveSubsystem A reference to the driveSubsystem
+     * @param intakeSubsystem A reference to the intakeSubsystem
+     * @param autoPosition The auto position we started at
+     */
     public AutoDriveAndPlacePurpleCommand(DriveSubsystem driveSubsystem, IntakeSubsystem intakeSubsystem, AutoPosition autoPosition) {
-        int multiplier = autoPosition.isBlue ? 1 : -1;
         // This is if we are upstage and the team prop is upstage
-        if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
+        if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE && autoPosition.isUpstage) {
             addCommands(
                     // Driving to the correct position
-                    new DriveCommand(driveSubsystem, -18),
-                    new WaitCommand(250),
-                    new StrafeCommand(driveSubsystem, -8 * multiplier),
-                    new WaitCommand(250),
-                    new TurnToHeadingCommand(driveSubsystem, 0 * multiplier),
+                    new MoveCommand(driveSubsystem, MovementType.DRIVE, -18),
+                    new MoveCommand(driveSubsystem, MovementType.STRAFE, autoPosition.flip(-8)),
+                    new MoveCommand(driveSubsystem, MovementType.TURN_TO_HEADING, autoPosition.flip(0)),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
         // This is if we are downstage and the team prop is upstage
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.UPSTAGE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.UPSTAGE) {
             addCommands(
-                    new StrafeCommand(driveSubsystem, 7 * multiplier),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -4),
-                    new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, 90 * multiplier),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, 3),
-                    new WaitCommand(250),
-                    // Placing purple
+                    new MoveCommand(driveSubsystem, MovementType.STRAFE, autoPosition.flip(7)),
+                    new MoveCommand(driveSubsystem, MovementType.DRIVE, -4),
+                    new MoveCommand(driveSubsystem, MovementType.TURN, autoPosition.flip(90)),
+                    new MoveCommand(driveSubsystem, MovementType.DRIVE, 3),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.MIDDLE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.MIDDLE) {
             addCommands(
-                    new DriveCommand(driveSubsystem, -7),
+                    new MoveCommand(driveSubsystem, MovementType.DRIVE, -7),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
-        else if (autoPosition.spikeMark == NewAutonomousController.SpikeMark.DOWNSTAGE) {
+        else if (autoPosition.spikeMark == AutoPosition.SpikeMark.DOWNSTAGE) {
             addCommands(
-                    new DriveCommand(driveSubsystem, -4),
-                    new WaitCommand(250),
-                    new TurnCommand(driveSubsystem, -90 * multiplier),
-                    new WaitCommand(250),
-                    new DriveCommand(driveSubsystem, -2),
-                    new WaitCommand(250),
-                    // Placing purple
+                    new MoveCommand(driveSubsystem, MovementType.DRIVE, -4),
+                    new MoveCommand(driveSubsystem, MovementType.TURN, autoPosition.flip(-90)),
+                    new MoveCommand(driveSubsystem, MovementType.DRIVE, -2),
                     new AutoPlacePurpleCommand(intakeSubsystem)
             );
         }
